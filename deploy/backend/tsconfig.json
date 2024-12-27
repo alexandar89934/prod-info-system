@@ -1,0 +1,46 @@
+{
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "types": ["node", "jest"],
+    "lib": [
+      "dom",
+      "es6",
+      "es2017",
+      "esnext"
+    ],
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "outDir": "./dist/src",
+    "moduleResolution": "node",
+    "removeComments": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "baseUrl": "./src",
+    "typeRoots": ["./src/shared/types", "./node_modules/@types"],
+    "paths": {
+      "#config": [
+        "config/config.ts"
+      ],
+      "#logger": [
+        "config/logger.ts"
+      ]
+    }
+  },
+  "exclude": [ "node_modules", "**/*.test.*" ],
+  "include": [ "./src/**/*.ts" ]
+}

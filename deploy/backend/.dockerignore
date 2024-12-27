@@ -1,0 +1,10 @@
+# Add all the files / folders for exclusion during copy
+
+node_modules/
+npm-debug.log
+
+Dockerfile
+
+.dockerignore
+
+docker-compose.yml

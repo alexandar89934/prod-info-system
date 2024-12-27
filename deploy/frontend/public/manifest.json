@@ -1,0 +1,35 @@
+{
+    "short_name": "BLCK",
+    "name": "Okidoki",
+    "icons": [
+      {
+        "src": "57x57.ico",
+        "sizes": "57x57",
+        "type": "image/x-icon"
+      },
+      {
+        "src": "192x192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "256x256.png",
+        "type": "image/png",
+        "sizes": "256x256"
+      },
+      {
+        "src": "384x384.png",
+        "type": "image/png",
+        "sizes": "384x384"
+      },
+      {
+        "src": "512x512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#081422",
+    "background_color": "#081422"
+  }

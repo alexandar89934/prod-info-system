@@ -1,0 +1,78 @@
+services:
+  database:
+    image: postgres:14.2-alpine
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      PGUSER: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: database
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: 'exit 0'
+    networks:
+      - local_net
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: deploy/tools/docker/backend/Dockerfile
+    entrypoint: /backend/entrypoint.sh
+    env_file:
+      - deploy/tools/env/backend.dev.env
+    depends_on:
+      database:
+        condition: service_started
+    volumes:
+      - ./deploy/backend/node_modules:/backend/node_modules
+      - ./deploy/backend/src:/backend/src
+      - ./deploy/backend/migrations:/backend/migrations
+    networks:
+      - local_net
+
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: deploy/tools/docker/frontend/Dockerfile
+    entrypoint: /frontend/entrypoint.sh
+    env_file:
+      - deploy/tools/env/frontend.dev.env
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./deploy/frontend/node_modules:/frontend/node_modules
+      - ./deploy/frontend/src:/frontend/src
+      - ./deploy/frontend/tailwind.config.js:/frontend/tailwind.config.js
+    networks:
+      - local_net
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/tools/docker/nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf
+      - ./deploy/tools/docker/nginx/check-backend.sh:/check-backend.sh
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - local_net
+    restart: unless-stopped
+    command: ["/bin/sh", "./check-backend.sh"]
+
+volumes:
+  postgres-data: {}
+
+networks:
+  local_net:
+    driver: bridge

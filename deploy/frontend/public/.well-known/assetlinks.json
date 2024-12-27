@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.mzaric13.smartwatering",
+      "sha256_cert_fingerprints": [
+        "05:0F:09:DD:50:26:D1:FD:00:62:68:D3:C4:26:6C:05:D7:75:6F:9F:FA:48:3E:B1:DE:F1:A1:75:41:30:F5:DB"
+      ]
+    }
+  }
+]

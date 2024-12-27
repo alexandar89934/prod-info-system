@@ -1,0 +1,68 @@
+{
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    }
+  },
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "airbnb-base",
+    "airbnb-typescript/base",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "overrides": [
+    {
+      "files": ["*.js", "*.ts", "*.tsx"],
+      "rules": {
+        "no-param-reassign": [
+          "error",
+          { "props": true, "ignorePropertyModificationsFor": ["state"] }
+        ],
+        "eslint-config-stylish": "off",
+        "import/order": ["error", {
+          "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "always",
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          }
+        }]
+      }
+    }
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "@typescript-eslint", "prettier"
+  ],
+  "ignorePatterns": [ "*.js", "*.yml", "*.html" ],
+  "rules": {
+    "import/no-extraneous-dependencies": "off",
+    "import/order": "off",
+    "import/no-self-import": "off",
+    "import/extensions": "off",
+    "import/no-duplicates": "off",
+    "import/no-cycle": "off",
+    "import/no-relative-packages": "off",
+    "import/no-named-as-default": "off",
+    "import/no-useless-path-segments": "off",
+    "import/no-default-export": "error",
+    "import/prefer-default-export": "off",
+    "func-style": ["error", "expression"],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "prefer-arrow-callback": ["error", { "allowNamedFunctions": false }],
+    "no-param-reassign": "off",
+    "no-use-before-define": "off",
+    "@typescript/no-use-before-define": "off"
+  }
+}

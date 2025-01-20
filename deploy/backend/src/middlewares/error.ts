@@ -1,10 +1,9 @@
 import httpStatus from "http-status";
 
+import { config } from "../config/config";
+import { logger } from "../config/logger";
 import { createLogQuery } from "../models/log.model";
 import { ApiError } from "../shared/error/ApiError";
-
-import { config } from "./../config/config";
-import { logger } from "./../config/logger";
 
 export const errorConverter = (err: any, _req: any, _res: any, next: any) => {
   let error = err;

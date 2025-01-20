@@ -23,6 +23,9 @@ const envVars = cleanEnv(
     FRONTEND_URL: str(),
     FRONTEND_HOST: str(),
     FRONTEND_PORT: num(),
+    ADMIN_USERNAME: str(),
+    ADMIN_NAME: str(),
+    ADMIN_PASSWORD: str(),
   },
   {
     reporter: ({ errors }) => {
@@ -68,5 +71,10 @@ export const config = {
   },
   hash: {
     salt: envVars.HASH_SALT,
-  }
+  },
+  adminCredentials: {
+    username: envVars.ADMIN_USERNAME,
+    name: envVars.ADMIN_NAME,
+    password: envVars.ADMIN_PASSWORD,
+  },
 };

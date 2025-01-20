@@ -14,7 +14,7 @@
     ],
     "skipLibCheck": true,
     "sourceMap": true,
-    "outDir": "./dist/src",
+    "outDir": "./dist",
     "moduleResolution": "node",
     "removeComments": false,
     "noImplicitAny": true,

@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { app } from "./app";
 import { config } from "./config/config";
 import { logger } from "./config/logger";
+import { createAdmin } from "./service/user.service";
 
 // @ts-ignore
 let server: any;
@@ -39,6 +40,7 @@ pool.on("error", (err: Error) => {
 
 const startServer = () => {
   server = app.listen(config.server.port, async () => {
+    await createAdmin();
     logger.info(`Server started at port: ${config.server.port}`);
   });
 };

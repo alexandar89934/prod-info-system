@@ -8,6 +8,7 @@ import {
   errorConverter,
   errorHandler as apiErrorHandler,
 } from "./middlewares/error";
+import { apiRouter } from "./routes/api";
 import { healthcheckRouter } from "./routes/healthcheck/healthcheck.route";
 
 export const app = express();
@@ -35,6 +36,7 @@ app.use(
 );
 
 app.use("/", healthcheckRouter);
+app.use("/api", apiRouter);
 
 // Convert Error to ApiError if needed
 app.use(errorConverter);

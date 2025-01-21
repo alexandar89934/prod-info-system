@@ -1,9 +1,8 @@
 import { PoolClient, QueryResult } from "pg";
 
+import { logger } from "../../config/logger";
 import { pool } from "../../index";
 import { DBError } from "../../shared/error/DBError";
-
-import { logger } from "./../../config/logger";
 
 export const callQuery = async <T>(
   sqlQuery: string,

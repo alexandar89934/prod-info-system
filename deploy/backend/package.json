@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Backend",
   "main": "index.js",
-  "repository": "https://github.com/2C-Solution/smart-watering.git",
-  "author": "Matija Zaric <matija.zaric@2c-solution.net>",
+  "repository": "https://github.com/alexandar89934/prod-info-system",
+  "author": "Aleksandar Radovanovic <aleksandar.radovanovic2712@gmail.com>",
   "private": true,
   "scripts": {
     "dev": "nodemon",

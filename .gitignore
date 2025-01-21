@@ -1,0 +1,12 @@
+/.idea/misc.xml
+
+.idea/
+
+# mac files
+.DS_Store
+
+# Env files
+deploy/tools/env/.env
+deploy/tools/env/.env.*
+deploy/tools/env/*.*.env
+deploy/tools/env/*.*.env.*

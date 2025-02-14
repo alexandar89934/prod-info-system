@@ -7,10 +7,12 @@ import { ApiError } from "../shared/error/ApiError";
 export const validateRequestBody =
   (schema: Joi.ObjectSchema) =>
   (req: Request, _res: Response, next: NextFunction) => {
-    const validationResult = schema.validate(req.body);
-
+    const validationResult = schema.validate(req.body, { abortEarly: false });
     if (validationResult.error) {
-      throw new ApiError("Invalid Input", httpStatus.BAD_REQUEST);
+      throw new ApiError(
+        `Invalid Input, ${validationResult.error}`,
+        httpStatus.BAD_REQUEST,
+      );
     }
 
     next();

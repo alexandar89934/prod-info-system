@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRightOutlined,
   HomeOutlined,
-  ShoppingCartOutlined,
   Groups2Outlined,
   ReceiptLongOutlined,
   PublicOutlined,
@@ -54,8 +53,8 @@ type SidebarProps = {
 
 const navItems: NavItem[] = [
   { text: 'Dashboard', icon: <HomeOutlined /> },
-  { text: 'Client Facing', icon: null },
-  { text: 'Products', icon: <ShoppingCartOutlined /> },
+  { text: 'Person Manage', icon: null },
+  { text: 'Person', icon: <Groups2Outlined /> },
   { text: 'Customers', icon: <Groups2Outlined /> },
   { text: 'Transactions', icon: <ReceiptLongOutlined /> },
   { text: 'Geography', icon: <PublicOutlined /> },
@@ -102,26 +101,27 @@ const Sidebar: React.FC<SidebarProps> = ({
               boxSizing: 'border-box',
               borderWidth: isNonMobile ? 0 : '2px',
               width: drawerWidth,
-              overflowY: 'hidden', // Makes scrollbar appear only when content overflows
+              overflowY: 'hidden',
+              scrollBehavior: 'smooth',
+            },
+          }}
+        >
+          <Box
+            flexGrow={1}
+            overflow="auto"
+            sx={{
               '&::-webkit-scrollbar': {
-                width: 0, // Hides the scrollbar by default (works on Chrome/Brave/Edge)
+                width: '8px',
               },
-              '&:hover::-webkit-scrollbar': {
-                width: '8px', // Makes it appear on hover
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: theme.palette.primary[900],
+                borderRadius: '4px',
               },
               '&::-webkit-scrollbar-track': {
                 backgroundColor: theme.palette.background.paper,
               },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: '4px',
-              },
-            },
-          }}
-        >
-          <Box flexGrow={1} overflow="auto">
-            {' '}
-            {/* Added for scrollable content */}
+            }}
+          >
             <Box m="1.5rem 2rem 2rem 3rem">
               <FlexBetween color={theme.palette.secondary.main}>
                 <Box display="flex" alignItems="center" gap="0.5rem">

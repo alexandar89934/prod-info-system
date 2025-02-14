@@ -1,5 +1,6 @@
 import { Request } from "express";
 import jwt from "jsonwebtoken";
+import { sign, SignOptions } from "jsonwebtoken";
 
 import { ApiError } from "../error/ApiError";
 import { AuthError } from "../error/AuthError";
@@ -8,9 +9,15 @@ import { config } from "./../../config/config";
 
 export const encodeJWT = <T extends object>(
   objectToEncode: T,
-  validity: string,
-): string =>
-  jwt.sign(objectToEncode, config.jwt.secret, { expiresIn: validity });
+  validity: string | number,
+): string => {
+  const { secret } = config.jwt; // Ensure this is a string
+
+  // Create options with correct type for expiresIn
+  const options: SignOptions = { expiresIn: Number(validity) };
+
+  return sign(objectToEncode, secret, options);
+};
 
 export const decodeJWT = <T extends object>(encodedToken: string): T => {
   let decodedToken: T;

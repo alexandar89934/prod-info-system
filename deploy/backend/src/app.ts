@@ -1,3 +1,5 @@
+import path from "path";
+
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -37,7 +39,7 @@ app.use(
 
 app.use("/", healthcheckRouter);
 app.use("/api", apiRouter);
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Convert Error to ApiError if needed
 app.use(errorConverter);
 

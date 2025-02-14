@@ -10,6 +10,9 @@ import { themeSettings } from './theme.tsx';
 
 import Dashboard from '@/scenes/dashboard';
 import Login from '@/scenes/login';
+import Person from '@/scenes/personManagement';
+import AddPerson from '@/scenes/personManagement/addPerson';
+import EditPerson from '@/scenes/personManagement/editPerson.tsx';
 import { RootState } from '@/state/store.ts';
 import { selectThemeMode } from '@/state/theme/theme.selectors.ts';
 import { ThemeMode } from '@/state/theme/theme.types.ts';
@@ -29,6 +32,9 @@ function App() {
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/person" element={<Person />} />
+              <Route path="/addPerson" element={<AddPerson />} />
+              <Route path="/editPerson/:id" element={<EditPerson />} />
             </Route>
           </Routes>
         </ThemeProvider>

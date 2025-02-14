@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     sentryVitePlugin({
       org: '2c-solution',
-      project: 'smart-watering-frontend',
+      project: 'prod-info-system-frontend',
       authToken: process.env.VITE_SENTRY_AUTH_KEY,
       release: {
         name: process.env.VITE_SENTRY_RELEASE_NAME,

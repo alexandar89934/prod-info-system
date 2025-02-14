@@ -13,7 +13,9 @@ export const callQuery = async <T>(
   try {
     client = await pool.connect();
     const result: QueryResult = await client.query(sqlQuery, queryValues);
-
+    if (sqlQuery.trim().toUpperCase().startsWith("DELETE")) {
+      return result.rowCount as unknown as T;
+    }
     return getAll ? result.rows : result.rows[0];
   } catch (error) {
     logger.error(error);

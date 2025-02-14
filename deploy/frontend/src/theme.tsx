@@ -165,5 +165,5 @@ export const themeSettings = (mode: ThemeMode): ThemeSettings => {
         fontSize: 14,
       },
     },
-  };
+  } as ThemeSettings;
 };

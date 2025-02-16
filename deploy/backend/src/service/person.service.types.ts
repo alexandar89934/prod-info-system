@@ -4,7 +4,7 @@ export type CreatePersonData = {
   address: string;
   mail: string;
   picture?: string;
-  additional_info?: string;
+  additionalInfo?: string;
   documents?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
@@ -13,10 +13,10 @@ export type CreatePersonData = {
 };
 
 export type GetAllPersonsData = {
-  persons: CreatePersonData[]; // Array of persons returned
-  totalPersons: number; // Total number of persons for pagination
-  currentPage: number; // Current page number
-  totalPages: number; // Total number of pages based on the limit
+  persons: CreatePersonData[];
+  totalPersons: number;
+  currentPage: number;
+  totalPages: number;
 };
 
 export type EditPersonData = {
@@ -26,7 +26,7 @@ export type EditPersonData = {
   address: string;
   mail: string;
   picture?: string;
-  additional_info?: string;
+  additionalInfo?: string;
   documents?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;

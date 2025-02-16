@@ -1,18 +1,18 @@
+import { Visibility, Download, Delete } from '@mui/icons-material';
 import {
   Box,
   Button,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
+  TableHead,
   TableRow,
   useTheme,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
-import DocumentTableHead from './DocumentTableHead';
-import DocumentTableRow from './DocumentTableRow';
 
 import ConfirmDialog from '@/components/ConfirmDialog.tsx';
 import {
@@ -140,7 +140,20 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
         }}
       >
         <Table>
-          <DocumentTableHead />
+          <TableHead
+            sx={{
+              position: 'sticky',
+              top: 0,
+              backgroundColor: theme.palette.background.default,
+              zIndex: 2,
+              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <TableRow>
+              <TableCell>Document Name</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
         </Table>
         <Box
           sx={{
@@ -168,13 +181,29 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
                 </TableRow>
               ) : (
                 documents.map((doc) => (
-                  <DocumentTableRow
-                    key={doc.name}
-                    document={doc}
-                    onView={handleView}
-                    onDownload={handleDownload}
-                    onDelete={handleDelete}
-                  />
+                  <TableRow key={doc.name}>
+                    <TableCell>{doc.name}</TableCell>
+                    <TableCell sx={{ width: '30%' }}>
+                      <IconButton
+                        onClick={() => handleView(doc.name)}
+                        color="primary"
+                      >
+                        <Visibility />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDownload(doc.name)}
+                        color="secondary"
+                      >
+                        <Download />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDelete(doc)}
+                        color="error"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
             </TableBody>

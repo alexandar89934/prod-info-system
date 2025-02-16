@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Typography,
   CircularProgress,
@@ -10,6 +11,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -22,34 +24,49 @@ import {
   uploadImage,
 } from '@/state/person/person.actions.ts';
 import { selectPerson, selectError } from '@/state/person/person.selectors.ts';
-import { setDocuments, setError } from '@/state/person/person.slice.ts';
+import {
+  setDocuments,
+  setError,
+  clearPerson,
+  updatePersonPicture,
+} from '@/state/person/person.slice.ts';
 import { EditPersonFormData } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
+import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
 const EditPerson = () => {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
 
   const person = useSelector(selectPerson);
-  const error = useSelector(selectError);
+  const reduxError = useSelector(selectError);
+  const [loading, setLoading] = useState(false);
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<EditPersonFormData>({
-    id: '',
-    employeeNumber: 0,
-    name: '',
-    address: '',
-    mail: '',
-    picture: '',
-    additionalInfo: '',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: getName(),
-    updatedBy: getName(),
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<EditPersonFormData>({
+    resolver: zodResolver(personSchema),
+    defaultValues: {
+      id: '',
+      employeeNumber: 0,
+      name: '',
+      address: '',
+      mail: '',
+      additionalInfo: '',
+      picture: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: getName(),
+      updatedBy: getName(),
+    },
   });
 
   useEffect(() => {
@@ -60,81 +77,31 @@ const EditPerson = () => {
 
   useEffect(() => {
     if (person) {
-      setFormData({
-        id,
+      reset({
         employeeNumber: person.employeeNumber || 0,
         name: person.name || '',
         address: person.address || '',
         mail: person.mail || '',
         additionalInfo: person.additionalInfo || '',
         picture: person.picture || '',
-        createdAt: new Date(),
+        createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,
         updatedBy: getName(),
       });
       setImagePath(person.picture);
     }
-  }, [id, person]);
+  }, [person, id, reset]);
 
-  const handleChange =
-    (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData({ ...formData, [field]: event.target.value });
-    };
-
-  const handleCancel = () => {
-    dispatch(setDocuments([]));
-    navigate('/person');
-  };
-
-  const handleUpdatePerson = async (data: EditPersonFormData) => {
-    setLoading(true);
-    try {
-      const response = await dispatch(updatePerson(data)).unwrap();
-      if (!response.success) {
-        setError(response.error.message);
-        return;
-      }
-      setError(null);
-      setSuccess('Person updated successfully!');
-      setTimeout(() => {
-        setSuccess(null);
-        navigate('/person');
-      }, 3000);
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-      setSuccess(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    await handleUpdatePerson(formData);
-  };
-  const formErrors = {
-    employeeNumber: '',
-    name: '',
-    address: '',
-    mail: '',
-    picture: '',
-    additionalInfo: '',
-    documents: '',
-    createdBy: '',
-    updatedBy: '',
-  };
   const handleImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-
     if (file) {
       const imageUploadFormData = new FormData();
       imageUploadFormData.append('profileImage', file);
       try {
         const response = await dispatch(uploadImage(imageUploadFormData));
-
         if (response.meta.requestStatus === 'fulfilled') {
           const uploadedImagePath = response.payload?.path;
           await dispatch(
@@ -143,17 +110,45 @@ const EditPerson = () => {
               personId: id,
             })
           );
-
           setImagePath(uploadedImagePath);
-          setFormData((prev) => ({
-            ...prev,
-            picture: uploadedImagePath,
-          }));
+          setValue('picture', uploadedImagePath);
+          dispatch(updatePersonPicture(uploadedImagePath));
         }
       } catch (imageUploadError) {
-        console.error('Image upload failed:', imageUploadError);
+        setError(`Image upload failed: ${imageUploadError}`);
       }
     }
+  };
+
+  const onSubmit = async (data: EditPersonFormData) => {
+    setLoading(true);
+    try {
+      const response = await dispatch(updatePerson({ ...data, id })).unwrap();
+      if (!response.success) {
+        dispatch(setError(response.error.message));
+        return;
+      }
+      dispatch(setError(null));
+      setSuccess('Person updated successfully!');
+      setTimeout(() => {
+        setSuccess(null);
+        navigate('/person');
+        dispatch(clearPerson());
+        dispatch(setDocuments([]));
+      }, 3000);
+    } catch (err: any) {
+      dispatch(setError(err.message || 'An unexpected error occurred.'));
+      setSuccess(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    dispatch(setError(null));
+    dispatch(clearPerson());
+    dispatch(setDocuments([]));
+    navigate('/person');
   };
 
   return (
@@ -178,11 +173,9 @@ const EditPerson = () => {
           backgroundColor: theme.palette.background.default,
           maxHeight: '80vh',
           overflowY: 'auto',
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
+          '&::-webkit-scrollbar': { width: '8px' },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: theme.palette.primary.main, // Adjust to fit theme
+            backgroundColor: theme.palette.primary.main,
             borderRadius: '4px',
           },
           '&::-webkit-scrollbar-track': {
@@ -193,7 +186,7 @@ const EditPerson = () => {
         <Typography variant="h4" component="h1" align="center" mb={2} mt={2}>
           Edit Person
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Box
             sx={{
               display: 'flex',
@@ -223,10 +216,9 @@ const EditPerson = () => {
                   id="employeeNumber"
                   type="number"
                   variant="outlined"
-                  value={formData.employeeNumber}
-                  onChange={handleChange('employeeNumber')}
-                  error={!!formErrors.employeeNumber}
-                  helperText={formErrors.employeeNumber}
+                  {...register('employeeNumber', { valueAsNumber: true })}
+                  error={!!errors.employeeNumber}
+                  helperText={errors.employeeNumber?.message}
                   sx={{ flexGrow: 1 }}
                 />
               </FormControl>
@@ -246,10 +238,9 @@ const EditPerson = () => {
                 <TextField
                   id="name"
                   variant="outlined"
-                  value={formData.name}
-                  onChange={handleChange('name')}
-                  error={!!formErrors.name}
-                  helperText={formErrors.name}
+                  {...register('name')}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
                   sx={{ flexGrow: 1 }}
                 />
               </FormControl>
@@ -269,14 +260,14 @@ const EditPerson = () => {
                 <TextField
                   id="address"
                   variant="outlined"
-                  value={formData.address}
-                  onChange={handleChange('address')}
-                  error={!!formErrors.address}
-                  helperText={formErrors.address}
+                  {...register('address')}
+                  error={!!errors.address}
+                  helperText={errors.address?.message}
                   sx={{ flexGrow: 1 }}
                 />
               </FormControl>
             </Box>
+
             <Box
               sx={{
                 flex: '1 1 25%',
@@ -290,41 +281,28 @@ const EditPerson = () => {
                 margin="normal"
                 sx={{
                   display: 'flex',
-                  flexDirection: 'row',
+                  flexDirection: 'column',
                   alignItems: 'center',
                 }}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    flexGrow: 1,
+                <img
+                  src={imagePath || ''}
+                  alt="Profile"
+                  style={{
+                    maxWidth: '150px',
+                    maxHeight: '150px',
+                    objectFit: 'cover',
+                    borderRadius: '4px',
                   }}
-                >
-                  <img
-                    src={imagePath}
-                    alt="Default Profile"
-                    style={{
-                      maxWidth: '150px',
-                      maxHeight: '150px',
-                      objectFit: 'cover',
-                      borderRadius: '4px',
-                    }}
-                  />
-
-                  <Button variant="contained" component="label" sx={{ mt: 2 }}>
-                    Upload Image
-                    <input
-                      type="file"
-                      hidden
-                      onChange={(e) => handleImageChange(e)}
-                    />
-                  </Button>
-                </Box>
+                />
+                <Button variant="contained" component="label" sx={{ mt: 2 }}>
+                  Upload Image
+                  <input type="file" hidden onChange={handleImageChange} />
+                </Button>
               </FormControl>
             </Box>
           </Box>
+
           <FormControl
             fullWidth
             margin="normal"
@@ -337,10 +315,9 @@ const EditPerson = () => {
               id="mail"
               type="email"
               variant="outlined"
-              value={formData.mail}
-              onChange={handleChange('mail')}
-              error={!!formErrors.mail}
-              helperText={formErrors.mail}
+              {...register('mail')}
+              error={!!errors.mail}
+              helperText={errors.mail?.message}
               sx={{ flexGrow: 1 }}
             />
           </FormControl>
@@ -351,17 +328,14 @@ const EditPerson = () => {
             sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
           >
             <Box sx={{ minWidth: '150px', mr: 2 }}>
-              <InputLabel htmlFor="additional_info">
-                Additional Info:
-              </InputLabel>
+              <InputLabel htmlFor="additionalInfo">Additional Info:</InputLabel>
             </Box>
             <TextField
-              id="additional_info"
+              id="additionalInfo"
               variant="outlined"
-              value={formData.additionalInfo}
-              onChange={handleChange('additionalInfo')}
-              error={!!formErrors.additionalInfo}
-              helperText={formErrors.additionalInfo}
+              {...register('additionalInfo')}
+              error={!!errors.additionalInfo}
+              helperText={errors.additionalInfo?.message}
               sx={{ flexGrow: 1 }}
             />
           </FormControl>
@@ -374,12 +348,12 @@ const EditPerson = () => {
             <Box sx={{ minWidth: '150px', mr: 2 }}>
               <InputLabel htmlFor="documents">Documents:</InputLabel>
             </Box>
-
             <DocumentList personId={id} />
           </FormControl>
-          {error && (
+
+          {reduxError && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
+              {reduxError}
             </Alert>
           )}
           {success && (
@@ -387,6 +361,7 @@ const EditPerson = () => {
               {success}
             </Alert>
           )}
+
           <Box
             sx={{
               display: 'flex',
@@ -402,10 +377,10 @@ const EditPerson = () => {
           >
             <Button
               type="submit"
-              sx={{ color: theme.palette.primary[200], m: '20px' }}
               variant="contained"
               color="primary"
               disabled={loading}
+              sx={{ color: theme.palette.primary[200], m: '20px' }}
               startIcon={
                 loading ? <CircularProgress size={20} color="inherit" /> : null
               }
@@ -414,6 +389,8 @@ const EditPerson = () => {
             </Button>
             <Button
               variant="outlined"
+              onClick={handleCancel}
+              disabled={loading}
               sx={{
                 color: theme.palette.primary[100],
                 borderColor: theme.palette.primary[100],
@@ -423,8 +400,6 @@ const EditPerson = () => {
                   color: theme.palette.common.white,
                 },
               }}
-              onClick={handleCancel}
-              disabled={loading}
             >
               Cancel
             </Button>

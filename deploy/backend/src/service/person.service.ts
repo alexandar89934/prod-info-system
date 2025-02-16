@@ -1,11 +1,14 @@
 import fs from "fs";
 import path from "path";
 
+import httpStatus from "http-status";
+
 import {
   createPersonQuery,
   getAllPersonsQuery,
   getTotalPersonsCountQuery,
   getPersonByIdQuery,
+  checkEmployeeNumberExists,
   deletePersonQuery,
   updatePersonDocumentsQuery,
   updatePersonImagePathQuery,
@@ -13,88 +16,41 @@ import {
 } from "../models/person.model";
 import { ApiError } from "../shared/error/ApiError";
 
-import { CreatePersonData, GetAllPersonsData } from "./person.service.types";
+import {
+  CreatePersonData,
+  EditPersonData,
+  GetAllPersonsData,
+} from "./person.service.types";
 
-export const createPerson: (
-  employeeNumber: number,
-  name: string,
-  address: string,
-  mail: string,
-  picture: string,
-  additionalInfo: string,
-  documents: Array<object>,
-  createdAt: Date,
-  updatedAt: Date,
-  createdBy: string,
-  updatedBy: string,
-) => Promise<CreatePersonData> = async (
-  employeeNumber: number,
-  name: string,
-  address: string,
-  mail: string,
-  picture: string,
-  additionalInfo: string,
-  documents: Array<object>,
-  createdAt: Date,
-  updatedAt: Date,
-  createdBy: string,
-  updatedBy: string,
+export const createPerson = async (
+  data: CreatePersonData,
 ): Promise<CreatePersonData> => {
-  try {
-    return await createPersonQuery(
-      employeeNumber,
-      name,
-      address,
-      mail,
-      picture,
-      additionalInfo,
-      documents,
-      createdAt,
-      updatedAt,
-      createdBy,
-      updatedBy,
+  const existingPerson = await checkEmployeeNumberExists(data.employeeNumber);
+
+  if (existingPerson) {
+    throw new ApiError(
+      `Employee number ${data.employeeNumber} already exists!`,
+      httpStatus.CONFLICT,
     );
-  } catch (error) {
-    throw new ApiError("Error while fetching person!");
   }
+  return createPersonQuery(data);
 };
-export const updatePerson: (
-  id: string,
-  employeeNumber: number,
-  name: string,
-  address: string,
-  mail: string,
-  picture: string,
-  additionalInfo: string,
-  updatedAt: Date,
-  updatedBy: string,
-) => Promise<CreatePersonData> = async (
-  id: string,
-  employeeNumber: number,
-  name: string,
-  address: string,
-  mail: string,
-  picture: string,
-  additionalInfo: string,
-  updatedAt: Date,
-  updatedBy: string,
-): Promise<CreatePersonData> => {
-  try {
-    // Perform the update query
-    return await updatePersonQuery(
-      id,
-      employeeNumber,
-      name,
-      address,
-      mail,
-      picture,
-      additionalInfo,
-      updatedAt,
-      updatedBy,
+export const updatePerson = async (
+  data: EditPersonData,
+): Promise<EditPersonData> => {
+  const existingPerson = await checkEmployeeNumberExists(
+    data.employeeNumber,
+    data.id,
+  );
+
+  if (existingPerson) {
+    throw new ApiError(
+      `Employee number ${data.employeeNumber} already exists!`,
+      httpStatus.CONFLICT,
     );
-  } catch (error) {
-    throw new ApiError("Error while updating person!");
   }
+
+  return updatePersonQuery(data);
 };
 
 const getTotalPersonsCount = async (): Promise<number> => {
@@ -105,31 +61,32 @@ const getTotalPersonsCount = async (): Promise<number> => {
   }
 };
 
-export const deletePerson: (id: string) => Promise<boolean> = async (
-  id: string,
-): Promise<boolean> => {
-  try {
-    const person = await getPersonByIdQuery(id);
-    if (!person) {
-      throw new ApiError("Person not found!", 404);
-    }
-    if (person.picture) {
-      const imagePath = path.join("/backend/src/", person.picture);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath); // Deletes the file
-      }
-    }
+export const deletePerson = async (id: string): Promise<boolean | null> => {
+  const person = await getPersonByIdQuery(id);
 
-    const deleted = await deletePersonQuery(id);
-
-    if (!deleted) {
-      throw new ApiError("Person not found!", 404);
-    }
-
-    return true;
-  } catch (error) {
-    throw new ApiError("Error while deleting person!");
+  if (!person) {
+    return null;
   }
+
+  if (person.picture) {
+    const imagePath = path.join("/backend/src/", person.picture);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+  }
+
+  if (Array.isArray(person.documents)) {
+    person.documents.forEach((doc) => {
+      const docPath = path.join("/backend/src/", doc.path);
+      if (fs.existsSync(docPath)) {
+        fs.unlinkSync(docPath);
+      }
+    });
+  }
+
+  await deletePersonQuery(id);
+
+  return true;
 };
 
 export const deleteDocument: (
@@ -284,7 +241,6 @@ export const updatePersonsDocuments = async (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
-    console.error("Error updating person's documents:", error);
     throw new ApiError("Error while updating person documents!", 500);
   }
 };

@@ -1,56 +1,42 @@
-import { CreatePersonData } from "../service/person.service.types";
+import {
+  CreatePersonData,
+  EditPersonData,
+} from "../service/person.service.types";
 
 import { callQuery } from "./utils/query";
 
 export const createPersonQuery = async (
-  employeeNumber: number,
-  name: string,
-  address: string,
-  mail: string,
-  picture: string,
-  additionalInfo: string,
-  documents: Array<object>,
-  createdAt: Date,
-  updatedAt: Date,
-  createdBy: string,
-  updatedBy: string,
+  personData: CreatePersonData,
 ): Promise<CreatePersonData> => {
   const insertSQL = `
     INSERT INTO "Person" (
-      "employeeNumber", "name", "address", "mail", "picture", 
+      "employeeNumber", "name", "address", "mail", "picture",
       "additionalInfo", "documents", "createdAt", "updatedAt", "createdBy", "updatedBy"
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
-    RETURNING *;
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *;
   `;
+
   const values = [
-    employeeNumber,
-    name,
-    address,
-    mail,
-    picture || null,
-    additionalInfo || null,
-    JSON.stringify(documents || []),
-    new Date(createdAt).toISOString(),
-    new Date(updatedAt).toISOString(),
-    createdBy,
-    updatedBy,
+    personData.employeeNumber,
+    personData.name,
+    personData.address,
+    personData.mail,
+    personData.picture || null,
+    personData.additionalInfo || null,
+    JSON.stringify(personData.documents || []),
+    new Date(personData.createdAt).toISOString(),
+    new Date(personData.updatedAt).toISOString(),
+    personData.createdBy,
+    personData.updatedBy,
   ];
 
   return callQuery<CreatePersonData>(insertSQL, values);
 };
 
 export const updatePersonQuery = async (
-  id: string,
-  employeeNumber: number,
-  name: string,
-  address: string,
-  mail: string,
-  picture: string,
-  additionalInfo: string,
-  updatedAt: Date,
-  updatedBy: string,
-): Promise<CreatePersonData> => {
+  personData: EditPersonData,
+): Promise<EditPersonData> => {
   const updateSQL = `
     UPDATE "Person" 
     SET 
@@ -66,18 +52,18 @@ export const updatePersonQuery = async (
     RETURNING *;
   `;
   const values = [
-    id, // The ID of the person being updated
-    employeeNumber,
-    name,
-    address,
-    mail,
-    picture || null,
-    additionalInfo || null,
-    new Date(updatedAt).toISOString(),
-    updatedBy,
+    personData.id,
+    personData.employeeNumber,
+    personData.name,
+    personData.address,
+    personData.mail,
+    personData.picture || null,
+    personData.additionalInfo || null,
+    new Date(personData.updatedAt).toISOString(),
+    personData.updatedBy,
   ];
 
-  return callQuery<CreatePersonData>(updateSQL, values); // Use callQuery for executing the SQL
+  return callQuery<EditPersonData>(updateSQL, values);
 };
 
 export const deletePersonQuery = async (id: string): Promise<boolean> => {
@@ -109,6 +95,27 @@ export const getPersonByIdQuery = async (
   } catch (error) {
     console.error("Error fetching person by ID:", error);
     return null;
+  }
+};
+
+export const checkEmployeeNumberExists = async (
+  employeeNumber: number,
+  excludeId?: string,
+): Promise<boolean> => {
+  const selectSQL = `
+    SELECT COUNT(*) FROM "Person"
+    WHERE "employeeNumber" = $1
+    ${excludeId ? `AND "id" <> $2` : ""};
+  `;
+
+  const params = excludeId ? [employeeNumber, excludeId] : [employeeNumber];
+
+  try {
+    const result = await callQuery<{ count: number }>(selectSQL, params);
+    return result.count > 0; // Return true if employeeNumber exists
+  } catch (error) {
+    console.error("Error checking employee number:", error);
+    throw new Error("Database error while checking employee number");
   }
 };
 

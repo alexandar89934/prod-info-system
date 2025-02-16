@@ -31,6 +31,15 @@ export const UpdatePersonSchema = Joi.object({
   mail: Joi.string().email().empty(""),
   picture: Joi.string().empty(""),
   additionalInfo: Joi.string().empty(""),
+  documents: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string().required(),
+        path: Joi.string().required(),
+        dateAdded: Joi.date().required(),
+      }),
+    )
+    .optional(),
   createdAt: Joi.date().empty(""),
   updatedAt: Joi.date().empty(""),
   createdBy: Joi.string().required(),

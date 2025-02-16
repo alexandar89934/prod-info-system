@@ -69,6 +69,7 @@ const Person = () => {
       try {
         const result = await dispatch(deletePerson(selectedPerson.id));
         handleClose();
+
         if (deletePerson.rejected.match(result)) {
           const errorMessage = result.payload || 'Error deleting person!';
           setNotification({ message: `${errorMessage}`, type: 'error' });

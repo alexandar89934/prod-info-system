@@ -88,14 +88,14 @@ export const deletePerson = createAsyncThunk(
     try {
       const response = await axiosServer.delete(`/person/delete/${personId}`);
       if (response.status >= 400 && response.status < 500) {
-        throw new Error(`Client error: ${response.status} - ${response.data}`);
+        throw new Error(
+          `Client error: ${response.status} - ${response.data.message}`
+        );
       }
       return response.data;
     } catch (error) {
       dispatch(setError(error.message));
-      return rejectWithValue(
-        error.response?.data?.message || 'Failed to delete person.'
-      );
+      return rejectWithValue(error || 'Failed to delete person.');
     }
   }
 );

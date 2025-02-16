@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { getName } from '@/state/auth/auth.selectors.ts';
 
-export const addPersonSchema = z.object({
+export const personSchema = z.object({
   employeeNumber: z
     .number({ invalid_type_error: 'Employee number is required' })
     .min(1, 'Employee number must be at least 1'),

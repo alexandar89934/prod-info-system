@@ -23,8 +23,17 @@ const personSlice = createSlice({
         state.person = action.payload;
       }
     },
+    clearPerson(state) {
+      state.person = null;
+    },
+
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
+    },
+    updatePersonPicture(state, action: PayloadAction<string>) {
+      if (state.person) {
+        state.person.picture = action.payload; // Assuming `picture` is the correct field
+      }
     },
     setDocuments(state, action: PayloadAction<DocumentData | DocumentData[]>) {
       if (state.person) {
@@ -56,6 +65,12 @@ const personSlice = createSlice({
   },
 });
 
-export const { setPerson, setError, setDocuments } = personSlice.actions;
+export const {
+  setPerson,
+  clearPerson,
+  setError,
+  setDocuments,
+  updatePersonPicture,
+} = personSlice.actions;
 
 export default personSlice.reducer;

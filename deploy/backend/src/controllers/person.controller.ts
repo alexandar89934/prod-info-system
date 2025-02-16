@@ -5,35 +5,16 @@ import { Request, Response } from "express";
 import httpStatus from "http-status";
 
 import { personService } from "../service";
+import {
+  CreatePersonData,
+  EditPersonData,
+} from "../service/person.service.types";
 import { catchAsync } from "../shared/utils/CatchAsync";
 
 export const createPerson = catchAsync(async (req: Request, res: Response) => {
-  const {
-    employeeNumber,
-    name,
-    address,
-    mail,
-    picture,
-    additionalInfo,
-    documents,
-    createdAt,
-    updatedAt,
-    createdBy,
-    updatedBy,
-  } = req.body;
-  const person = await personService.createPerson(
-    employeeNumber,
-    name,
-    address,
-    mail,
-    picture,
-    additionalInfo,
-    documents,
-    createdAt,
-    updatedAt,
-    createdBy,
-    updatedBy,
-  );
+  const personData: CreatePersonData = req.body;
+
+  const person = await personService.createPerson(personData);
 
   res.status(httpStatus.OK).send({
     success: true,
@@ -46,43 +27,25 @@ export const createPerson = catchAsync(async (req: Request, res: Response) => {
 
 export const updatePerson = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const {
-    employeeNumber,
-    name,
-    address,
-    mail,
-    picture,
-    additionalInfo,
-    updatedAt,
-    updatedBy,
-  } = req.body;
 
-  try {
-    const person = await personService.updatePerson(
-      id,
-      employeeNumber,
-      name,
-      address,
-      mail,
-      picture,
-      additionalInfo,
-      updatedAt,
-      updatedBy,
-    );
-
-    res.status(httpStatus.OK).send({
-      success: true,
-      message: "Successfully updated Person!",
-      content: {
-        person,
-      },
-    });
-  } catch (error) {
-    res.status(httpStatus.NOT_FOUND).send({
+  if (!id) {
+    return res.status(httpStatus.BAD_REQUEST).send({
       success: false,
-      message: error.message || "Person not found!",
+      message: "Missing person ID in request.",
     });
   }
+
+  const personData: EditPersonData = { ...req.body, id };
+
+  const person = await personService.updatePerson(personData);
+
+  return res.status(httpStatus.OK).send({
+    success: true,
+    message: "Successfully updated Person!",
+    content: {
+      person,
+    },
+  });
 });
 
 export const getAllPersons = catchAsync(async (req: Request, res: Response) => {

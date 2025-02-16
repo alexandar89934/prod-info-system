@@ -20,11 +20,15 @@ import profileImage from '../../assets/profile.jpeg';
 import DocumentList from '@/components/DocumentsList.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import { useAppDispatch } from '@/state/hooks.ts';
-import { addPerson, uploadImage } from '@/state/person/person.actions.ts';
-import { addPersonSchema } from '@/state/person/person.schema.ts';
+import {
+  addPerson,
+  deleteFileNewPerson,
+  uploadImage,
+} from '@/state/person/person.actions.ts';
 import { selectPerson } from '@/state/person/person.selectors.ts';
 import { setDocuments } from '@/state/person/person.slice.ts';
 import { AddPersonFormData } from '@/state/person/person.types.ts';
+import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
 const AddPerson: React.FC = () => {
   const navigate = useNavigate();
@@ -34,7 +38,7 @@ const AddPerson: React.FC = () => {
   const [imagePath, setImagePath] = useState<string | null>(profileImage);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const person = useSelector(selectPerson);
+  const person: AddPersonFormData = useSelector(selectPerson);
 
   const {
     register,
@@ -43,7 +47,7 @@ const AddPerson: React.FC = () => {
     reset,
     formState: { errors },
   } = useForm<AddPersonFormData>({
-    resolver: zodResolver(addPersonSchema),
+    resolver: zodResolver(personSchema),
     defaultValues: {
       employeeNumber: 0,
       name: '',
@@ -85,10 +89,26 @@ const AddPerson: React.FC = () => {
     }
   };
 
-  const handleCancel = () => {
-    reset();
-    dispatch(setDocuments([]));
-    navigate('/person');
+  const handleCancel = async () => {
+    try {
+      setError(null);
+      if (person) {
+        await Promise.all(
+          person.documents.map((doc) =>
+            dispatch(deleteFileNewPerson({ documentPath: doc.path }))
+          )
+        );
+        if (!(imagePath === profileImage)) {
+          dispatch(deleteFileNewPerson({ documentPath: imagePath }));
+        }
+      }
+
+      reset();
+      dispatch(setDocuments([]));
+      navigate('/person');
+    } catch (removeDocumentError) {
+      setError(`Error while removing documents: ${removeDocumentError}`);
+    }
   };
 
   const handleImageChange = async (
@@ -106,13 +126,13 @@ const AddPerson: React.FC = () => {
           setValue('picture', uploadedImagePath);
         }
       } catch (imageUploadError) {
-        console.error('Image upload failed:', imageUploadError);
+        setError(`Image upload failed: ${imageUploadError}`);
       }
     }
   };
 
-  const onSubmit = (data: AddPersonFormData) => {
-    handleAddPerson(data);
+  const onSubmit = async (data: AddPersonFormData) => {
+    await handleAddPerson(data);
   };
 
   return (

@@ -50,7 +50,7 @@ export interface GetPersonsData {
 }
 
 export interface PersonState {
-  documents: any;
+  documents: DocumentData[];
   persons: AddPersonFormData[];
   person: AddPersonFormData;
   total: number;

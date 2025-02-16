@@ -4,4 +4,6 @@ export abstract class BaseError extends Error {
   stack: string;
 
   isOperational: boolean;
+
+  errors: string;
 }

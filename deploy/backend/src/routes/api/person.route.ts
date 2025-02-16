@@ -1,0 +1,62 @@
+import { RequestHandler, Router } from "express";
+
+import { upload } from "../../config/multerConfig";
+import { personController } from "../../controllers";
+import { validateRequestBody } from "../../middlewares/requestValidation";
+import {
+  CreatePersonSchema,
+  UpdatePersonSchema,
+} from "../../shared/joi/person.schema";
+
+export const personRouter = Router();
+
+personRouter
+  .route("/create")
+  .post(validateRequestBody(CreatePersonSchema), personController.createPerson);
+
+personRouter
+  .route("/update/:id")
+  .put(validateRequestBody(UpdatePersonSchema), personController.updatePerson);
+
+personRouter.route("/").get(personController.getAllPersons);
+
+personRouter.route("/delete/:id").delete(personController.deletePerson);
+
+personRouter
+  .route("/delete-file/:personId")
+  .delete(personController.deleteDocument);
+
+personRouter
+  .route("/delete-file-new-person/")
+  .post(personController.deleteDocumentNewPerson);
+
+personRouter.route("/:id").get(personController.getPersonById);
+
+personRouter
+  .route("/upload-image")
+  .post(
+    upload.single("profileImage") as unknown as RequestHandler,
+    personController.uploadProfileImage,
+  );
+
+personRouter
+  .route("/update-image/:personId")
+  .put(personController.updateImagePath);
+
+personRouter
+  .route("/upload-file")
+  .post(
+    upload.single("uploadFile") as unknown as RequestHandler,
+    personController.uploadFile,
+  );
+
+personRouter
+  .route("/upload-file-new-person")
+  .post(
+    upload.single("uploadFile") as unknown as RequestHandler,
+    personController.uploadFileNewPerson,
+  );
+
+personRouter.get("/download-file/:fileName", personController.downloadDocument);
+
+personRouter.get("/view-file/:fileName", personController.viewDocument);

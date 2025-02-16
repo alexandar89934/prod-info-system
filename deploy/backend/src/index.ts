@@ -5,7 +5,6 @@ import { config } from "./config/config";
 import { logger } from "./config/logger";
 import { createAdmin } from "./service/user.service";
 
-// @ts-ignore
 let server: any;
 
 const exitHandler = () => {

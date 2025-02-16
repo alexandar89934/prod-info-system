@@ -17,7 +17,7 @@ export const adminSignIn = async (username: string, password: string) => {
   }
 
   return {
-    token: encodeJWT<{ username: string }>({ username: user.username }, "3h"),
+    token: encodeJWT<{ username: string }>({ username: user.username }, "3600"),
     user,
   };
 };

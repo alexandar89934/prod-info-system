@@ -133,3 +133,6 @@ dist
 .DS_Store
 
 .idea/
+
+#ignore uploaded files
+uploads/

@@ -1,3 +1,5 @@
+import path from "path";
+
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -18,14 +20,10 @@ if (config.env !== "test") {
   app.use(errorHandler);
 }
 
-// Parse request body as json and set a limit of 1MB
 app.use(express.json({ limit: "1mb" }));
-// Parse urlencoded body and set a limit of 1MB
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-// Allow Node to get real IP address even if behind proxy
 app.enable("trust proxy");
 
-// Secure HTTP headers
 app.use(helmet());
 app.use(
   cors({
@@ -37,9 +35,6 @@ app.use(
 
 app.use("/", healthcheckRouter);
 app.use("/api", apiRouter);
-
-// Convert Error to ApiError if needed
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(errorConverter);
-
-// Handle Errors
 app.use(apiErrorHandler);

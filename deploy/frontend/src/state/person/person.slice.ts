@@ -1,76 +1,204 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
-import { PersonState, AddPersonFormData, DocumentData } from './person.types';
+import { PersonState } from './person.types';
 
 import profileImage from '@/assets/profile.jpeg';
 import { getName } from '@/state/auth/auth.selectors.ts';
+import {
+  addPerson,
+  deleteFile,
+  deleteFileNewPerson,
+  fetchPersonByEmployeeNumber,
+  fetchPersonById,
+  fetchPersons,
+  updatePerson,
+  updatePersonsImagePath,
+  uploadFile,
+  uploadFileForNewPerson,
+  uploadImage,
+} from '@/state/person/person.actions.ts';
+
+const initialPerson: PersonState['person'] = {
+  profileImage,
+  employeeNumber: 0,
+  name: '',
+  address: '',
+  mail: '',
+  picture: '',
+  additionalInfo: '',
+  startDate: '',
+  endDate: '',
+  roles: [],
+  createdAt: null,
+  updatedAt: null,
+  createdBy: getName(),
+  updatedBy: getName(),
+  documents: [],
+};
 
 const initialState: PersonState = {
   persons: [],
-  person: null,
+  person: initialPerson,
   total: 0,
   loading: false,
   error: null,
-  documents: [],
+  success: null,
 };
 
 const personSlice = createSlice({
   name: 'person',
   initialState,
   reducers: {
-    setPerson(state, action: PayloadAction<AddPersonFormData>) {
-      if (action.payload) {
-        state.person = action.payload;
-      }
-    },
     clearPerson(state) {
-      state.person = null;
+      state.person = initialPerson;
     },
-
-    setError(state, action: PayloadAction<string | null>) {
-      state.error = action.payload;
+    clearPersons: (state) => {
+      state.persons = [];
     },
-    updatePersonPicture(state, action: PayloadAction<string>) {
-      if (state.person) {
-        state.person.picture = action.payload; // Assuming `picture` is the correct field
-      }
-    },
-    setDocuments(state, action: PayloadAction<DocumentData | DocumentData[]>) {
-      if (state.person) {
-        state.person = {
-          ...state.person,
-          documents: Array.isArray(action.payload)
-            ? [...action.payload]
-            : [...state.person.documents, action.payload],
-        };
-      } else {
-        state.person = {
-          profileImage,
-          employeeNumber: 0,
-          name: '',
-          address: '',
-          mail: '',
-          picture: '',
-          additionalInfo: '',
-          createdAt: null,
-          updatedAt: null,
-          createdBy: getName(),
-          updatedBy: getName(),
-          documents: Array.isArray(action.payload)
-            ? action.payload
-            : [action.payload],
-        };
-      }
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchPersons.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPersons.fulfilled, (state, action) => {
+        state.loading = false;
+        state.persons = action.payload.content?.persons;
+        state.total = action.payload.content?.pagination?.total;
+      })
+      .addCase(fetchPersons.rejected, (state, action) => {
+        console.log('uslo');
+        console.log(action.payload);
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchPersonById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPersonById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.person = action.payload;
+      })
+      .addCase(fetchPersonById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchPersonByEmployeeNumber.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPersonByEmployeeNumber.fulfilled, (state, action) => {
+        state.loading = false;
+        state.person = action.payload;
+      })
+      .addCase(fetchPersonByEmployeeNumber.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(addPerson.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addPerson.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload.message;
+      })
+      .addCase(addPerson.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updatePerson.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePerson.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload.message;
+      })
+      .addCase(updatePerson.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(uploadImage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadImage.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload.message;
+      })
+      .addCase(uploadImage.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updatePersonsImagePath.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePersonsImagePath.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload.message;
+        state.person.picture = action.payload;
+      })
+      .addCase(updatePersonsImagePath.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(uploadFile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadFile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.person.documents = action.payload;
+      })
+      .addCase(uploadFile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(uploadFileForNewPerson.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadFileForNewPerson.fulfilled, (state, action) => {
+        state.loading = false;
+        state.person.documents = [...state.person.documents, action.payload];
+      })
+      .addCase(uploadFileForNewPerson.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deleteFile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteFile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.person.documents = action.payload;
+      })
+      .addCase(deleteFile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deleteFileNewPerson.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteFileNewPerson.fulfilled, (state, action) => {
+        state.loading = false;
+        state.person.documents = state.person.documents.filter(
+          (doc) => doc.path !== action.payload
+        );
+      })
+      .addCase(deleteFileNewPerson.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const {
-  setPerson,
-  clearPerson,
-  setError,
-  setDocuments,
-  updatePersonPicture,
-} = personSlice.actions;
+export const { clearPerson, clearPersons } = personSlice.actions;
 
 export default personSlice.reducer;

@@ -11,9 +11,9 @@ export const createPersonQuery = async (
   const insertSQL = `
     INSERT INTO "Person" (
       "employeeNumber", "name", "address", "mail", "picture",
-      "additionalInfo", "documents", "createdAt", "updatedAt", "createdBy", "updatedBy"
+      "additionalInfo", "documents","startDate","endDate", "createdAt", "updatedAt", "createdBy", "updatedBy"
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
   `;
 
@@ -25,6 +25,8 @@ export const createPersonQuery = async (
     personData.picture || null,
     personData.additionalInfo || null,
     JSON.stringify(personData.documents || []),
+    personData.startDate,
+    personData.endDate || null,
     new Date(personData.createdAt).toISOString(),
     new Date(personData.updatedAt).toISOString(),
     personData.createdBy,
@@ -92,6 +94,22 @@ export const getPersonByIdQuery = async (
 
   try {
     return await callQuery<CreatePersonData>(selectSQL, [id]);
+  } catch (error) {
+    console.error("Error fetching person by ID:", error);
+    return null;
+  }
+};
+
+export const getPersonByEmployeeNumberQuery = async (
+  employeeNumber: string,
+): Promise<CreatePersonData | null> => {
+  const selectSQL = `
+    SELECT * FROM "Person"
+    WHERE "employeeNumber" = $1;
+  `;
+
+  try {
+    return await callQuery<CreatePersonData>(selectSQL, [employeeNumber]);
   } catch (error) {
     console.error("Error fetching person by ID:", error);
     return null;

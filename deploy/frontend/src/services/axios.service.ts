@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { config } from '../config/config.ts';
 
-import { getFromLocalStorage } from './local.storage.ts';
+import { getFromLocalStorage } from '@/services/local.storage.ts';
 
 const axiosServer = axios.create({
   baseURL: config.backend.apiUrl,
@@ -14,16 +14,15 @@ let tokenRenewalPromise: Promise<boolean> | null = null;
 
 export const renewTokens = async () => {
   const axiosResponse = await axiosServer.post('/auth/user/renew-token');
-
   if (axiosResponse.data.success) {
     const { token } = axiosResponse.headers;
     localStorage.setItem('token', token);
     return true;
   }
-
   localStorage.removeItem('token');
   localStorage.removeItem('name');
-  localStorage.removeItem('id');
+  localStorage.removeItem('employeeNumber');
+  localStorage.removeItem('profilePicture');
   return false;
 };
 

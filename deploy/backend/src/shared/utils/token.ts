@@ -7,14 +7,19 @@ import { AuthError } from "../error/AuthError";
 
 import { config } from "./../../config/config";
 
-export const encodeJWT = <T extends object>(
-  objectToEncode: T,
-  validity: string | number,
-): string => {
-  const { secret } = config.jwt; // Ensure this is a string
+export const encodeJWT = <T extends object>(objectToEncode: T): string => {
+  const { secret, validity } = config.jwt;
 
-  // Create options with correct type for expiresIn
   const options: SignOptions = { expiresIn: Number(validity) };
+
+  return sign(objectToEncode, secret, options);
+};
+
+export const encodeJWTRefresh = <T extends object>(
+  objectToEncode: T,
+): string => {
+  const { secret, refreshValidity } = config.jwt;
+  const options: SignOptions = { expiresIn: Number(refreshValidity) };
 
   return sign(objectToEncode, secret, options);
 };

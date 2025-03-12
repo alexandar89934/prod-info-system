@@ -4,16 +4,21 @@ import path from "path";
 import httpStatus from "http-status";
 
 import {
-  createPersonQuery,
-  getAllPersonsQuery,
-  getTotalPersonsCountQuery,
-  getPersonByIdQuery,
   checkEmployeeNumberExists,
+  createPersonQuery,
   deletePersonQuery,
+  getAllPersonsQuery,
+  getPersonByEmployeeNumberQuery,
+  getPersonByIdQuery,
+  getTotalPersonsCountQuery,
   updatePersonDocumentsQuery,
   updatePersonImagePathQuery,
   updatePersonQuery,
 } from "../models/person.model";
+import {
+  getUserByEmployeeNumber,
+  getUserRolesById,
+} from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
 
 import {
@@ -21,6 +26,7 @@ import {
   EditPersonData,
   GetAllPersonsData,
 } from "./person.service.types";
+import { createUser } from "./user.service";
 
 export const createPerson = async (
   data: CreatePersonData,
@@ -33,6 +39,7 @@ export const createPerson = async (
       httpStatus.CONFLICT,
     );
   }
+  await createUser(String(data.employeeNumber), data.roles ?? []);
   return createPersonQuery(data);
 };
 export const updatePerson = async (
@@ -123,14 +130,13 @@ export const deleteDocument: (
 
 export const deleteDocumentNewPerson: (
   docPath: string,
-) => Promise<boolean> = async (docPath: string): Promise<boolean> => {
+) => Promise<string> = async (docPath: string): Promise<string> => {
   try {
     const documentPath = path.join("/backend/src/", docPath);
     if (fs.existsSync(documentPath)) {
       fs.unlinkSync(documentPath);
-      return true;
     }
-    return false;
+    return docPath;
   } catch (error) {
     throw new ApiError("Error while deleting Document!");
   }
@@ -204,12 +210,34 @@ export const getPersonById: (
 ): Promise<CreatePersonData | null> => {
   try {
     const person = await getPersonByIdQuery(id);
+    const user = await getUserByEmployeeNumber(String(person?.employeeNumber));
+    const roles = await getUserRolesById(user.id);
 
     if (!person) {
       throw new ApiError(`Person with ID ${id} not found!`);
     }
 
-    return person;
+    return { ...person, roles };
+  } catch (error) {
+    throw new ApiError("Error while fetching person by ID!");
+  }
+};
+
+export const getPersonByEmployeeNumber: (
+  employeeNumber: string,
+) => Promise<CreatePersonData | null> = async (
+  employeeNumber: string,
+): Promise<CreatePersonData | null> => {
+  try {
+    const person = await getPersonByEmployeeNumberQuery(employeeNumber);
+    const user = await getUserByEmployeeNumber(employeeNumber);
+    const roles = await getUserRolesById(user.id);
+
+    if (!person) {
+      throw new ApiError(`Person with ID ${employeeNumber} not found!`);
+    }
+
+    return { ...person, roles };
   } catch (error) {
     throw new ApiError("Error while fetching person by ID!");
   }

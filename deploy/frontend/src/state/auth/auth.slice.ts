@@ -1,11 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+import profileImage from '../../assets/profile.jpeg';
+
 import { getFromLocalStorage } from '@/services/local.storage.ts';
 
 const authInitialState = {
   isLoggedIn: !!getFromLocalStorage('token'),
   name: '',
+  employeeNumber: '',
   id: getFromLocalStorage('id'),
+  profilePicture: profileImage,
 };
 
 const authSlice = createSlice({
@@ -21,8 +25,20 @@ const authSlice = createSlice({
     setName: (state, action) => {
       state.name = action.payload.name;
     },
+    setEmployeeNumber: (state, action) => {
+      state.employeeNumber = action.payload.employeeNumber;
+    },
+    setProfilePicture: (state, action) => {
+      state.profilePicture = action.payload.profilePicture;
+    },
   },
 });
 
-export const { login, logoutState, setName } = authSlice.actions;
+export const {
+  login,
+  logoutState,
+  setName,
+  setEmployeeNumber,
+  setProfilePicture,
+} = authSlice.actions;
 export default authSlice.reducer;

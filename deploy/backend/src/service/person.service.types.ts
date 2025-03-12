@@ -6,10 +6,13 @@ export type CreatePersonData = {
   picture?: string;
   additionalInfo?: string;
   documents?: Record<string, unknown>;
+  roles?: number[];
+  startDate: Date;
+  endDate: Date;
   createdAt: Date;
   updatedAt: Date;
-  createdBy: Date;
-  updatedBy: Date;
+  createdBy: string;
+  updatedBy: string;
 };
 
 export type GetAllPersonsData = {
@@ -28,6 +31,9 @@ export type EditPersonData = {
   picture?: string;
   additionalInfo?: string;
   documents?: Record<string, unknown>;
+  roles?: number[];
+  startDate: Date;
+  endDate: Date;
   createdAt: Date;
   updatedAt: Date;
   createdBy: Date;

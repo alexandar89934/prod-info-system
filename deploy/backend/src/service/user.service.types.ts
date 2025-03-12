@@ -5,3 +5,12 @@ export type Admin = {
   name: string;
   lastPasswordReset: string;
 };
+
+export type User = {
+  picture: string;
+  name: string;
+  id: string;
+  employeeNumber: string;
+  password: string;
+  lastPasswordReset: string;
+};

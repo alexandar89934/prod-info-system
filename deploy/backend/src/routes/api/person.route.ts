@@ -4,11 +4,16 @@ import { upload } from "../../config/multerConfig";
 import { personController } from "../../controllers";
 import { validateRequestBody } from "../../middlewares/requestValidation";
 import {
+  authorizeAdmin,
+  verifyTokenMiddleware,
+} from "../../middlewares/verifyTokenMiddleware";
+import {
   CreatePersonSchema,
   UpdatePersonSchema,
 } from "../../shared/joi/person.schema";
 
 export const personRouter = Router();
+personRouter.use(verifyTokenMiddleware);
 
 personRouter
   .route("/create")
@@ -18,7 +23,7 @@ personRouter
   .route("/update/:id")
   .put(validateRequestBody(UpdatePersonSchema), personController.updatePerson);
 
-personRouter.route("/").get(personController.getAllPersons);
+personRouter.route("/").get(authorizeAdmin, personController.getAllPersons);
 
 personRouter.route("/delete/:id").delete(personController.deletePerson);
 
@@ -31,6 +36,10 @@ personRouter
   .post(personController.deleteDocumentNewPerson);
 
 personRouter.route("/:id").get(personController.getPersonById);
+
+personRouter
+  .route("/profile/:employeeNumber")
+  .get(personController.getPersonByEmployeeNumber);
 
 personRouter
   .route("/upload-image")

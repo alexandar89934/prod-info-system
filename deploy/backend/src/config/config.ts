@@ -13,6 +13,8 @@ const envVars = cleanEnv(
     APP_ENVIRONMENT: str(),
     APP_LOG_LEVEL: str(),
     JWT_SECRET: str(),
+    JWT_VALIDITY: str(),
+    JWT_REFRESH_VALIDITY: str(),
     HASH_SALT: str(),
     DB_USERNAME: str(),
     DB_PASSWORD: str(),
@@ -23,9 +25,10 @@ const envVars = cleanEnv(
     FRONTEND_URL: str(),
     FRONTEND_HOST: str(),
     FRONTEND_PORT: num(),
-    ADMIN_USERNAME: str(),
     ADMIN_NAME: str(),
     ADMIN_PASSWORD: str(),
+    ADMIN_EMPLOYEE_NUMBER: str(),
+    ROLES: str(),
   },
   {
     reporter: ({ errors }) => {
@@ -68,13 +71,18 @@ export const config = {
   },
   jwt: {
     secret: envVars.JWT_SECRET,
+    validity: envVars.JWT_VALIDITY,
+    refreshValidity: envVars.JWT_REFRESH_VALIDITY,
   },
   hash: {
     salt: envVars.HASH_SALT,
   },
   adminCredentials: {
-    username: envVars.ADMIN_USERNAME,
     name: envVars.ADMIN_NAME,
     password: envVars.ADMIN_PASSWORD,
+    employeeNumber: envVars.ADMIN_EMPLOYEE_NUMBER,
+  },
+  roles: {
+    roles: envVars.ROLES,
   },
 };

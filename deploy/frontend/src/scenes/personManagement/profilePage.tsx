@@ -10,45 +10,39 @@ import {
   InputLabel,
   useTheme,
 } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import profile from '../../assets/profile.jpeg';
-
+import profile from '@/assets/profile.jpeg';
 import DocumentList from '@/components/DocumentsList.tsx';
 import ProfileImageUpload from '@/components/ProfileImageUpload.tsx';
 import UserRolesSelect from '@/components/UserRolesSelect.tsx';
-import { getName } from '@/state/auth/auth.selectors.ts';
+import { getEmployeeNumber, getName } from '@/state/auth/auth.selectors.ts';
+import { setProfilePicture } from '@/state/auth/auth.slice.ts';
 import {
-  fetchPersonById,
+  fetchPersonByEmployeeNumber,
   updatePerson,
 } from '@/state/person/person.actions.ts';
-import {
-  selectError,
-  selectLoading,
-  selectPerson,
-  selectSuccess,
-} from '@/state/person/person.selectors.ts';
+import { selectPerson, selectError } from '@/state/person/person.selectors.ts';
 import { clearPerson } from '@/state/person/person.slice.ts';
-import {
-  AddPersonFormData,
-  EditPersonFormData,
-} from '@/state/person/person.types.ts';
+import { EditPersonFormData } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
-const EditPerson = () => {
-  const { id } = useParams();
+const ProfilePage = () => {
+  const employeeNumber = getEmployeeNumber();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const theme = useTheme();
-  const person: AddPersonFormData = useSelector(selectPerson);
-  const imagePath = person.picture ?? profile;
+
+  const person = useSelector(selectPerson) as unknown as EditPersonFormData;
+  const profilePicture = person?.picture ?? profile;
+  const id = person?.id;
   const error = useSelector(selectError);
-  const loading = useSelector(selectLoading);
-  const success = useSelector(selectSuccess);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const {
     register,
@@ -77,10 +71,10 @@ const EditPerson = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      dispatch(fetchPersonById(id));
+    if (employeeNumber) {
+      dispatch(fetchPersonByEmployeeNumber(employeeNumber));
     }
-  }, [dispatch, id]);
+  }, [dispatch, employeeNumber]);
 
   useEffect(() => {
     if (person) {
@@ -103,12 +97,18 @@ const EditPerson = () => {
         createdBy: person.createdBy,
         updatedBy: getName(),
       });
+      setProfilePicture(person.picture);
     }
-  }, [person, id, reset]);
+  }, [person, employeeNumber, reset]);
 
   const onSubmit = async (data: EditPersonFormData) => {
-    await dispatch(updatePerson({ ...data, id })).unwrap();
+    setLoading(true);
+    const response = await dispatch(updatePerson({ ...data, id })).unwrap();
+    if (!response.success) {
+      return;
+    }
     setTimeout(() => {
+      setSuccess(null);
       navigate('/person');
       dispatch(clearPerson());
     }, 3000);
@@ -154,7 +154,11 @@ const EditPerson = () => {
         <Typography variant="h4" component="h1" align="center" mb={2} mt={2}>
           Edit Person
         </Typography>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={handleSubmit(onSubmit, (formErrors) => {
+            console.log('Validation errors:', formErrors);
+          })}
+        >
           <Box
             sx={{
               display: 'flex',
@@ -164,7 +168,11 @@ const EditPerson = () => {
             }}
           >
             <Box
-              sx={{ flex: '1 1 65%', display: 'flex', flexDirection: 'column' }}
+              sx={{
+                flex: '1 1 65%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
             >
               <FormControl
                 fullWidth
@@ -253,7 +261,16 @@ const EditPerson = () => {
                   alignItems: 'center',
                 }}
               >
-                <ProfileImageUpload profilePicture={imagePath} personId={id} />
+                <ProfileImageUpload
+                  profilePicture={profilePicture}
+                  personId={id}
+                  onImageUpload={(uploadedPath: string) => {
+                    localStorage.setItem('profilePicture', uploadedPath);
+                    dispatch(
+                      setProfilePicture({ profilePicture: uploadedPath })
+                    );
+                  }}
+                />
               </FormControl>
             </Box>
           </Box>
@@ -261,7 +278,11 @@ const EditPerson = () => {
           <FormControl
             fullWidth
             margin="normal"
-            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
           >
             <Box sx={{ minWidth: '150px', mr: 2 }}>
               <InputLabel htmlFor="mail">Mail:</InputLabel>
@@ -276,7 +297,6 @@ const EditPerson = () => {
               sx={{ flexGrow: 1 }}
             />
           </FormControl>
-
           <FormControl
             fullWidth
             margin="normal"
@@ -323,7 +343,11 @@ const EditPerson = () => {
           <FormControl
             fullWidth
             margin="normal"
-            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
           >
             <Box sx={{ minWidth: '150px', mr: 2 }}>
               <InputLabel htmlFor="additionalInfo">Additional Info:</InputLabel>
@@ -354,7 +378,11 @@ const EditPerson = () => {
           <FormControl
             fullWidth
             margin="normal"
-            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
           >
             <Box sx={{ minWidth: '150px', mr: 2 }}>
               <InputLabel htmlFor="documents">Documents:</InputLabel>
@@ -420,5 +448,4 @@ const EditPerson = () => {
     </Box>
   );
 };
-
-export default EditPerson;
+export default ProfilePage;

@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Box,
@@ -10,28 +11,35 @@ import {
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
 
-import { adminLogin } from '@/state/auth/auth.actions.ts';
+import { userLogin } from '@/state/auth/auth.actions.ts';
 import { useAppDispatch } from '@/state/hooks.ts';
+import { loginSchema } from '@/zodValidationSchemas/login.schema.ts';
 
-export type LoginFormData = {
-  username: string;
-  password: string;
-};
+export type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useAppDispatch();
   const router = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
   const handleLogin = async (data: LoginFormData) => {
     setLoading(true);
     try {
-      const response = await dispatch(adminLogin(data)).unwrap();
+      const response = await dispatch(userLogin(data)).unwrap();
       if (!response.success) {
         setError(response.error.message);
       } else {
@@ -43,20 +51,6 @@ const Login: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const loginData: LoginFormData = {
-      username,
-      password,
-    };
-    handleLogin(loginData);
-  };
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   return (
@@ -85,16 +79,15 @@ const Login: React.FC = () => {
             {error}
           </Alert>
         )}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(handleLogin)}>
           <TextField
             fullWidth
-            label="Username"
+            label="Employee Number"
             variant="outlined"
             margin="normal"
-            value={username}
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
+            {...register('employeeNumber')}
+            error={!!errors.employeeNumber}
+            helperText={errors.employeeNumber?.message}
           />
           <TextField
             fullWidth
@@ -102,16 +95,15 @@ const Login: React.FC = () => {
             type={showPassword ? 'text' : 'password'}
             variant="outlined"
             margin="normal"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
+            {...register('password')}
+            error={!!errors.password}
+            helperText={errors.password?.message}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     aria-label="toggle password visibility"
-                    onClick={handleTogglePasswordVisibility}
+                    onClick={() => setShowPassword(!showPassword)}
                     edge="end"
                   >
                     {showPassword ? <VisibilityOff /> : <Visibility />}

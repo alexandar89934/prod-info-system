@@ -49,28 +49,35 @@ export const updatePerson = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getAllPersons = catchAsync(async (req: Request, res: Response) => {
-  const { page = 1, limit = 10, search, sortField, sortOrder } = req.query;
-  const offset = (Number(page) - 1) * Number(limit);
+  try {
+    const { page = 1, limit = 10, search, sortField, sortOrder } = req.query;
+    const offset = (Number(page) - 1) * Number(limit);
 
-  const { persons, totalPersons } = await personService.getAllPersons(
-    Number(limit),
-    offset,
-    String(search),
-    String(sortField),
-    String(sortOrder),
-  );
-  res.status(httpStatus.OK).send({
-    success: true,
-    message: "Successfully fetched persons.",
-    content: {
-      persons,
-      pagination: {
-        total: totalPersons,
-        page: Number(page),
-        limit: Number(limit),
+    const { persons, totalPersons } = await personService.getAllPersons(
+      Number(limit),
+      offset,
+      String(search),
+      String(sortField),
+      String(sortOrder),
+    );
+    res.status(httpStatus.OK).send({
+      success: true,
+      message: "Successfully fetched persons.",
+      content: {
+        persons,
+        pagination: {
+          total: totalPersons,
+          page: Number(page),
+          limit: Number(limit),
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+      success: false,
+      message: error.message || "An error occurred while fetching persons.",
+    });
+  }
 });
 
 export const deletePerson = catchAsync(async (req: Request, res: Response) => {
@@ -215,6 +222,37 @@ export const getPersonById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const getPersonByEmployeeNumber = catchAsync(
+  async (req: Request, res: Response) => {
+    const { employeeNumber } = req.params;
+
+    if (!employeeNumber) {
+      return res.status(httpStatus.BAD_REQUEST).send({
+        success: false,
+        message: "Missing Employee Number in request.",
+      });
+    }
+
+    const person =
+      await personService.getPersonByEmployeeNumber(employeeNumber);
+
+    if (!person) {
+      return res.status(httpStatus.NOT_FOUND).send({
+        success: false,
+        message: "Person not found!",
+      });
+    }
+
+    return res.status(httpStatus.OK).send({
+      success: true,
+      message: "Successfully fetched person by Id.",
+      content: {
+        person,
+      },
+    });
+  },
+);
+
 export const uploadProfileImage = (req: Request, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
@@ -285,14 +323,12 @@ export const downloadDocument = async (
 
     return res.download(filePath, fileName, (err) => {
       if (err) {
-        console.error("File download error:", err);
         if (!res.headersSent) {
           res.status(500).json({ message: "Error downloading file" });
         }
       }
     });
   } catch (error) {
-    console.error("Download error:", error);
     return res
       .status(500)
       .json({ message: "Error processing request", error: error.message });
@@ -318,14 +354,12 @@ export const viewDocument = async (
 
     return res.sendFile(filePath, (err) => {
       if (err) {
-        console.error("File view error:", err);
         if (!res.headersSent) {
           res.status(500).json({ message: "Error displaying file" });
         }
       }
     });
   } catch (error) {
-    console.error("View error:", error);
     return res
       .status(500)
       .json({ message: "Error processing request", error: error.message });

@@ -1,10 +1,14 @@
-import { getAdminByUsername } from "../models/admin.model";
+import { deleteRefreshTokenByUserQuery } from "../models/refreshToken.model";
+import { getUserByEmployeeNumber } from "../models/user.model";
+import { ApiError } from "../shared/error/ApiError";
 import { AuthError } from "../shared/error/AuthError";
 import { compareHashedData } from "../shared/utils/hash";
 import { encodeJWT } from "../shared/utils/token";
 
-export const adminSignIn = async (username: string, password: string) => {
-  const user = await getAdminByUsername(username);
+import { getUserById } from "./user.service";
+
+export const userSignIn = async (employeeNumber: string, password: string) => {
+  const user = await getUserByEmployeeNumber(employeeNumber);
 
   if (!user) {
     throw new AuthError("Wrong username or password");
@@ -17,7 +21,17 @@ export const adminSignIn = async (username: string, password: string) => {
   }
 
   return {
-    token: encodeJWT<{ username: string }>({ username: user.username }, "3600"),
+    token: encodeJWT<{ userId: string }>({
+      userId: user.id,
+    }),
     user,
   };
+};
+
+export const logout = async (userId: string) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError("User does not exist");
+  }
+  await deleteRefreshTokenByUserQuery(user.id);
 };

@@ -19,6 +19,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
         unique: true,
+        validate: {
+          notNull: true,
+        },
       },
       name: {
         allowNull: false,
@@ -44,6 +47,14 @@ module.exports = {
         allowNull: true,
         type: Sequelize.JSON,
       },
+      startDate: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      endDate: {
+        allowNull: true,
+        type: Sequelize.DATE,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -61,6 +72,22 @@ module.exports = {
         type: Sequelize.TEXT,
       },
     });
+    await queryInterface.sequelize.query(`
+      CREATE OR REPLACE FUNCTION prevent_employee_number_update()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        IF NEW."employeeNumber" <> OLD."employeeNumber"THEN
+          RAISE EXCEPTION 'Updating employeeNumber is not allowed';
+        END IF;
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+
+      CREATE TRIGGER prevent_employee_number_update_trigger
+      BEFORE UPDATE ON "Person"
+      FOR EACH ROW
+      EXECUTE FUNCTION prevent_employee_number_update();
+    `);
   },
 
   async down(queryInterface, Sequelize) {
@@ -70,5 +97,10 @@ module.exports = {
     await queryInterface.dropTable("Person", {
       cascade: true,
     });
+
+    await queryInterface.sequelize.query(`
+      DROP TRIGGER IF EXISTS prevent_employee_number_update_trigger ON "Person";
+      DROP FUNCTION IF EXISTS prevent_employee_number_update;
+    `);
   },
 };

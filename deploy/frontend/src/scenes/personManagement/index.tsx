@@ -11,15 +11,26 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
+import profileImage from '../../assets/profile.jpeg';
 import DataGridCustomToolbar from '../../components/DataGridCustomToolbar.tsx';
 import Header from '../../components/Header.tsx';
 
 import ConfirmDialog from '@/components/ConfirmDialog.tsx';
+import {
+  getEmployeeNumber,
+  getIsLoggedIn,
+} from '@/state/auth/auth.selectors.ts';
 import { deletePerson, fetchPersons } from '@/state/person/person.actions.ts';
-import { GetPersonsData } from '@/state/person/person.types.ts';
+import {
+  selectError,
+  selectLoading,
+  selectPersons,
+  selectTotal,
+} from '@/state/person/person.selectors.ts';
+import { clearPersons } from '@/state/person/person.slice.ts';
 import { AppDispatch } from '@/state/store.ts';
 
 const Person = () => {
@@ -27,9 +38,6 @@ const Person = () => {
   const theme = useTheme();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
-  const [persons, setPersons] = useState<GetPersonsData[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [total, setTotal] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [reload, setReload] = useState(false);
@@ -40,6 +48,12 @@ const Person = () => {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [sortModel, setSortModel] = useState([]);
+  const persons = useSelector(selectPersons);
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
+  const total = useSelector(selectTotal);
+  const employeeNumber = getEmployeeNumber();
+  const isLoggedIn = useSelector(getIsLoggedIn);
 
   const handleSortModelChange = (newModel) => {
     setSortModel(newModel);
@@ -50,7 +64,11 @@ const Person = () => {
   const handleAddPerson = () => {
     navigate('/addPerson');
   };
-  const handleEdit = (row: { id: string }) => {
+  const handleEdit = (row: { id: string; employeeNumber: number }) => {
+    if (Number(row.employeeNumber) === Number(employeeNumber)) {
+      navigate(`/profilePage`);
+      return;
+    }
     navigate(`/editPerson/${row.id}`);
   };
 
@@ -80,39 +98,44 @@ const Person = () => {
           message: 'Person deleted successfully!',
           type: 'success',
         });
-      } catch (error) {
-        setNotification({ message: 'Error deleting person!', type: 'error' });
+      } catch (err) {
+        setNotification({
+          message: `Error deleting person!${err}`,
+          type: 'error',
+        });
       }
     }
     handleClose();
   };
 
   useEffect(() => {
-    const fetchPerson = async () => {
-      setLoading(true);
-      try {
-        const result = await dispatch(
-          fetchPersons({
-            limit: pageSize,
-            page: page + 1,
-            search,
-            sortField: sortModel.length ? sortModel[0].field : '',
-            sortOrder: sortModel.length ? sortModel[0].sort : '',
-          })
-        );
-        setPersons(result.payload.content.persons);
-        setTotal(result.payload.content.pagination.total);
-      } catch (error) {
-        setNotification({ message: 'Error Fetching Persons!', type: 'error' });
-      } finally {
-        setLoading(false);
-      }
+    const sortField = sortModel[0]?.field || '';
+    const sortOrder = sortModel[0]?.sort || '';
+    dispatch(
+      fetchPersons({
+        limit: pageSize,
+        page: page + 1,
+        search,
+        sortField,
+        sortOrder,
+      })
+    );
+    return () => {
+      dispatch(clearPersons());
     };
-
-    fetchPerson().then((r) => {
-      return r;
-    });
   }, [dispatch, page, pageSize, search, reload, sortModel]);
+
+  useEffect(() => {
+    if (error) {
+      setNotification({
+        message: `Error Fetching Persons! ${error}`,
+        type: 'error',
+      });
+    }
+    if (!isLoggedIn) {
+      navigate('/login');
+    }
+  }, [error, isLoggedIn, navigate]);
 
   const columns = [
     {
@@ -121,7 +144,7 @@ const Person = () => {
       flex: 0.5,
       renderCell: (params) => (
         <img
-          src={params.value}
+          src={params.value || profileImage}
           alt="Person"
           style={{ width: 50, height: 50, borderRadius: '8%' }}
         />
@@ -150,7 +173,7 @@ const Person = () => {
       field: 'edit',
       headerName: 'Edit',
       flex: 0.5,
-      renderCell: (params: { row: { id: string } }) => (
+      renderCell: (params: { row: { id: string; employeeNumber: number } }) => (
         <IconButton onClick={() => handleEdit(params.row)}>
           <EditIcon />
         </IconButton>
@@ -176,7 +199,7 @@ const Person = () => {
         alignItems="center"
         mb={2}
       >
-        <Header title="PERSONS" subtitle="List of all persons" />
+        <Header title="EMPLOYEES" subtitle="List of all employees" />
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -241,11 +264,11 @@ const Person = () => {
               scrollbarWidth: 'thin',
             },
             '& .MuiDataGrid-row.Mui-selected': {
-              backgroundColor: `${theme.palette.action.selected} !important`, // Use MUI theme for selection
+              backgroundColor: `${theme.palette.action.selected} !important`,
               color: theme.palette.primary.contrastText,
             },
             '& .MuiDataGrid-row.Mui-selected:hover': {
-              backgroundColor: `${theme.palette.action.hover} !important`, // Hover effect
+              backgroundColor: `${theme.palette.action.hover} !important`,
             },
           }}
         />

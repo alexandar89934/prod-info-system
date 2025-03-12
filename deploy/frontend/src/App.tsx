@@ -13,6 +13,7 @@ import Login from '@/scenes/login';
 import Person from '@/scenes/personManagement';
 import AddPerson from '@/scenes/personManagement/addPerson';
 import EditPerson from '@/scenes/personManagement/editPerson.tsx';
+import ProfilePage from '@/scenes/personManagement/profilePage.tsx';
 import { RootState } from '@/state/store.ts';
 import { selectThemeMode } from '@/state/theme/theme.selectors.ts';
 import { ThemeMode } from '@/state/theme/theme.types.ts';
@@ -35,6 +36,7 @@ function App() {
               <Route path="/person" element={<Person />} />
               <Route path="/addPerson" element={<AddPerson />} />
               <Route path="/editPerson/:id" element={<EditPerson />} />
+              <Route path="/profilePage" element={<ProfilePage />} />
             </Route>
           </Routes>
         </ThemeProvider>

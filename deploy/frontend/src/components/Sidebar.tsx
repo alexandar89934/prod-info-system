@@ -30,8 +30,6 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import profileImage from '../assets/profile.jpeg';
-
 import FlexBetween from './FlexBetween';
 
 import { getIsLoggedIn } from '@/state/auth/auth.selectors.ts';
@@ -80,6 +78,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const theme = useTheme();
   const isLoggedIn: boolean = useSelector(getIsLoggedIn);
+
+  const handleProfileClick = () => {
+    navigate('/profilePage');
+  };
 
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -188,19 +190,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <Box position="relative" padding="1rem 2rem">
             {' '}
-            {/* User info moved outside of scroll */}
             <Divider />
             {isLoggedIn && (
               <FlexBetween textTransform="none" gap="1rem" m="1.5rem 0 0">
-                <Box
-                  component="img"
-                  alt="profile"
-                  src={profileImage}
-                  height="40px"
-                  width="40px"
-                  borderRadius="50%"
-                  sx={{ objectFit: 'cover' }}
-                />
                 <Box textAlign="left">
                   <Typography
                     fontWeight="bold"
@@ -214,12 +206,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                     sx={{ color: theme.palette.secondary[200] }}
                   />
                 </Box>
-                <SettingsOutlined
-                  sx={{
-                    color: theme.palette.secondary[300],
-                    fontSize: '25px',
-                  }}
-                />
+                <IconButton onClick={handleProfileClick}>
+                  <SettingsOutlined
+                    sx={{
+                      color: theme.palette.secondary[300],
+                      fontSize: '25px',
+                    }}
+                  />
+                </IconButton>
               </FlexBetween>
             )}
           </Box>

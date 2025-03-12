@@ -21,13 +21,13 @@ import {
 import Link from '@mui/material/Link';
 import React, { useState, MouseEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
-import profileImage from '../assets/profile.jpeg';
+import { useNavigate } from 'react-router-dom';
 
 import FlexBetween from './FlexBetween.tsx';
 
 import { logout } from '@/state/auth/auth.actions.ts';
 import { getIsLoggedIn } from '@/state/auth/auth.selectors.ts';
+import { getProfilePicture } from '@/state/auth/auth.selectors.ts';
 import { setMode } from '@/state/theme/theme.slice.ts';
 
 type NavbarProps = {
@@ -48,11 +48,19 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
+  const navigate = useNavigate();
   const handleClick = (event: MouseEvent<HTMLButtonElement>) =>
     setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
-  const onLogoutClick = () => logout({ dispatch });
+  const onLogoutClick = () => {
+    logout({ dispatch });
+    navigate('/');
+  };
+  const handleProfileClick = () => {
+    navigate('/profilePage');
+  };
   const isLoggedIn: boolean = useSelector(getIsLoggedIn);
+  const profilePicture = useSelector(getProfilePicture);
   return (
     <AppBar
       sx={{
@@ -90,7 +98,7 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
           </IconButton>
           {isLoggedIn && (
-            <IconButton>
+            <IconButton onClick={handleProfileClick}>
               <SettingsOutlined sx={{ fontSize: '25px' }} />
             </IconButton>
           )}
@@ -109,7 +117,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <Box
                   component="img"
                   alt="profile"
-                  src={profileImage}
+                  src={profilePicture}
                   height="32px"
                   width="32px"
                   borderRadius="50%"

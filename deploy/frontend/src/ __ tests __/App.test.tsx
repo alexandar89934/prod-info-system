@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import App from '../App';
-import store from '../redux/store';
+import store from '../state/store';
 
 test('demo', () => {
   expect(true).toBe(true);

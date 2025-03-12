@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 
 import { personRouter } from "./person.route";
+import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
 
 export const apiRouter = express.Router();
@@ -13,6 +14,10 @@ const defaultRoutes = [
   {
     path: "/person",
     route: personRouter,
+  },
+  {
+    path: "/role",
+    route: roleRouter,
   },
 ];
 

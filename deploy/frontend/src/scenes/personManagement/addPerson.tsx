@@ -18,15 +18,20 @@ import { useNavigate } from 'react-router-dom';
 import profileImage from '../../assets/profile.jpeg';
 
 import DocumentList from '@/components/DocumentsList.tsx';
+import ProfileImageUpload from '@/components/ProfileImageUpload.tsx';
+import UserRolesSelect from '@/components/UserRolesSelect.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import { useAppDispatch } from '@/state/hooks.ts';
 import {
   addPerson,
   deleteFileNewPerson,
-  uploadImage,
 } from '@/state/person/person.actions.ts';
-import { selectPerson } from '@/state/person/person.selectors.ts';
-import { setDocuments } from '@/state/person/person.slice.ts';
+import {
+  selectError,
+  selectLoading,
+  selectPerson,
+  selectSuccess,
+} from '@/state/person/person.selectors.ts';
 import { AddPersonFormData } from '@/state/person/person.types.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
@@ -34,16 +39,17 @@ const AddPerson: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
   const [imagePath, setImagePath] = useState<string | null>(profileImage);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const person: AddPersonFormData = useSelector(selectPerson);
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
+  const success = useSelector(selectSuccess);
 
   const {
     register,
     handleSubmit,
     setValue,
+    control,
     reset,
     formState: { errors },
   } = useForm<AddPersonFormData>({
@@ -56,6 +62,9 @@ const AddPerson: React.FC = () => {
       additionalInfo: '',
       picture: profileImage,
       documents: [],
+      roles: [],
+      startDate: '',
+      endDate: '',
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: getName(),
@@ -65,70 +74,24 @@ const AddPerson: React.FC = () => {
   });
 
   const handleAddPerson = async (data: AddPersonFormData) => {
-    setLoading(true);
-    try {
-      const payload = { ...data, documents: person?.documents ?? [] };
-      const response = await dispatch(addPerson(payload)).unwrap();
-      if (!response.success) {
-        setError(response.error.message);
-        return;
-      }
-      setError(null);
-      setSuccess('Person added successfully!');
-      setTimeout(() => {
-        setSuccess(null);
-      }, 3000);
-      setImagePath(profileImage);
-      dispatch(setDocuments([]));
-      reset();
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-      setSuccess(null);
-    } finally {
-      setLoading(false);
-    }
+    const payload = { ...data, documents: person?.documents ?? [] };
+    await dispatch(addPerson(payload)).unwrap();
+
+    setImagePath(profileImage);
+    reset();
   };
 
   const handleCancel = async () => {
-    try {
-      setError(null);
-      if (person) {
-        await Promise.all(
-          person.documents.map((doc) =>
-            dispatch(deleteFileNewPerson({ documentPath: doc.path }))
-          )
-        );
-        if (!(imagePath === profileImage)) {
-          dispatch(deleteFileNewPerson({ documentPath: imagePath }));
-        }
-      }
-
-      reset();
-      dispatch(setDocuments([]));
-      navigate('/person');
-    } catch (removeDocumentError) {
-      setError(`Error while removing documents: ${removeDocumentError}`);
+    await Promise.all(
+      person.documents.map((doc) =>
+        dispatch(deleteFileNewPerson({ documentPath: doc.path }))
+      )
+    );
+    if (!(imagePath === profileImage)) {
+      dispatch(deleteFileNewPerson({ documentPath: imagePath }));
     }
-  };
-
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUploadFormData = new FormData();
-      imageUploadFormData.append('profileImage', file);
-      try {
-        const response = await dispatch(uploadImage(imageUploadFormData));
-        if (response.meta.requestStatus === 'fulfilled') {
-          const uploadedImagePath = response.payload?.path;
-          setImagePath(uploadedImagePath);
-          setValue('picture', uploadedImagePath);
-        }
-      } catch (imageUploadError) {
-        setError(`Image upload failed: ${imageUploadError}`);
-      }
-    }
+    reset();
+    navigate('/person');
   };
 
   const onSubmit = async (data: AddPersonFormData) => {
@@ -266,20 +229,13 @@ const AddPerson: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                <img
-                  src={imagePath || profileImage}
-                  alt="Profile"
-                  style={{
-                    maxWidth: '150px',
-                    maxHeight: '150px',
-                    objectFit: 'cover',
-                    borderRadius: '4px',
+                <ProfileImageUpload
+                  profilePicture={imagePath}
+                  onImageUpload={(uploadedPath: string) => {
+                    setImagePath(uploadedPath);
+                    setValue('picture', uploadedPath);
                   }}
                 />
-                <Button variant="contained" component="label" sx={{ mt: 2 }}>
-                  Upload Image
-                  <input type="file" hidden onChange={handleImageChange} />
-                </Button>
               </FormControl>
             </Box>
           </Box>
@@ -307,6 +263,48 @@ const AddPerson: React.FC = () => {
             sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
           >
             <Box sx={{ minWidth: '150px', mr: 2 }}>
+              <InputLabel htmlFor="startDate">Start Date:</InputLabel>
+            </Box>
+            <TextField
+              id="startDate"
+              variant="outlined"
+              {...register('startDate')}
+              error={!!errors.startDate}
+              helperText={errors.startDate?.message}
+              sx={{ flexGrow: 1 }}
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </FormControl>
+          <FormControl
+            fullWidth
+            margin="normal"
+            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Box sx={{ minWidth: '150px', mr: 2 }}>
+              <InputLabel htmlFor="endDate">End Date:</InputLabel>
+            </Box>
+            <TextField
+              id="endDate"
+              variant="outlined"
+              {...register('endDate')}
+              error={!!errors.endDate}
+              helperText={errors.endDate?.message}
+              sx={{ flexGrow: 1 }}
+              type="date"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </FormControl>
+          <FormControl
+            fullWidth
+            margin="normal"
+            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Box sx={{ minWidth: '150px', mr: 2 }}>
               <InputLabel htmlFor="additionalInfo">Additional Info:</InputLabel>
             </Box>
             <TextField
@@ -316,7 +314,19 @@ const AddPerson: React.FC = () => {
               error={!!errors.additionalInfo}
               helperText={errors.additionalInfo?.message}
               sx={{ flexGrow: 1 }}
+              multiline
+              rows={4}
             />
+          </FormControl>
+          <FormControl
+            fullWidth
+            margin="normal"
+            sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Box sx={{ minWidth: '150px', mr: 2 }}>
+              <InputLabel htmlFor="roles">Roles:</InputLabel>
+            </Box>
+            <UserRolesSelect control={control} name="roles" />
           </FormControl>
           <FormControl
             fullWidth
@@ -329,17 +339,6 @@ const AddPerson: React.FC = () => {
             <DocumentList />
           </FormControl>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }}>
-              {success}
-            </Alert>
-          )}
-
           <Box
             sx={{
               display: 'flex',
@@ -351,6 +350,7 @@ const AddPerson: React.FC = () => {
               bottom: 0,
               left: 0,
               width: '100%',
+              zIndex: 100,
             }}
           >
             <Button
@@ -380,6 +380,16 @@ const AddPerson: React.FC = () => {
             >
               Cancel
             </Button>
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
           </Box>
         </form>
       </Box>

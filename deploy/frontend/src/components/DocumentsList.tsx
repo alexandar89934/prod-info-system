@@ -24,8 +24,6 @@ import {
   viewFile,
 } from '@/state/person/person.actions.ts';
 import { selectPerson } from '@/state/person/person.selectors.ts';
-import { setDocuments } from '@/state/person/person.slice.ts';
-import { DocumentData } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 
 interface DocumentListProps {
@@ -40,10 +38,7 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
   const [selectedDocument, setSelectedDocument] = useState(null);
 
   const person = useSelector(selectPerson);
-  let documents = [];
-  if (person) {
-    documents = person.documents;
-  }
+  const { documents } = person;
 
   const handleView = (docName) => {
     dispatch(viewFile(docName));
@@ -65,33 +60,16 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
 
   const handleConfirmDelete = async () => {
     if (!isUpdateMode) {
-      const response = await dispatch(
+      await dispatch(
         deleteFileNewPerson({ documentPath: selectedDocument.path })
       );
-      if (response.meta.requestStatus === 'fulfilled') {
-        if (response.payload) {
-          const filteredDocuments: DocumentData[] = documents.filter(
-            (doc: DocumentData) => doc.path !== selectedDocument.path
-          );
-          dispatch(setDocuments(filteredDocuments));
-        }
-        handleClose();
-      }
+      handleClose();
       return;
     }
-    try {
-      const response = await dispatch(
-        deleteFile({ personId, documentName: selectedDocument.name })
-      );
-
-      if (response.meta.requestStatus === 'fulfilled') {
-        const updatedDocuments = response.payload;
-        setDocuments(updatedDocuments);
-        handleClose();
-      }
-    } catch (error) {
-      console.error('Failed to delete document:', error);
-    }
+    await dispatch(
+      deleteFile({ personId, documentName: selectedDocument.name })
+    );
+    handleClose();
   };
 
   const handleAddNewDocument = async (
@@ -104,26 +82,11 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
       fileUploadFormData.append('uploadFile', file);
       if (isUpdateMode) fileUploadFormData.append('personId', personId);
 
-      try {
-        if (isUpdateMode) {
-          const response = await dispatch(uploadFile(fileUploadFormData));
-
-          if (response.meta.requestStatus === 'fulfilled') {
-            const updatedDocuments = response.payload;
-            dispatch(setDocuments(updatedDocuments));
-          }
-        }
-        if (!isUpdateMode) {
-          const response = await dispatch(
-            uploadFileForNewPerson(fileUploadFormData)
-          );
-          if (response.meta.requestStatus === 'fulfilled') {
-            const newDocument: any = response.payload;
-            dispatch(setDocuments([...documents, newDocument]));
-          }
-        }
-      } catch (error) {
-        console.error('Image upload failed:', error);
+      if (isUpdateMode) {
+        await dispatch(uploadFile(fileUploadFormData));
+      }
+      if (!isUpdateMode) {
+        await dispatch(uploadFileForNewPerson(fileUploadFormData));
       }
     }
   };

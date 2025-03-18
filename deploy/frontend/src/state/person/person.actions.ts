@@ -27,7 +27,7 @@ export const fetchPersons = createAsyncThunk<
       });
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status}, ${response.statusText}, ${response.data?.error?.message || 'An error occurred while fetching persons.'}`
+          `${response.status ?? ''} ${response.statusText ?? ''} ${response.data?.error?.message || 'An error occurred while fetching persons.'}`
         );
       }
       return response.data;
@@ -46,7 +46,7 @@ export const fetchPersonById = createAsyncThunk(
       const response = await axiosServer.get(`/person/${personId}`);
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status}, ${response.statusText}, ${response.data?.error?.message || 'An error occurred while fetching person.'}`
+          `${response.status ?? 'Unknown Status'}, ${response.statusText ?? 'Unknown StatusText'}, ${response.data?.error?.message || 'An error occurred while fetching person.'}`
         );
       }
       return response.data.content?.person;
@@ -67,7 +67,7 @@ export const fetchPersonByEmployeeNumber = createAsyncThunk(
       );
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status}, ${response.statusText}, ${response.data?.error?.message || 'An error occurred while fetching person.'}`
+          `${response.status ?? 'Unknown Status'}, ${response.statusText ?? 'Unknown StatusText'}, ${response.data?.error?.message || 'An error occurred while fetching person.'}`
         );
       }
       return response.data.content?.person;
@@ -86,7 +86,7 @@ export const addPerson = createAsyncThunk(
       const response = await axiosServer.post(`/person/create`, person);
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status}, ${response.statusText}, ${response.data?.error?.message || 'An error occurred while fetching person.'}`
+          `${response.status ?? 'Unknown Status'}, ${response.statusText ?? 'Unknown StatusText'}, ${response.data?.error?.message || 'An error occurred while adding persons.'}`
         );
       }
       return response.data;
@@ -108,7 +108,7 @@ export const updatePerson = createAsyncThunk(
       );
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status}, ${response.statusText}, ${response.data?.error?.message || 'An error occurred while fetching person.'}`
+          `${response.status ?? 'Unknown Status'}, ${response.statusText ?? 'Unknown StatusText'}, ${response.data?.error?.message || 'An error occurred while updating person.'}`
         );
       }
       return response.data;
@@ -121,14 +121,17 @@ export const updatePerson = createAsyncThunk(
 );
 
 export const deletePerson = createAsyncThunk(
-  'person/delete',
+  'person/deletePerson',
   async (personId: string, { rejectWithValue }) => {
     try {
       const response = await axiosServer.delete(`/person/delete/${personId}`);
       if (response.status >= 400 && response.status < 500) {
         return rejectWithValue(
-          `Client error: ${response.status} - ${response.data.message}`
+          `Client error: ${response.status ?? 'Unknown Status'} - ${response.data?.error?.message || response.data?.message || 'An error occurred.'}`
         );
+      }
+      if (response.data.error) {
+        return rejectWithValue(`${response.data.error.message}`);
       }
       return response.data;
     } catch (error) {

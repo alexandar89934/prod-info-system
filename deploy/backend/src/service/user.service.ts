@@ -4,6 +4,7 @@ import {
   assignRoleToUser,
   getAllRoles,
   getRoleByName,
+  updateUserRolesQuery,
 } from "../models/role.model";
 import {
   createUserQuery,
@@ -28,7 +29,6 @@ export const createUserInitial = async () => {
       mail: "initial@setup.com",
       name,
       startDate: new Date(),
-      endDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: name,
@@ -64,6 +64,20 @@ export const createUser = async (employeeNumber: string, roles: number[]) => {
   }
 };
 
+export const updateUserRoles = async (
+  employeeNumber: string,
+  roles: number[],
+) => {
+  console.log("ovdeee");
+  console.log(employeeNumber);
+  const userExists = await getUserByEmployeeNumber(employeeNumber);
+  const userRoles = await getUserRolesById(userExists.id);
+
+  console.log(userExists);
+  console.log(userRoles);
+  await updateUserRolesQuery(userExists.id, roles, userRoles);
+};
+
 export const getUserById = async (id: string) => {
   const fetchedUser = await getUserByIdQuery(id);
 
@@ -93,5 +107,12 @@ export const checkIfAdmin = async (userId: string) => {
   const user = await getUserById(userId);
   const userRoles = await getUserRolesById(user.id);
   const role = await getRoleByName("Admin");
+  return userRoles.includes(role.id);
+};
+
+export const checkIfModerator = async (userId: string) => {
+  const user = await getUserById(userId);
+  const userRoles = await getUserRolesById(user.id);
+  const role = await getRoleByName("Moderator");
   return userRoles.includes(role.id);
 };

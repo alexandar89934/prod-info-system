@@ -5,10 +5,11 @@ import { callQuery } from "./utils/query";
 export const createRefreshTokenQuery = async (
   userId: string,
   refreshToken: string,
+  expiryDate: string,
 ): Promise<RefreshToken> => {
   const insertSQL = `
     INSERT INTO "RefreshTokens" ("userId", "token", "expiryDate", "createdAt", "updatedAt")
-    VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     ON CONFLICT ("userId") 
     DO UPDATE SET
       "token" = $2,
@@ -16,7 +17,7 @@ export const createRefreshTokenQuery = async (
     RETURNING *;
   `;
 
-  const values = [userId, refreshToken];
+  const values = [userId, refreshToken, expiryDate];
 
   return callQuery<RefreshToken>(insertSQL, values);
 };

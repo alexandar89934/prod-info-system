@@ -10,7 +10,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +32,10 @@ import {
   selectPerson,
   selectSuccess,
 } from '@/state/person/person.selectors.ts';
+import {
+  clearNotifications,
+  clearPerson,
+} from '@/state/person/person.slice.ts';
 import { AddPersonFormData } from '@/state/person/person.types.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
@@ -44,6 +48,19 @@ const AddPerson: React.FC = () => {
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
   const success = useSelector(selectSuccess);
+
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        dispatch(clearPerson());
+        dispatch(clearNotifications());
+      }, 3000);
+
+      return () => clearTimeout(timer); // Cleanup function
+    }
+
+    return undefined;
+  }, [error, success, dispatch]);
 
   const {
     register,
@@ -342,8 +359,8 @@ const AddPerson: React.FC = () => {
           <Box
             sx={{
               display: 'flex',
-              justifyContent: 'start',
-              alignItems: 'center',
+              flexDirection: 'column',
+              alignItems: 'start',
               padding: 2,
               backgroundColor: theme.palette.background.default,
               position: 'sticky',
@@ -353,43 +370,49 @@ const AddPerson: React.FC = () => {
               zIndex: 100,
             }}
           >
-            <Button
-              variant="contained"
-              sx={{ color: theme.palette.primary[200], m: '20px' }}
-              type="submit"
-              disabled={loading}
-              startIcon={
-                loading ? <CircularProgress size={20} color="inherit" /> : null
-              }
-            >
-              {loading ? 'Adding...' : 'Add Person'}
-            </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                color: theme.palette.primary[100],
-                borderColor: theme.palette.primary[100],
-                '&:hover': {
-                  borderColor: theme.palette.primary[200],
-                  backgroundColor: theme.palette.primary[100],
-                  color: theme.palette.common.white,
-                },
-              }}
-              onClick={handleCancel}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
                 {error}
               </Alert>
             )}
             {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
+              <Alert severity="success" sx={{ mb: 2, width: '100%' }}>
                 {success}
               </Alert>
             )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                sx={{ color: theme.palette.primary[200] }}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+              >
+                {loading ? 'Adding...' : 'Add Person'}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={handleCancel}
+                disabled={loading}
+                sx={{
+                  color: theme.palette.primary[100],
+                  borderColor: theme.palette.primary[100],
+                  '&:hover': {
+                    borderColor: theme.palette.primary[200],
+                    backgroundColor: theme.palette.primary[100],
+                    color: theme.palette.common.white,
+                  },
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
           </Box>
         </form>
       </Box>

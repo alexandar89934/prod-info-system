@@ -27,7 +27,6 @@ export const createPerson = catchAsync(async (req: Request, res: Response) => {
 
 export const updatePerson = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-
   if (!id) {
     return res.status(httpStatus.BAD_REQUEST).send({
       success: false,

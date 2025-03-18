@@ -48,8 +48,10 @@ export const updatePersonQuery = async (
       "mail" = $5, 
       "picture" = $6,
       "additionalInfo" = $7,
-      "updatedAt" = $8,
-      "updatedBy" = $9
+      "startDate" = $8,
+      "endDate" = $9,
+      "updatedAt" = $10,
+      "updatedBy" = $11
     WHERE "id" = $1
     RETURNING *;
   `;
@@ -61,6 +63,8 @@ export const updatePersonQuery = async (
     personData.mail,
     personData.picture || null,
     personData.additionalInfo || null,
+    personData.startDate,
+    personData.endDate || null,
     new Date(personData.updatedAt).toISOString(),
     personData.updatedBy,
   ];
@@ -72,6 +76,21 @@ export const deletePersonQuery = async (id: string): Promise<boolean> => {
   const deleteSQL = `
     DELETE FROM "Person"
     WHERE "id" = $1
+      RETURNING *;
+  `;
+
+  try {
+    const result = await callQuery<number>(deleteSQL, [id]);
+
+    return result > 0;
+  } catch (error) {
+    return false;
+  }
+};
+export const deleteUserQuery = async (id: string): Promise<boolean> => {
+  const deleteSQL = `
+    DELETE FROM "User"
+    WHERE "employeeNumber" = $1
       RETURNING *;
   `;
 

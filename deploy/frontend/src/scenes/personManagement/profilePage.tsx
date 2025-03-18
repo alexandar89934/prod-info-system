@@ -10,7 +10,7 @@ import {
   InputLabel,
   useTheme,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -25,8 +25,16 @@ import {
   fetchPersonByEmployeeNumber,
   updatePerson,
 } from '@/state/person/person.actions.ts';
-import { selectPerson, selectError } from '@/state/person/person.selectors.ts';
-import { clearPerson } from '@/state/person/person.slice.ts';
+import {
+  selectPerson,
+  selectError,
+  selectLoading,
+  selectSuccess,
+} from '@/state/person/person.selectors.ts';
+import {
+  clearNotifications,
+  clearPerson,
+} from '@/state/person/person.slice.ts';
 import { EditPersonFormData } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
@@ -41,8 +49,20 @@ const ProfilePage = () => {
   const profilePicture = person?.picture ?? profile;
   const id = person?.id;
   const error = useSelector(selectError);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+  const loading = useSelector(selectLoading);
+  const success = useSelector(selectSuccess);
+
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        dispatch(clearNotifications());
+      }, 3000);
+
+      return () => clearTimeout(timer); // Cleanup function
+    }
+
+    return undefined;
+  }, [error, success, dispatch]);
 
   const {
     register,
@@ -102,20 +122,18 @@ const ProfilePage = () => {
   }, [person, employeeNumber, reset]);
 
   const onSubmit = async (data: EditPersonFormData) => {
-    setLoading(true);
     const response = await dispatch(updatePerson({ ...data, id })).unwrap();
     if (!response.success) {
       return;
     }
     setTimeout(() => {
-      setSuccess(null);
-      navigate('/person');
-      dispatch(clearPerson());
+      dispatch(clearNotifications());
     }, 3000);
   };
 
   const handleCancel = () => {
     dispatch(clearPerson());
+    dispatch(clearNotifications());
     navigate('/person');
   };
 
@@ -393,8 +411,8 @@ const ProfilePage = () => {
           <Box
             sx={{
               display: 'flex',
-              justifyContent: 'start',
-              alignItems: 'center',
+              flexDirection: 'column',
+              alignItems: 'start',
               padding: 2,
               backgroundColor: theme.palette.background.default,
               position: 'sticky',
@@ -404,44 +422,49 @@ const ProfilePage = () => {
               zIndex: 100,
             }}
           >
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={loading}
-              sx={{ color: theme.palette.primary[200], m: '20px' }}
-              startIcon={
-                loading ? <CircularProgress size={20} color="inherit" /> : null
-              }
-            >
-              {loading ? 'Updating...' : 'Update Person'}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleCancel}
-              disabled={loading}
-              sx={{
-                color: theme.palette.primary[100],
-                borderColor: theme.palette.primary[100],
-                '&:hover': {
-                  borderColor: theme.palette.primary[200],
-                  backgroundColor: theme.palette.primary[100],
-                  color: theme.palette.common.white,
-                },
-              }}
-            >
-              Cancel
-            </Button>
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
                 {error}
               </Alert>
             )}
             {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
+              <Alert severity="success" sx={{ mb: 2, width: '100%' }}>
                 {success}
               </Alert>
             )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                sx={{ color: theme.palette.primary[200] }}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : null
+                }
+              >
+                {loading ? 'Updating...' : 'Update Person'}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={handleCancel}
+                disabled={loading}
+                sx={{
+                  color: theme.palette.primary[100],
+                  borderColor: theme.palette.primary[100],
+                  '&:hover': {
+                    borderColor: theme.palette.primary[200],
+                    backgroundColor: theme.palette.primary[100],
+                    color: theme.palette.common.white,
+                  },
+                }}
+              >
+                Cancel
+              </Button>
+            </Box>
           </Box>
         </form>
       </Box>

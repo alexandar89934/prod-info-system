@@ -3,7 +3,17 @@ import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 
 import { config } from "../config/config";
-import { checkIfAdmin, checkIfUser } from "../service/user.service";
+import {
+  getUserByEmployeeNumber,
+  getUserRolesById,
+} from "../models/user.model";
+import { getPersonByEmployeeNumber } from "../service/person.service";
+import {
+  checkIfAdmin,
+  checkIfModerator,
+  checkIfUser,
+  getUserById,
+} from "../service/user.service";
 import { tryExtractTokenFromHeaders } from "../shared/utils/token";
 
 export const authorizeAdmin = async (
@@ -21,6 +31,109 @@ export const authorizeAdmin = async (
         error: {
           code: httpStatus.UNAUTHORIZED,
           message: "This action requires administrator role.",
+        },
+      });
+      return;
+    }
+    next();
+  } catch (error) {
+    res.status(401).json({ message: error.message });
+  }
+};
+
+export const authorizeSelf = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // eslint-disable-next-line no-param-reassign
+    res.locals.user = tryExtractTokenFromHeaders(req);
+    const { userId } = res.locals.user;
+    const user = await getUserById(userId);
+    const person = await getPersonByEmployeeNumber(user.employeeNumber);
+    const targetUserId = req.params.id;
+
+    if (person?.id === targetUserId) {
+      return res.status(httpStatus.FORBIDDEN).json({
+        success: false,
+        error: {
+          code: httpStatus.FORBIDDEN,
+          message: "You cannot perform this action on yourself.",
+        },
+      });
+    }
+
+    return next();
+  } catch (error) {
+    return res.status(401).json({ message: error.message });
+  }
+};
+
+export const authorizeAdminOrSelf = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // eslint-disable-next-line no-param-reassign
+    res.locals.user = tryExtractTokenFromHeaders(req);
+    const { userId } = res.locals.user;
+    const user = await getUserById(userId);
+    const { employeeNumber: targetEmployeeNumber } = req.body; // Target employee number to be updated
+    const targetUser = await getUserByEmployeeNumber(targetEmployeeNumber);
+    const { roles: newRoles } = req.body;
+
+    const currentUserRoles = await getUserRolesById(targetUser.id);
+
+    const isChangingRoles =
+      newRoles &&
+      JSON.stringify(newRoles.sort()) !==
+        JSON.stringify(currentUserRoles.sort());
+
+    if (user.employeeNumber === targetEmployeeNumber) {
+      if (isChangingRoles && !(await checkIfAdmin(userId))) {
+        return res.status(httpStatus.FORBIDDEN).json({
+          success: false,
+          error: {
+            code: httpStatus.FORBIDDEN,
+            message: "You are not allowed to change roles.",
+          },
+        });
+      }
+      return next();
+    }
+    const isAdmin = await checkIfAdmin(userId);
+    if (isAdmin) {
+      return next();
+    }
+    return res.status(httpStatus.UNAUTHORIZED).json({
+      success: false,
+      error: {
+        code: httpStatus.UNAUTHORIZED,
+        message: "You are not authorized to perform this action.",
+      },
+    });
+  } catch (error) {
+    return res.status(401).json({ message: error.message });
+  }
+};
+
+export const authorizeModerator = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // eslint-disable-next-line no-param-reassign
+    res.locals.user = tryExtractTokenFromHeaders(req);
+    const isModerator = await checkIfModerator(res.locals.user.userId);
+    if (!isModerator) {
+      res.status(httpStatus.UNAUTHORIZED).send({
+        success: false,
+        error: {
+          code: httpStatus.UNAUTHORIZED,
+          message: "This action requires Moderator role.",
         },
       });
       return;
@@ -81,7 +194,7 @@ export const verifyTokenMiddleware = async (
         success: false,
         error: {
           code: httpStatus.UNAUTHORIZED,
-          message: "Token not valid",
+          message: "Refresh Token not valid",
         },
       });
   }

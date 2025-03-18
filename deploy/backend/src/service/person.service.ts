@@ -7,6 +7,7 @@ import {
   checkEmployeeNumberExists,
   createPersonQuery,
   deletePersonQuery,
+  deleteUserQuery,
   getAllPersonsQuery,
   getPersonByEmployeeNumberQuery,
   getPersonByIdQuery,
@@ -26,7 +27,7 @@ import {
   EditPersonData,
   GetAllPersonsData,
 } from "./person.service.types";
-import { createUser } from "./user.service";
+import { createUser, updateUserRoles } from "./user.service";
 
 export const createPerson = async (
   data: CreatePersonData,
@@ -49,14 +50,14 @@ export const updatePerson = async (
     data.employeeNumber,
     data.id,
   );
-
   if (existingPerson) {
     throw new ApiError(
       `Employee number ${data.employeeNumber} already exists!`,
       httpStatus.CONFLICT,
     );
   }
-
+  // TODO CHANCE EMPLOYEE NUMBER,IT IS WHAT IS CHANGED,SHOULD BE ORIGINAL PERSONS EMPLOYEE NUMBER
+  await updateUserRoles(String(data.employeeNumber), data.roles ?? []);
   return updatePersonQuery(data);
 };
 
@@ -90,7 +91,7 @@ export const deletePerson = async (id: string): Promise<boolean | null> => {
       }
     });
   }
-
+  await deleteUserQuery(String(person.employeeNumber));
   await deletePersonQuery(id);
 
   return true;

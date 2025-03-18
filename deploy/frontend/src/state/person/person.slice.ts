@@ -8,6 +8,7 @@ import {
   addPerson,
   deleteFile,
   deleteFileNewPerson,
+  deletePerson,
   fetchPersonByEmployeeNumber,
   fetchPersonById,
   fetchPersons,
@@ -52,6 +53,11 @@ const personSlice = createSlice({
     clearPerson(state) {
       state.person = initialPerson;
     },
+    clearNotifications(state) {
+      state.loading = false;
+      state.error = null;
+      state.success = null;
+    },
     clearPersons: (state) => {
       state.persons = [];
     },
@@ -68,8 +74,6 @@ const personSlice = createSlice({
         state.total = action.payload.content?.pagination?.total;
       })
       .addCase(fetchPersons.rejected, (state, action) => {
-        console.log('uslo');
-        console.log(action.payload);
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -118,6 +122,18 @@ const personSlice = createSlice({
         state.success = action.payload.message;
       })
       .addCase(updatePerson.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deletePerson.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deletePerson.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload.message;
+      })
+      .addCase(deletePerson.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -199,6 +215,7 @@ const personSlice = createSlice({
   },
 });
 
-export const { clearPerson, clearPersons } = personSlice.actions;
+export const { clearNotifications, clearPerson, clearPersons } =
+  personSlice.actions;
 
 export default personSlice.reducer;

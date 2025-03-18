@@ -3,14 +3,29 @@ import {
   deleteRefreshTokenByUserQuery,
   getRefreshTokenQuery,
 } from "../models/refreshToken.model";
-import { encodeJWTRefresh, readPayloadOfToken } from "../shared/utils/token";
+import {
+  decodeJWT,
+  encodeJWTRefresh,
+  readPayloadOfToken,
+} from "../shared/utils/token";
 
 import { RefreshToken } from "./refreshToken.service.model";
 import { getUserById } from "./user.service";
 
+interface DecodedToken {
+  userId: string;
+  iat: number;
+  exp: number;
+}
+
 export const createRefreshToken = async (userId: string) => {
   const refreshToken = encodeJWTRefresh<{ userId: string }>({ userId });
-  return createRefreshTokenQuery(userId, refreshToken);
+  const decodedToken = decodeJWT(refreshToken) as DecodedToken;
+  return createRefreshTokenQuery(
+    userId,
+    refreshToken,
+    new Date(decodedToken.exp * 1000).toISOString(),
+  );
 };
 
 export const renewAccessToken = async (refreshToken: string) => {
@@ -34,6 +49,7 @@ export const renewAccessToken = async (refreshToken: string) => {
     refreshToken: await createRefreshTokenQuery(
       databaseRefreshToken.userId,
       newRefreshToken,
+      new Date(databaseRefreshToken.expiryDate).toISOString(),
     ),
   };
 };

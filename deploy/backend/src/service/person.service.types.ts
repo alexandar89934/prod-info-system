@@ -1,4 +1,5 @@
 export type CreatePersonData = {
+  id?: string;
   employeeNumber: number;
   name: string;
   address: string;
@@ -8,7 +9,7 @@ export type CreatePersonData = {
   documents?: Record<string, unknown>;
   roles?: number[];
   startDate: Date;
-  endDate: Date;
+  endDate?: Date;
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
@@ -36,8 +37,8 @@ export type EditPersonData = {
   endDate: Date;
   createdAt: Date;
   updatedAt: Date;
-  createdBy: Date;
-  updatedBy: Date;
+  createdBy: string;
+  updatedBy: string;
 };
 
 export type PersonDocument = {

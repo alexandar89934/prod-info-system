@@ -3,7 +3,16 @@ import axios from 'axios';
 import { config } from '../config/config.ts';
 
 import { getFromLocalStorage } from '@/services/local.storage.ts';
+import { logoutState } from '@/state/auth/auth.slice.ts';
+import store from '@/state/store.ts';
 
+const removeUser = async () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('name');
+  localStorage.removeItem('employeeNumber');
+  localStorage.removeItem('profilePicture');
+  store.dispatch(logoutState());
+};
 const axiosServer = axios.create({
   baseURL: config.backend.apiUrl,
   withCredentials: true,
@@ -19,10 +28,7 @@ export const renewTokens = async () => {
     localStorage.setItem('token', token);
     return true;
   }
-  localStorage.removeItem('token');
-  localStorage.removeItem('name');
-  localStorage.removeItem('employeeNumber');
-  localStorage.removeItem('profilePicture');
+  await removeUser();
   return false;
 };
 
@@ -44,22 +50,35 @@ const handleTokenExpiredResponse = async (error: any) => {
     try {
       if (tokenRenewed) {
         originalRequest.headers.token = getFromLocalStorage('token');
-
         return await axios(originalRequest);
       }
-
+      await removeUser();
       return {
-        data: { success: false, error: { message: 'Error', removeUser: true } },
+        data: {
+          success: false,
+          error: {
+            message: error.response.data.error.message,
+          },
+        },
       };
     } catch (refreshError) {
+      await removeUser();
       return {
-        data: { success: false, error: { message: 'Error', removeUser: true } },
+        data: {
+          success: false,
+          error: {
+            message: error.response.data.error.message,
+          },
+        },
       };
     }
   }
-
+  await removeUser();
   return {
-    data: { success: false, error: { message: 'Error', removeUser: true } },
+    data: {
+      success: false,
+      error: { message: error.response.data.error.message },
+    },
   };
 };
 
@@ -67,9 +86,11 @@ const handleUnauthorizedResponse = async (error: any) => {
   if (error.response.data.error.tokenExpired) {
     return handleTokenExpiredResponse(error);
   }
-
   return {
-    data: { success: false, error: { message: 'Error', removeUser: true } },
+    data: {
+      success: false,
+      error: { message: error.response.data.error.message },
+    },
   };
 };
 

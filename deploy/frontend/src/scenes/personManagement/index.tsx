@@ -28,9 +28,14 @@ import {
   selectError,
   selectLoading,
   selectPersons,
+  selectSuccess,
   selectTotal,
 } from '@/state/person/person.selectors.ts';
-import { clearPersons } from '@/state/person/person.slice.ts';
+import {
+  clearNotifications,
+  clearPerson,
+  clearPersons,
+} from '@/state/person/person.slice.ts';
 import { AppDispatch } from '@/state/store.ts';
 
 const Person = () => {
@@ -51,6 +56,7 @@ const Person = () => {
   const persons = useSelector(selectPersons);
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
+  const success = useSelector(selectSuccess);
   const total = useSelector(selectTotal);
   const employeeNumber = getEmployeeNumber();
   const isLoggedIn = useSelector(getIsLoggedIn);
@@ -84,28 +90,10 @@ const Person = () => {
 
   const handleConfirmDelete = async () => {
     if (selectedPerson) {
-      try {
-        const result = await dispatch(deletePerson(selectedPerson.id));
-        handleClose();
-
-        if (deletePerson.rejected.match(result)) {
-          const errorMessage = result.payload || 'Error deleting person!';
-          setNotification({ message: `${errorMessage}`, type: 'error' });
-          return;
-        }
-        setReload((prev) => !prev);
-        setNotification({
-          message: 'Person deleted successfully!',
-          type: 'success',
-        });
-      } catch (err) {
-        setNotification({
-          message: `Error deleting person!${err}`,
-          type: 'error',
-        });
-      }
+      await dispatch(deletePerson(selectedPerson.id));
+      handleClose();
+      setReload((prev) => !prev);
     }
-    handleClose();
   };
 
   useEffect(() => {
@@ -126,29 +114,51 @@ const Person = () => {
   }, [dispatch, page, pageSize, search, reload, sortModel]);
 
   useEffect(() => {
-    if (error) {
+    if (!isLoggedIn) {
       setNotification({
         message: `Error Fetching Persons! ${error}`,
         type: 'error',
       });
     }
-    if (!isLoggedIn) {
-      navigate('/login');
-    }
   }, [error, isLoggedIn, navigate]);
+
+  useEffect(() => {
+    if (success) {
+      setNotification({ message: String(success), type: 'success' });
+      setTimeout(() => {
+        dispatch(clearPerson());
+        dispatch(clearNotifications());
+      }, 3000);
+    }
+
+    if (error) {
+      setNotification({ message: error, type: 'error' });
+      setTimeout(() => {
+        dispatch(clearPerson());
+        dispatch(clearNotifications());
+      }, 3000);
+    }
+  }, [success, error, dispatch]);
 
   const columns = [
     {
       field: 'picture',
       headerName: 'Picture',
       flex: 0.5,
-      renderCell: (params) => (
-        <img
-          src={params.value || profileImage}
-          alt="Person"
-          style={{ width: 50, height: 50, borderRadius: '8%' }}
-        />
-      ),
+      renderCell: (params: any) => {
+        return (
+          <img
+            src={params.value || profileImage}
+            alt="Person"
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: '8%',
+              objectFit: 'cover',
+            }}
+          />
+        );
+      },
     },
     { field: 'employeeNumber', headerName: 'Employee #', flex: 1 },
     { field: 'name', headerName: 'Name', flex: 1 },

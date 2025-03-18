@@ -35,3 +35,30 @@ export const assignRoleToUser = async (
     `;
   return callQuery<any>(sql, [userId, roleId]);
 };
+
+export const updateUserRolesQuery = async (
+  userId: string,
+  newRoles: number[],
+  currentRoles: number[],
+): Promise<void> => {
+  const rolesToAdd = newRoles.filter((role) => !currentRoles.includes(role));
+  const rolesToRemove = currentRoles.filter((role) => !newRoles.includes(role));
+
+  const queries = [
+    ...rolesToAdd.map((roleId) =>
+      callQuery(
+        `INSERT INTO "UserRoles" ("userId", "roleId", "createdAt", "updatedAt") 
+         VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);`,
+        [userId, roleId],
+      ),
+    ),
+    ...rolesToRemove.map((roleId) =>
+      callQuery(
+        `DELETE FROM "UserRoles" WHERE "userId" = $1 AND "roleId" = $2;`,
+        [userId, roleId],
+      ),
+    ),
+  ];
+
+  await Promise.all(queries);
+};

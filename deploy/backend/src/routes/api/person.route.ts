@@ -5,6 +5,8 @@ import { personController } from "../../controllers";
 import { validateRequestBody } from "../../middlewares/requestValidation";
 import {
   authorizeAdmin,
+  authorizeModerator,
+  authorizeSelf,
   verifyTokenMiddleware,
 } from "../../middlewares/verifyTokenMiddleware";
 import {
@@ -17,15 +19,21 @@ personRouter.use(verifyTokenMiddleware);
 
 personRouter
   .route("/create")
-  .post(validateRequestBody(CreatePersonSchema), personController.createPerson);
+  .post(
+    validateRequestBody(CreatePersonSchema),
+    authorizeAdmin,
+    personController.createPerson,
+  );
 
 personRouter
   .route("/update/:id")
   .put(validateRequestBody(UpdatePersonSchema), personController.updatePerson);
 
-personRouter.route("/").get(authorizeAdmin, personController.getAllPersons);
+personRouter.route("/").get(personController.getAllPersons);
 
-personRouter.route("/delete/:id").delete(personController.deletePerson);
+personRouter
+  .route("/delete/:id")
+  .delete(authorizeModerator, authorizeSelf, personController.deletePerson);
 
 personRouter
   .route("/delete-file/:personId")

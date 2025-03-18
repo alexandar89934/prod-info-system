@@ -19,7 +19,7 @@ import {
   useTheme,
 } from '@mui/material';
 import Link from '@mui/material/Link';
-import React, { useState, MouseEvent } from 'react';
+import React, { useState, MouseEvent, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,6 +49,12 @@ const Navbar: React.FC<NavbarProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isOpen = Boolean(anchorEl);
   const navigate = useNavigate();
+  const isLoggedIn: boolean = useSelector(getIsLoggedIn);
+  const profilePicture = useSelector(getProfilePicture);
+  useEffect(() => {
+    console.log('isLoggedIn changed:', isLoggedIn);
+    // You can trigger any logic here, like refetching data
+  }, [isLoggedIn]);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) =>
     setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -59,8 +65,6 @@ const Navbar: React.FC<NavbarProps> = ({
   const handleProfileClick = () => {
     navigate('/profilePage');
   };
-  const isLoggedIn: boolean = useSelector(getIsLoggedIn);
-  const profilePicture = useSelector(getProfilePicture);
   return (
     <AppBar
       sx={{

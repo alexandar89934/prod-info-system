@@ -42,6 +42,7 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
+    // FIXME: Da nije ovo duplikat, zar nisi mogao samo staviti trigger iz Person migracije?
     await queryInterface.sequelize.query(`
       CREATE OR REPLACE FUNCTION prevent_employee_number_update_on_user()
       RETURNS TRIGGER AS $$

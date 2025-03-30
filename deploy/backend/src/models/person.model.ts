@@ -5,6 +5,8 @@ import {
 
 import { callQuery } from "./utils/query";
 
+// FIXME: generalno za ceo fajl, okej je, samo mislim da bi trebao da se potrudis da pratis jedan nacin pisanja za query
+// negde radis await pa vracas true false, negde vracas niz a negde vracas query poziv, negde radis return await ( to generalno ne bi trebao osim ako imas razlog )
 export const createPersonQuery = async (
   personData: CreatePersonData,
 ): Promise<CreatePersonData> => {
@@ -205,6 +207,7 @@ export const getAllPersonsQuery = async (
   sortField: string,
   sortOrder: string,
 ): Promise<CreatePersonData[]> => {
+  // FIXME: Nemas try catch ovde, isto tako mislim da ti i ne treba, mozes samo da radi return callQuery ( bez awaita )
   const validSortFields = [
     "id",
     "employeeNumber",
@@ -220,6 +223,8 @@ export const getAllPersonsQuery = async (
 
   const orderDirection = sortOrder.toUpperCase() === "DESC" ? "DESC" : "ASC";
 
+  // FIXME: Takodje ne vidim da imas count za ovaj tip query-a, ako radis count po svima a prikazujes samo filtrirane onda je to lose
+  // jer ti treba broj filtriranih osoba bez limita i offseta
   const selectSQL = `
     SELECT
       "id", "employeeNumber", "name", "address", "mail", "picture",
@@ -242,6 +247,7 @@ export const getAllPersonsQuery = async (
 };
 
 export const getTotalPersonsCountQuery = async (): Promise<number> => {
+  // FIXME: Ovde isto nemas try catch, a mozes da radis samo return callQuery pa u servisu da sredis
   const countSQL = `SELECT COUNT(*) FROM "Person";`;
 
   const result = await callQuery<{ count: string }>(countSQL, []);

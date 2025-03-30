@@ -11,7 +11,7 @@ module.exports = {
     await queryInterface.sequelize.query(
       'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";',
     );
-
+    // FIXME: Ovo je idealno za Redis
     await queryInterface.createTable("RefreshTokens", {
       id: {
         allowNull: false,

@@ -6,6 +6,7 @@ import { logger } from "./config/logger";
 import { createRoles } from "./service/role.service";
 import { createUserInitial } from "./service/user.service";
 
+// FIXME: ima express tip za ovo
 let server: any;
 
 const exitHandler = () => {
@@ -25,6 +26,7 @@ const unexpectedErrorHandler = (error: any) => {
   exitHandler();
 };
 
+// FIXME: ovo je okej ali predlog da mozda prebacis u drugi fajl
 export const pool = new Pool({
   user: config.database.options.user,
   host: config.database.connection_url,
@@ -39,6 +41,7 @@ pool.on("error", (err: Error) => {
 });
 
 const startServer = () => {
+  // FIXME: Takodje ovde bi bilo dobro da dodas proveru pool-a da li zapravo ima konekciju ka bazi i tek onda pokreces server
   server = app.listen(config.server.port, async () => {
     await createRoles();
     await createUserInitial();

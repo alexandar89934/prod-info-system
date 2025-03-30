@@ -29,6 +29,7 @@ export const createRefreshToken = async (userId: string) => {
 };
 
 export const renewAccessToken = async (refreshToken: string) => {
+  // FIXME: Try catch?
   const databaseRefreshToken = await getRefreshTokenQuery(refreshToken);
   if (!databaseRefreshToken) {
     const decoded = readPayloadOfToken<RefreshToken>(refreshToken);

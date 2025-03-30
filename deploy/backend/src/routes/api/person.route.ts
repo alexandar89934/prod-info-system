@@ -25,6 +25,7 @@ personRouter
     personController.createPerson,
   );
 
+// FIXME: Svako moze da izmeni podatke korisnika?
 personRouter
   .route("/update/:id")
   .put(validateRequestBody(UpdatePersonSchema), personController.updatePerson);

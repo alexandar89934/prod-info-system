@@ -20,6 +20,7 @@ export const userSignIn = async (employeeNumber: string, password: string) => {
     throw new AuthError("Wrong username or password");
   }
 
+  // FIXME: A ne pravis mu refresh token?
   return {
     token: encodeJWT<{ userId: string }>({
       userId: user.id,
@@ -31,6 +32,7 @@ export const userSignIn = async (employeeNumber: string, password: string) => {
 export const logout = async (userId: string) => {
   const user = await getUserById(userId);
   if (!user) {
+    // FIXME: 404 status
     throw new ApiError("User does not exist");
   }
   await deleteRefreshTokenByUserQuery(user.id);

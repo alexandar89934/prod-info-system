@@ -40,6 +40,7 @@ export const createPerson = async (
       httpStatus.CONFLICT,
     );
   }
+  // FIXME: Ovo bi trebao biti jedan query
   await createUser(String(data.employeeNumber), data.roles ?? []);
   return createPersonQuery(data);
 };
@@ -57,6 +58,7 @@ export const updatePerson = async (
     );
   }
   // TODO CHANCE EMPLOYEE NUMBER,IT IS WHAT IS CHANGED,SHOULD BE ORIGINAL PERSONS EMPLOYEE NUMBER
+  // FIXME: Ovo bi trebao biti jedan query
   await updateUserRoles(String(data.employeeNumber), data.roles ?? []);
   return updatePersonQuery(data);
 };
@@ -76,6 +78,8 @@ export const deletePerson = async (id: string): Promise<boolean | null> => {
     return null;
   }
 
+  // FIXME: Ovo za dokumenta / fajlove izdvojiti u shared folder i koristiti u svim servisima
+  // Ako budes ikad menjao da izmenis samo na jednom mestu i da uvek imas isti input i output
   if (person.picture) {
     const imagePath = path.join("/backend/src/", person.picture);
     if (fs.existsSync(imagePath)) {
@@ -91,6 +95,7 @@ export const deletePerson = async (id: string): Promise<boolean | null> => {
       }
     });
   }
+  // FIXME: Ovo nije moglo kao jedan spojeni query? Sasvim ti je okej da napravis query koji radi dve uvezane stvari ako one imaju smisla
   await deleteUserQuery(String(person.employeeNumber));
   await deletePersonQuery(id);
 
@@ -125,6 +130,8 @@ export const deleteDocument: (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
+    // FIXME: Dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
+    // Kako bi ti not found izasao iz catcha
     throw new ApiError("Error while deleting person!");
   }
 };
@@ -170,6 +177,7 @@ export const updateImagePath: (
 
     return updatedPerson;
   } catch (error) {
+    // FIXME: Isto dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
     throw new ApiError("Error while updating person image path!");
   }
 };
@@ -196,6 +204,9 @@ export const getAllPersons: (
       sortOrder,
     );
 
+    // FIXME: Ovo je greska, tako dajes netacne informacije frontendu,
+    // On je trazio odredjen uslov za korisnike i ti treba da vratis koliko ima takvih korisnika a ne ukupno
+    // Jer ce svako reci "u jebote ima 200 njih a posle trece stranice nema nikoga ko je ovo pravio"
     const totalPersons = await getTotalPersonsCount();
 
     return { currentPage: 0, totalPages: 0, persons, totalPersons };
@@ -210,16 +221,19 @@ export const getPersonById: (
   id: string,
 ): Promise<CreatePersonData | null> => {
   try {
+    // FIXME: Ovo bi trebalo da bude jedan query
     const person = await getPersonByIdQuery(id);
     const user = await getUserByEmployeeNumber(String(person?.employeeNumber));
     const roles = await getUserRolesById(user.id);
 
     if (!person) {
+      // FIXME: fali 404 status
       throw new ApiError(`Person with ID ${id} not found!`);
     }
 
     return { ...person, roles };
   } catch (error) {
+    // FIXME: Isto dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
     throw new ApiError("Error while fetching person by ID!");
   }
 };
@@ -230,11 +244,13 @@ export const getPersonByEmployeeNumber: (
   employeeNumber: string,
 ): Promise<CreatePersonData | null> => {
   try {
+    // FIXME: Isto jedan query treba biti
     const person = await getPersonByEmployeeNumberQuery(employeeNumber);
     const user = await getUserByEmployeeNumber(employeeNumber);
     const roles = await getUserRolesById(user.id);
 
     if (!person) {
+      // FIXME: Fali 404 status
       throw new ApiError(`Person with ID ${employeeNumber} not found!`);
     }
 
@@ -270,6 +286,7 @@ export const updatePersonsDocuments = async (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
+    // FIXME: Dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
     throw new ApiError("Error while updating person documents!", 500);
   }
 };

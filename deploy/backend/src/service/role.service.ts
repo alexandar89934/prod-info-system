@@ -8,6 +8,8 @@ import {
 import { ApiError } from "../shared/error/ApiError";
 
 export const createRoles = async () => {
+  // FIXME: Ovo si mogao kroz seed da uradis
+  // takodje ovaj map i proveru si mogao kroz query da odradis da ne bi pozivao bazu x puta
   const { roles } = config.roles;
   const rolesArray = roles.split(",");
 

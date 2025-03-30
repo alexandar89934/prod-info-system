@@ -2,6 +2,7 @@ import { User } from "../service/user.service.types";
 
 import { callQuery } from "./utils/query";
 
+// FIXME: Napraviti user tip
 export const createUserQuery = async (
   employeeNumber: string,
   password: string,

@@ -47,6 +47,8 @@ module.exports = {
         allowNull: true,
         type: Sequelize.JSON,
       },
+      // FIXME: Mozda bi bilo dobro da se ovo prebaci u posebnu tabelu
+      // Tipa PersonHistory ili samo EmploymentHistory zavisi sta bismo sve pratii
       startDate: {
         allowNull: false,
         type: Sequelize.DATE,

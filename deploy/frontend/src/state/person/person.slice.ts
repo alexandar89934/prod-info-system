@@ -120,6 +120,14 @@ const personSlice = createSlice({
       .addCase(updatePerson.fulfilled, (state, action) => {
         state.loading = false;
         state.success = action.payload.message;
+        const localStorageEmployeeNumber =
+          localStorage.getItem('employeeNumber');
+        if (
+          Number(localStorageEmployeeNumber) ===
+          action.payload.content.person.employeeNumber
+        ) {
+          localStorage.setItem('name', action.payload.content.person.name);
+        }
       })
       .addCase(updatePerson.rejected, (state, action) => {
         state.loading = false;

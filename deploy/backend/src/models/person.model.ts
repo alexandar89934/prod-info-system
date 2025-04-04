@@ -223,7 +223,7 @@ export const getAllPersonsQuery = async (
   const selectSQL = `
     SELECT
       "id", "employeeNumber", "name", "address", "mail", "picture",
-      "additionalInfo", "documents", "createdAt", "updatedAt", "createdBy", "updatedBy"
+      "additionalInfo","startDate", "documents", "createdAt", "updatedAt", "createdBy", "updatedBy"
     FROM "Person"
     WHERE
       "name" ILIKE $3 OR

@@ -8,6 +8,7 @@ import {
   useTheme,
   Snackbar,
   Alert,
+  useMediaQuery,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
@@ -41,8 +42,9 @@ import { AppDispatch } from '@/state/store.ts';
 const Person = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(isMobile ? 10 : 20);
   const [open, setOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [reload, setReload] = useState(false);
@@ -116,7 +118,7 @@ const Person = () => {
   useEffect(() => {
     if (!isLoggedIn) {
       setNotification({
-        message: `Error Fetching Persons! ${error}`,
+        message: `Error Fetching Persons! ${error ?? (error || '')}`,
         type: 'error',
       });
     }
@@ -140,11 +142,55 @@ const Person = () => {
     }
   }, [success, error, dispatch]);
 
-  const columns = [
+  const mobileColumns = [
+    {
+      field: 'name',
+      headerName: 'Employee',
+      flex: 1,
+      renderCell: (params: any) => (
+        <Box display="flex" alignItems="center">
+          <img
+            src={params.row.picture || profileImage}
+            alt="Person"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              marginRight: 10,
+            }}
+          />
+          <Box>
+            <div style={{ fontWeight: 'bold' }}>{params.value}</div>
+            <div style={{ fontSize: '0.8rem' }}>
+              #{params.row.employeeNumber}
+            </div>
+          </Box>
+        </Box>
+      ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 0.5,
+      renderCell: (params: { row: any }) => (
+        <Box>
+          <IconButton onClick={() => handleEdit(params.row)} size="small">
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row)} size="small">
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      ),
+    },
+  ];
+
+  const desktopColumns = [
     {
       field: 'picture',
       headerName: 'Picture',
-      flex: 0.5,
+      flex: 0.3,
       renderCell: (params: any) => {
         return (
           <img
@@ -160,67 +206,63 @@ const Person = () => {
         );
       },
     },
-    { field: 'employeeNumber', headerName: 'Employee #', flex: 1 },
+    { field: 'employeeNumber', headerName: 'Employee #', flex: 0.5 },
     { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'address', headerName: 'Address', flex: 1 },
-    { field: 'mail', headerName: 'Email', flex: 1 },
-    { field: 'additionalInfo', headerName: 'Additional Info', flex: 1 },
+    { field: 'mail', headerName: 'Email', flex: 1.5 },
     {
-      field: 'createdAt',
-      headerName: 'Created At',
-      flex: 1,
-      valueFormatter: (params: { value: string }) =>
-        new Date(params.value as string).toLocaleDateString(),
+      field: 'startDate',
+      headerName: 'Start Date',
+      flex: 0.6,
     },
     {
-      field: 'updatedAt',
-      headerName: 'Updated At',
-      flex: 1,
-      valueFormatter: (params: { value: string }) =>
-        new Date(params.value as string).toLocaleDateString(),
-    },
-    {
-      field: 'edit',
-      headerName: 'Edit',
-      flex: 0.5,
+      field: 'actions',
+      headerName: 'Actions',
+      flex: 0.8,
       renderCell: (params: { row: { id: string; employeeNumber: number } }) => (
-        <IconButton onClick={() => handleEdit(params.row)}>
-          <EditIcon />
-        </IconButton>
-      ),
-    },
-    {
-      field: 'delete',
-      headerName: 'Delete',
-      flex: 0.5,
-      renderCell: (params: { row: any }) => (
-        <IconButton onClick={() => handleDelete(params.row)}>
-          <DeleteIcon />
-        </IconButton>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            justifyContent: 'flex-start',
+            width: '100%',
+          }}
+        >
+          <IconButton onClick={() => handleEdit(params.row)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => handleDelete(params.row)}>
+            <DeleteIcon />
+          </IconButton>
+        </Box>
       ),
     },
   ];
 
+  const columns = isMobile ? mobileColumns : desktopColumns;
+
   return (
-    <Box m="5rem 5rem">
+    <Box m={isMobile ? '1rem' : '5rem 5rem'}>
       <Box
         display="flex"
+        flexDirection={isMobile ? 'column' : 'row'}
         justifyContent="space-between"
-        alignItems="center"
+        alignItems={isMobile ? 'flex-start' : 'center'}
         mb={2}
+        gap={isMobile ? 2 : 0}
       >
         <Header title="EMPLOYEES" subtitle="List of all employees" />
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleAddPerson}
-          sx={{ marginLeft: 'auto' }}
+          fullWidth={isMobile}
+          size={isMobile ? 'medium' : 'large'}
         >
           Add new person
         </Button>
       </Box>
       <Box
-        height="78vh"
+        height={isMobile ? '70vh' : '78vh'}
         width="100%"
         overflow="auto"
         sx={{
@@ -252,10 +294,10 @@ const Person = () => {
           density="comfortable"
           loading={loading}
           getRowId={(row) => row.id}
-          rows={(persons && persons) || []}
+          rows={persons ?? []}
           columns={columns}
-          rowCount={(total && total) || 0}
-          rowsPerPageOptions={[5, 10, 20, 50, 100]}
+          rowCount={total ?? 0}
+          rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
           pagination
           page={page}
           pageSize={pageSize}
@@ -280,6 +322,12 @@ const Person = () => {
             '& .MuiDataGrid-row.Mui-selected:hover': {
               backgroundColor: `${theme.palette.action.hover} !important`,
             },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+            },
+            '& .MuiDataGrid-cellContent': {
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+            },
           }}
         />
       </Box>
@@ -300,6 +348,7 @@ const Person = () => {
           onClose={() => setNotification(null)}
           severity={notification?.type}
           variant="filled"
+          sx={{ width: '100%' }}
         >
           {notification?.message}
         </Alert>

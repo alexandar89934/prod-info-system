@@ -50,16 +50,11 @@ export const renewAccessToken = catchAsync(
       refreshToken[0].split("=")[1] as string,
     );
     if (!renewedTokens) {
-      res
-        .status(httpStatus.BAD_REQUEST)
-        .clearCookie("refreshToken")
-        .send({
-          success: false,
-          error: {
-            message: "Refresh token used",
-            removeUser: true,
-          },
-        });
+      res.status(httpStatus.BAD_REQUEST).clearCookie("refreshToken").send({
+        success: false,
+        message: "Refresh token used",
+        removeUser: true,
+      });
       return;
     }
 

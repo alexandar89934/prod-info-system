@@ -15,7 +15,7 @@ export const getAllRoles = catchAsync(async (_req: Request, res: Response) => {
   } catch (error) {
     res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
       success: false,
-      message: error.message || "An error occurred while fetching roles.",
+      message: String(error) || "An error occurred while fetching roles.",
     });
   }
 });

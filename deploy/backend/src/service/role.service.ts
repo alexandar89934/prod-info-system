@@ -5,7 +5,6 @@ import {
   getRoleByName,
   getAllRolesQuery,
 } from "../models/role.model";
-import { ApiError } from "../shared/error/ApiError";
 
 export const createRoles = async () => {
   const { roles } = config.roles;
@@ -22,9 +21,5 @@ export const createRoles = async () => {
 };
 
 export const getAllRoles = async (): Promise<{ id: number }[]> => {
-  try {
-    return await getAllRolesQuery();
-  } catch (error) {
-    throw new ApiError("Error while fetching roles!");
-  }
+  return getAllRolesQuery();
 };

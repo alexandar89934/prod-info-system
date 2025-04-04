@@ -74,11 +74,11 @@ const Login: React.FC = () => {
         <Typography variant="h4" component="h1" align="center" mb={2}>
           Login
         </Typography>
-        {error && (
+        {error ? (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
-        )}
+        ) : null}
         <form onSubmit={handleSubmit(handleLogin)}>
           <TextField
             fullWidth

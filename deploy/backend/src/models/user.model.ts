@@ -45,6 +45,15 @@ export const getUserByIdQuery = async (id: string) => {
   return callQuery<User>(selectSQL, values);
 };
 
+export const getAdminUsersCount = async (): Promise<number> => {
+  const selectSQL = `
+    SELECT COUNT(*) as "count" FROM "UserRoles"
+    WHERE "roleId" = 2; -- 2 is the Admin roleId
+  `;
+  const result = await callQuery<{ count: number }>(selectSQL, []);
+  return result.count;
+};
+
 export const updateUserPasswordQuery = async (
   id: string,
   newPassword: string,

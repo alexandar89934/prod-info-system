@@ -1,4 +1,10 @@
 import {
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  Download as DownloadIcon,
+  AttachFile as AttachFileIcon,
+} from '@mui/icons-material';
+import {
   Box,
   Button,
   Table,
@@ -7,12 +13,15 @@ import {
   TableContainer,
   TableRow,
   useTheme,
+  useMediaQuery,
+  Typography,
+  IconButton,
+  Stack,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import DocumentTableHead from './DocumentTableHead';
-import DocumentTableRow from './DocumentTableRow';
 
 import ConfirmDialog from '@/components/ConfirmDialog.tsx';
 import {
@@ -28,11 +37,18 @@ import { AppDispatch } from '@/state/store.ts';
 
 interface DocumentListProps {
   personId?: string;
+  isEdit?: boolean;
+  fullWidth?: boolean;
 }
 
-const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
-  const isUpdateMode = Boolean(personId);
+const DocumentList: React.FC<DocumentListProps> = ({
+  personId,
+  isEdit,
+  fullWidth,
+}) => {
+  const isUpdateMode = isEdit;
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const dispatch = useDispatch<AppDispatch>();
   const [open, setOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -92,62 +108,167 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-      <TableContainer
-        sx={{
-          flexGrow: 1,
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          padding: 1,
-          position: 'relative',
-        }}
-      >
-        <Table>
-          <DocumentTableHead />
-        </Table>
+    <Box
+      sx={{
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        width: fullWidth ? '100%' : undefined,
+      }}
+    >
+      {isMobile ? (
+        // Mobile layout - list view
         <Box
           sx={{
-            maxHeight: '25vh',
-            overflowY: 'auto',
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: theme.palette.primary.main,
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: theme.palette.background.default,
-            },
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            padding: 1,
+            mb: 2,
+          }}
+        >
+          {documents.length === 0 ? (
+            <Typography variant="body2" align="center" sx={{ p: 2 }}>
+              No documents available
+            </Typography>
+          ) : (
+            <Stack spacing={1}>
+              {documents.map((doc) => (
+                <Box
+                  key={doc.name}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 1,
+                    borderBottom: '1px solid #eee',
+                    '&:last-child': {
+                      borderBottom: 'none',
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '60%',
+                    }}
+                  >
+                    {doc.name}
+                  </Typography>
+                  <Box>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleView(doc.name)}
+                      color="success"
+                    >
+                      <ViewIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDownload(doc.name)}
+                      color="secondary"
+                    >
+                      <DownloadIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDelete(doc)}
+                      color="error"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </Box>
+      ) : (
+        // Desktop layout - table view
+        <TableContainer
+          sx={{
+            flexGrow: 1,
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            padding: 1,
+            position: 'relative',
           }}
         >
           <Table>
-            <TableBody>
-              {documents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={2} align="center">
-                    No Data Available
-                  </TableCell>
-                </TableRow>
-              ) : (
-                documents.map((doc) => (
-                  <DocumentTableRow
-                    key={doc.name}
-                    document={doc}
-                    onView={handleView}
-                    onDownload={handleDownload}
-                    onDelete={handleDelete}
-                  />
-                ))
-              )}
-            </TableBody>
+            <DocumentTableHead />
           </Table>
-        </Box>
-      </TableContainer>
+          <Box
+            sx={{
+              maxHeight: '25vh',
+              overflowY: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: theme.palette.background.default,
+              },
+            }}
+          >
+            <Table>
+              <TableBody>
+                {documents.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={2} align="center">
+                      No Data Available
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  documents.map((doc) => (
+                    <TableRow key={doc.name}>
+                      <TableCell>{doc.name}</TableCell>
+                      <TableCell align="left">
+                        <Button
+                          size="small"
+                          onClick={() => handleView(doc.name)}
+                          sx={{ mr: 1 }}
+                          color="success"
+                          startIcon={<ViewIcon />}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => handleDownload(doc.name)}
+                          sx={{ mr: 1 }}
+                          color="secondary"
+                          startIcon={<DownloadIcon />}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => handleDelete(doc)}
+                          sx={{ mr: 1 }}
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Box>
+        </TableContainer>
+      )}
+
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: isMobile ? 'center' : 'flex-end',
           marginTop: 2,
         }}
       >
@@ -155,14 +276,18 @@ const DocumentList: React.FC<DocumentListProps> = ({ personId }) => {
           variant="contained"
           component="label"
           color="primary"
+          size={isMobile ? 'medium' : 'small'}
+          startIcon={<AttachFileIcon />}
           sx={{
-            marginRight: 1,
+            width: isMobile ? '100%' : 'auto',
+            py: isMobile ? 1.5 : 1,
           }}
         >
           Add New Document
           <input type="file" hidden onChange={handleAddNewDocument} />
         </Button>
       </Box>
+
       <ConfirmDialog
         open={open}
         title="Confirm Delete"

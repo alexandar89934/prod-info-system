@@ -9,7 +9,7 @@ const FlexBetween = styled(Box)<FlexBetweenProps>(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  backgroundColor: theme.palette.background.paper, // default to theme's background.alt if not provided
+  backgroundColor: theme.palette.background.paper,
 }));
 
 export default FlexBetween;

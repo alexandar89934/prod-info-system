@@ -43,6 +43,7 @@ export const createPerson = async (
   await createUser(String(data.employeeNumber), data.roles ?? []);
   return createPersonQuery(data);
 };
+
 export const updatePerson = async (
   data: EditPersonData,
 ): Promise<EditPersonData> => {
@@ -56,17 +57,17 @@ export const updatePerson = async (
       httpStatus.CONFLICT,
     );
   }
-  // TODO CHANCE EMPLOYEE NUMBER,IT IS WHAT IS CHANGED,SHOULD BE ORIGINAL PERSONS EMPLOYEE NUMBER
-  await updateUserRoles(String(data.employeeNumber), data.roles ?? []);
   return updatePersonQuery(data);
 };
 
+export const updatePersonUserRoles = async (
+  data: EditPersonData,
+): Promise<void> => {
+  return updateUserRoles(String(data.employeeNumber), data.roles ?? []);
+};
+
 const getTotalPersonsCount = async (): Promise<number> => {
-  try {
-    return await getTotalPersonsCountQuery();
-  } catch (error) {
-    throw new ApiError("Error while counting persons!");
-  }
+  return getTotalPersonsCountQuery();
 };
 
 export const deletePerson = async (id: string): Promise<boolean | null> => {
@@ -97,50 +98,39 @@ export const deletePerson = async (id: string): Promise<boolean | null> => {
   return true;
 };
 
-export const deleteDocument: (
+export const deleteDocument = async (
   id: string,
   docName: string,
-) => Promise<[]> = async (id: string, docName: string): Promise<[]> => {
-  try {
-    const person = await getPersonByIdQuery(id);
-    if (!person) {
-      throw new ApiError("Person not found!", 404);
-    }
-
-    const documentPath = path.join("/backend/src/uploads/", docName);
-
-    if (fs.existsSync(documentPath)) {
-      fs.unlinkSync(documentPath);
-    }
-    const updatedDocuments = Array.isArray(person.documents)
-      ? [...person.documents]
-      : [];
-    const filteredDocuments = updatedDocuments.filter(
-      (doc) => doc.name.trim() !== docName.trim(),
-    );
-
-    const updatedDocumentsInDb = await updatePersonDocumentsQuery(
-      id,
-      filteredDocuments,
-    );
-    return updatedDocumentsInDb || [];
-  } catch (error) {
-    throw new ApiError("Error while deleting person!");
+): Promise<[]> => {
+  const person = await getPersonByIdQuery(id);
+  if (!person) {
+    throw new ApiError("Person not found!", 404);
   }
+
+  const documentPath = path.join("/backend/src/uploads/", docName);
+
+  if (fs.existsSync(documentPath)) {
+    fs.unlinkSync(documentPath);
+  }
+
+  const updatedDocuments = Array.isArray(person.documents)
+    ? [...person.documents]
+    : [];
+  const filteredDocuments = updatedDocuments.filter(
+    (doc) => doc.name.trim() !== docName.trim(),
+  );
+
+  return (await updatePersonDocumentsQuery(id, filteredDocuments)) || [];
 };
 
 export const deleteDocumentNewPerson: (
   docPath: string,
 ) => Promise<string> = async (docPath: string): Promise<string> => {
-  try {
-    const documentPath = path.join("/backend/src/", docPath);
-    if (fs.existsSync(documentPath)) {
-      fs.unlinkSync(documentPath);
-    }
-    return docPath;
-  } catch (error) {
-    throw new ApiError("Error while deleting Document!");
+  const documentPath = path.join("/backend/src/", docPath);
+  if (fs.existsSync(documentPath)) {
+    fs.unlinkSync(documentPath);
   }
+  return docPath;
 };
 
 export const updateImagePath: (
@@ -150,28 +140,24 @@ export const updateImagePath: (
   id: string,
   newImagePath: string,
 ): Promise<string> => {
-  try {
-    const person = await getPersonByIdQuery(id);
-    if (!person) {
-      throw new ApiError("Person not found!", 404);
-    }
-    const oldImagePath = person.picture;
-    if (oldImagePath) {
-      const oldImageFullPath = path.join("/backend/src/", oldImagePath);
-      if (fs.existsSync(oldImageFullPath)) {
-        fs.unlinkSync(oldImageFullPath);
-      }
-    }
-
-    const updatedPerson = await updatePersonImagePathQuery(id, newImagePath);
-    if (!updatedPerson) {
-      throw new ApiError("Error updating image path in database!", 500);
-    }
-
-    return updatedPerson;
-  } catch (error) {
-    throw new ApiError("Error while updating person image path!");
+  const person = await getPersonByIdQuery(id);
+  if (!person) {
+    throw new ApiError("Person not found!", 404);
   }
+  const oldImagePath = person.picture;
+  if (oldImagePath) {
+    const oldImageFullPath = path.join("/backend/src/", oldImagePath);
+    if (fs.existsSync(oldImageFullPath)) {
+      fs.unlinkSync(oldImageFullPath);
+    }
+  }
+
+  const updatedPerson = await updatePersonImagePathQuery(id, newImagePath);
+  if (!updatedPerson) {
+    throw new ApiError("Error updating image path in database!", 500);
+  }
+
+  return updatedPerson;
 };
 
 export const getAllPersons: (
@@ -187,21 +173,17 @@ export const getAllPersons: (
   sortField: string,
   sortOrder: string,
 ): Promise<GetAllPersonsData> => {
-  try {
-    const persons = await getAllPersonsQuery(
-      limit,
-      offset,
-      search,
-      sortField,
-      sortOrder,
-    );
+  const persons = await getAllPersonsQuery(
+    limit,
+    offset,
+    search,
+    sortField,
+    sortOrder,
+  );
 
-    const totalPersons = await getTotalPersonsCount();
+  const totalPersons = await getTotalPersonsCount();
 
-    return { currentPage: 0, totalPages: 0, persons, totalPersons };
-  } catch (error) {
-    throw new ApiError("Error while fetching persons!");
-  }
+  return { currentPage: 0, totalPages: 0, persons, totalPersons };
 };
 
 export const getPersonById: (
@@ -209,19 +191,15 @@ export const getPersonById: (
 ) => Promise<CreatePersonData | null> = async (
   id: string,
 ): Promise<CreatePersonData | null> => {
-  try {
-    const person = await getPersonByIdQuery(id);
-    const user = await getUserByEmployeeNumber(String(person?.employeeNumber));
-    const roles = await getUserRolesById(user.id);
+  const person = await getPersonByIdQuery(id);
+  const user = await getUserByEmployeeNumber(String(person?.employeeNumber));
+  const roles = await getUserRolesById(user.id);
 
-    if (!person) {
-      throw new ApiError(`Person with ID ${id} not found!`);
-    }
-
-    return { ...person, roles };
-  } catch (error) {
-    throw new ApiError("Error while fetching person by ID!");
+  if (!person) {
+    throw new ApiError(`Person with ID ${id} not found!`);
   }
+
+  return { ...person, roles };
 };
 
 export const getPersonByEmployeeNumber: (
@@ -229,19 +207,15 @@ export const getPersonByEmployeeNumber: (
 ) => Promise<CreatePersonData | null> = async (
   employeeNumber: string,
 ): Promise<CreatePersonData | null> => {
-  try {
-    const person = await getPersonByEmployeeNumberQuery(employeeNumber);
-    const user = await getUserByEmployeeNumber(employeeNumber);
-    const roles = await getUserRolesById(user.id);
+  const person = await getPersonByEmployeeNumberQuery(employeeNumber);
+  const user = await getUserByEmployeeNumber(employeeNumber);
+  const roles = await getUserRolesById(user.id);
 
-    if (!person) {
-      throw new ApiError(`Person with ID ${employeeNumber} not found!`);
-    }
-
-    return { ...person, roles };
-  } catch (error) {
-    throw new ApiError("Error while fetching person by ID!");
+  if (!person) {
+    throw new ApiError(`Person with ID ${employeeNumber} not found!`);
   }
+
+  return { ...person, roles };
 };
 
 export const updatePersonsDocuments = async (
@@ -249,27 +223,23 @@ export const updatePersonsDocuments = async (
   filePath: string,
   fileName: string,
 ): Promise<[]> => {
-  try {
-    const person = await getPersonByIdQuery(id);
-    if (!person) {
-      throw new ApiError("Person not found!", 404);
-    }
-    const updatedDocuments = Array.isArray(person.documents)
-      ? [...person.documents]
-      : [];
-
-    updatedDocuments.push({
-      name: fileName,
-      path: filePath,
-      dateAdded: new Date(),
-    });
-
-    const updatedDocumentsInDb = await updatePersonDocumentsQuery(
-      id,
-      updatedDocuments,
-    );
-    return updatedDocumentsInDb || [];
-  } catch (error) {
-    throw new ApiError("Error while updating person documents!", 500);
+  const person = await getPersonByIdQuery(id);
+  if (!person) {
+    throw new ApiError("Person not found!", 404);
   }
+  const updatedDocuments = Array.isArray(person.documents)
+    ? [...person.documents]
+    : [];
+
+  updatedDocuments.push({
+    name: fileName,
+    path: filePath,
+    dateAdded: new Date(),
+  });
+
+  const updatedDocumentsInDb = await updatePersonDocumentsQuery(
+    id,
+    updatedDocuments,
+  );
+  return updatedDocumentsInDb || [];
 };

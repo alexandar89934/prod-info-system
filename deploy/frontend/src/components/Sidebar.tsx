@@ -89,55 +89,58 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <Box component="nav">
-      {isSidebarOpen && (
-        <Drawer
-          open={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          variant="persistent"
-          anchor="left"
-          sx={{
+      <Drawer
+        open={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        variant={isNonMobile ? 'persistent' : 'temporary'}
+        anchor="left"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
             width: drawerWidth,
-            '& .MuiDrawer-paper': {
-              color: theme.palette.secondary[200],
-              backgroundColor: theme.palette.background.paper,
-              boxSizing: 'border-box',
-              borderWidth: isNonMobile ? 0 : '2px',
-              width: drawerWidth,
-              overflowY: 'hidden',
-              scrollBehavior: 'smooth',
+            boxSizing: 'border-box',
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.secondary[200],
+            borderRight: isNonMobile
+              ? 'none'
+              : `1px solid ${theme.palette.divider}`,
+            position: isNonMobile ? 'relative' : 'fixed',
+            top: isNonMobile ? 0 : '64px',
+            height: isNonMobile ? '100vh' : 'calc(100vh - 64px)',
+            zIndex: isNonMobile ? theme.zIndex.drawer : theme.zIndex.drawer + 1,
+            overflowY: 'auto',
+            scrollBehavior: 'smooth',
+            '&::-webkit-scrollbar': {
+              width: '8px',
             },
-          }}
-        >
-          <Box
-            flexGrow={1}
-            overflow="auto"
-            sx={{
-              '&::-webkit-scrollbar': {
-                width: '8px',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                backgroundColor: theme.palette.primary[900],
-                borderRadius: '4px',
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: theme.palette.background.paper,
-              },
-            }}
-          >
-            <Box m="1.5rem 2rem 2rem 3rem">
-              <FlexBetween color={theme.palette.secondary.main}>
-                <Box display="flex" alignItems="center" gap="0.5rem">
-                  <Typography variant="h4" fontWeight="bold">
-                    Production Info System
-                  </Typography>
-                </Box>
-                {!isNonMobile && (
-                  <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                    <ChevronLeft />
-                  </IconButton>
-                )}
-              </FlexBetween>
-            </Box>
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: theme.palette.primary[900],
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: theme.palette.background.paper,
+            },
+          },
+        }}
+      >
+        <Box display="flex" flexDirection="column" height="100%">
+          <Box m="1.5rem 2rem 2rem 3rem">
+            <FlexBetween color={theme.palette.secondary.main}>
+              <Box display="flex" alignItems="center" gap="0.5rem">
+                <Typography variant="h4" fontWeight="bold">
+                  Production Info System
+                </Typography>
+              </Box>
+              {!isNonMobile ? (
+                <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                  <ChevronLeft />
+                </IconButton>
+              ) : null}
+            </FlexBetween>
+          </Box>
+
+          <Box flexGrow={1}>
             <List>
               {navItems.map(({ text, icon }) => {
                 if (!icon) {
@@ -154,6 +157,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => {
                         navigate(`/${lcText}`);
                         setActive(lcText);
+                        if (!isNonMobile) {
+                          setIsSidebarOpen(false);
+                        }
                       }}
                       sx={{
                         backgroundColor:
@@ -178,9 +184,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                         {icon}
                       </ListItemIcon>
                       <ListItemText primary={text} />
-                      {active === lcText && (
+                      {active === lcText ? (
                         <ChevronRightOutlined sx={{ ml: 'auto' }} />
-                      )}
+                      ) : null}
                     </ListItemButton>
                   </ListItem>
                 );
@@ -189,9 +195,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           </Box>
 
           <Box position="relative" padding="1rem 2rem">
-            {' '}
             <Divider />
-            {isLoggedIn && (
+            {isLoggedIn ? (
               <FlexBetween textTransform="none" gap="1rem" m="1.5rem 0 0">
                 <Box textAlign="left">
                   <Typography
@@ -201,10 +206,6 @@ const Sidebar: React.FC<SidebarProps> = ({
                   >
                     {user.name}
                   </Typography>
-                  <Typography
-                    fontSize="0.8rem"
-                    sx={{ color: theme.palette.secondary[200] }}
-                  />
                 </Box>
                 <IconButton onClick={handleProfileClick}>
                   <SettingsOutlined
@@ -215,10 +216,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                   />
                 </IconButton>
               </FlexBetween>
-            )}
+            ) : null}
           </Box>
-        </Drawer>
-      )}
+        </Box>
+      </Drawer>
     </Box>
   );
 };

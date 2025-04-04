@@ -1,3 +1,5 @@
+import httpStatus from "http-status";
+
 import { config } from "../config/config";
 import { createPersonQuery } from "../models/person.model";
 import {
@@ -8,6 +10,7 @@ import {
 } from "../models/role.model";
 import {
   createUserQuery,
+  getAdminUsersCount,
   getUserByEmployeeNumber,
   getUserByIdQuery,
   getUserRolesById,
@@ -68,23 +71,23 @@ export const updateUserRoles = async (
   employeeNumber: string,
   roles: number[],
 ) => {
-  console.log("ovdeee");
-  console.log(employeeNumber);
   const userExists = await getUserByEmployeeNumber(employeeNumber);
   const userRoles = await getUserRolesById(userExists.id);
-
-  console.log(userExists);
-  console.log(userRoles);
+  const adminUsersCount = await getAdminUsersCount();
+  if (Number(adminUsersCount) === 1 && !roles.includes(2)) {
+    throw new ApiError(
+      "Cannot remove the last admin user.",
+      httpStatus.FORBIDDEN,
+    );
+  }
   await updateUserRolesQuery(userExists.id, roles, userRoles);
 };
 
 export const getUserById = async (id: string) => {
   const fetchedUser = await getUserByIdQuery(id);
-
   if (!fetchedUser) {
     throw new ApiError(`Error Getting User with id ${id}`);
   }
-
   return fetchedUser;
 };
 

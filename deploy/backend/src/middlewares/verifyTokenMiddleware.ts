@@ -78,7 +78,10 @@ export const authorizeAdminOrSelf = async (
     const targetUser = await getUserByEmployeeNumber(targetEmployeeNumber);
     const { roles: newRoles } = req.body;
 
-    const currentUserRoles = await getUserRolesById(targetUser.id);
+    const userRoles = await getUserRolesById(targetUser.id);
+    const currentUserRoles = userRoles
+      ? userRoles.map((row) => row.roleId)
+      : [];
 
     const isChangingRoles =
       newRoles &&

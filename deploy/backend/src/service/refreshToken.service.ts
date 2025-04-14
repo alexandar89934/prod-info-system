@@ -1,55 +1,73 @@
+import { logger } from "#logger";
+
 import {
-  createRefreshTokenQuery,
-  deleteRefreshTokenByUserQuery,
-  getRefreshTokenQuery,
-} from "../models/refreshToken.model";
+  setRefreshToken,
+  getRefreshToken,
+  deleteRefreshToken,
+} from "../infrastructure/refreshToken.redis";
 import {
-  decodeJWT,
+  encodeJWT,
   encodeJWTRefresh,
   readPayloadOfToken,
 } from "../shared/utils/token";
 
 import { RefreshToken } from "./refreshToken.service.model";
-import { getUserById } from "./user.service";
 
-interface DecodedToken {
-  userId: string;
-  iat: number;
-  exp: number;
-}
+export const createRefreshToken = async (userId: string, device: string) => {
+  try {
+    const refreshToken = encodeJWTRefresh<{ userId: string; device: string }>({
+      userId,
+      device,
+    });
 
-export const createRefreshToken = async (userId: string) => {
-  const refreshToken = encodeJWTRefresh<{ userId: string }>({ userId });
-  const decodedToken = decodeJWT(refreshToken) as DecodedToken;
-  return createRefreshTokenQuery(
-    userId,
-    refreshToken,
-    new Date(decodedToken.exp * 1000).toISOString(),
-  );
-};
+    await setRefreshToken(userId, refreshToken, device);
 
-export const renewAccessToken = async (refreshToken: string) => {
-  const databaseRefreshToken = await getRefreshTokenQuery(refreshToken);
-  if (!databaseRefreshToken) {
-    const decoded = readPayloadOfToken<RefreshToken>(refreshToken);
-    await deleteRefreshTokenByUserQuery(decoded.userId);
-    return null;
+    return {
+      userId,
+      refreshToken,
+      device,
+    };
+  } catch (error) {
+    logger.error(error);
+    throw new Error("Failed to create refresh token");
   }
-  const user = await getUserById(databaseRefreshToken.userId);
-  const accessToken = encodeJWTRefresh<{ userId: string }>({
-    userId: user.id,
-  });
+};
+export const renewAccessToken = async (
+  refreshToken: string,
+  device: string,
+) => {
+  try {
+    const decoded = readPayloadOfToken<RefreshToken>(refreshToken);
+    const { userId } = decoded;
 
-  const newRefreshToken = encodeJWTRefresh<{ userId: string }>({
-    userId: databaseRefreshToken.userId,
-  });
+    const storedToken = await getRefreshToken(userId, device);
+    if (!storedToken || storedToken !== refreshToken) {
+      await deleteRefreshToken(userId, device);
+      return null;
+    }
 
-  return {
-    token: accessToken,
-    refreshToken: await createRefreshTokenQuery(
-      databaseRefreshToken.userId,
-      newRefreshToken,
-      new Date(databaseRefreshToken.expiryDate).toISOString(),
-    ),
-  };
+    const newAccessToken = encodeJWT<{ userId: string }>({ userId });
+
+    const newRefreshToken = encodeJWTRefresh<{
+      userId: string;
+      device: string;
+    }>({
+      userId,
+      device,
+    });
+
+    await setRefreshToken(userId, newRefreshToken, device);
+
+    return {
+      token: newAccessToken,
+      refreshToken: {
+        userId,
+        refreshToken: newRefreshToken,
+        device,
+      },
+    };
+  } catch (error) {
+    logger.error(error);
+    throw new Error("Failed to renew access token");
+  }
 };

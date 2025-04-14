@@ -29,6 +29,8 @@ const envVars = cleanEnv(
     ADMIN_PASSWORD: str(),
     ADMIN_EMPLOYEE_NUMBER: str(),
     ROLES: str(),
+    REDIS_HOST: str(),
+    REDIS_PORT: num(),
   },
   {
     reporter: ({ errors }) => {
@@ -84,5 +86,9 @@ export const config = {
   },
   roles: {
     roles: envVars.ROLES,
+  },
+  redis: {
+    host: envVars.REDIS_HOST,
+    port: envVars.REDIS_PORT,
   },
 };

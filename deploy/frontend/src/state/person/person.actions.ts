@@ -86,7 +86,7 @@ export const addPerson = createAsyncThunk(
       const response = await axiosServer.post(`/person/create`, person);
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status ?? 'Unknown Status'}, ${response.statusText ?? 'Unknown StatusText'}, ${response.data?.message || 'An error occurred while adding persons.'}`
+          `${response.data?.message || ''},${response.data?.error?.message || 'An error occurred while adding persons.'}`
         );
       }
       return response.data;
@@ -108,7 +108,7 @@ export const updatePerson = createAsyncThunk(
       );
       if (!response.data.success) {
         return rejectWithValue(
-          `${response.status ?? 'Unknown Status'}, ${response.statusText ?? 'Unknown StatusText'}, ${response.data?.message || 'An error occurred while updating person.'}`
+          `${response.data?.message || ''}, ${response.data?.error?.message || 'An error occurred while updating person.'}`
         );
       }
       return response.data;

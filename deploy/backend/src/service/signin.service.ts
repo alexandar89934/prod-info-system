@@ -1,4 +1,4 @@
-import { deleteRefreshTokenByUserQuery } from "../models/refreshToken.model";
+import { deleteRefreshToken } from "../infrastructure/refreshToken.redis";
 import { getUserByEmployeeNumber } from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
 import { AuthError } from "../shared/error/AuthError";
@@ -20,6 +20,8 @@ export const userSignIn = async (employeeNumber: string, password: string) => {
     throw new AuthError("Wrong username or password");
   }
 
+  // FIXME: A ne pravis mu refresh token?
+  // FIXED: Refresh token se pravi ali se poziva u userSignIn controller-u
   return {
     token: encodeJWT<{ userId: string }>({
       userId: user.id,
@@ -28,10 +30,12 @@ export const userSignIn = async (employeeNumber: string, password: string) => {
   };
 };
 
-export const logout = async (userId: string) => {
+export const logout = async (userId: string, device: string) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError("User does not exist");
+    // FIXME: 404 status
+    // FIXED
+    throw new ApiError("User does not exist", 404);
   }
-  await deleteRefreshTokenByUserQuery(user.id);
+  await deleteRefreshToken(user.id, device);
 };

@@ -32,6 +32,14 @@ services:
       test: 'exit 0'
     networks:
       - local_net
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+          - local_net
+    volumes:
+      - redis_data:/data
 
   backend:
     container_name: backend
@@ -89,6 +97,7 @@ services:
 volumes:
   postgres-data: {}
   pgadmin-data: {}
+  redis_data: {}
 
 networks:
   local_net:

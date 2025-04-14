@@ -1,24 +1,4 @@
-import { config } from "#config";
-
-import {
-  createRoleQuery,
-  getRoleByName,
-  getAllRolesQuery,
-} from "../models/role.model";
-
-export const createRoles = async () => {
-  const { roles } = config.roles;
-  const rolesArray = roles.split(",");
-
-  await Promise.all(
-    rolesArray.map(async (role) => {
-      const roleExists = await getRoleByName(role);
-      if (!roleExists) {
-        await createRoleQuery(role);
-      }
-    }),
-  );
-};
+import { getAllRolesQuery } from "../models/role.model";
 
 export const getAllRoles = async (): Promise<{ id: number }[]> => {
   return getAllRolesQuery();

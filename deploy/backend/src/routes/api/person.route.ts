@@ -26,6 +26,8 @@ personRouter
     personController.createPerson,
   );
 
+// FIXME: Svako moze da izmeni podatke korisnika?
+// Nije mi jasno ovo, ima authorizeAdminOrSelf, sto znaci,mozes da monjas svoje podatke kad si ulogovan,a admin moze da menja sve naloge
 personRouter
   .route("/update/:id")
   .put(

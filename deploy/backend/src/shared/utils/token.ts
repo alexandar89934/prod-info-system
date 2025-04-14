@@ -1,4 +1,5 @@
 import { Request } from "express";
+import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 import { sign, SignOptions } from "jsonwebtoken";
 
@@ -25,14 +26,16 @@ export const encodeJWTRefresh = <T extends object>(
 };
 
 export const decodeJWT = <T extends object>(encodedToken: string): T => {
-  let decodedToken: T;
   try {
-    decodedToken = jwt.verify(encodedToken, config.jwt.secret) as T;
-  } catch (e) {
-    throw new ApiError(e);
+    return jwt.verify(encodedToken, config.jwt.secret) as T;
+  } catch (error: any) {
+    throw new ApiError(
+      error.message || "Invalid token",
+      error.name === "TokenExpiredError"
+        ? httpStatus.UNAUTHORIZED
+        : httpStatus.BAD_REQUEST,
+    );
   }
-
-  return decodedToken;
 };
 
 export const tryExtractTokenFromHeaders = <T extends object>(

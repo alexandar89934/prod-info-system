@@ -6,8 +6,6 @@ import { logger } from "./config/logger";
 import { checkDatabaseConnection } from "./infrastructure/db";
 import { redisClient } from "./infrastructure/redis";
 
-// FIXME: ima express tip za ovo
-// FIXED
 let server: Server;
 
 const exitHandler = () => {
@@ -28,12 +26,8 @@ const unexpectedErrorHandler = (error: any) => {
   exitHandler();
 };
 
-// FIXME: ovo je okej ali predlog da mozda prebacis u drugi fajl
-// FIXED pool prebacen u file u infrastucture folder
 const startServer = async () => {
   try {
-    // FIXME: Takodje ovde bi bilo dobro da dodas proveru pool-a da li zapravo ima konekciju ka bazi i tek onda pokreces server
-    // FIXED Dodata provera. Sve stavljeno u try catch i obustavlja proces ako konekcija nije uspostavljena
     await checkDatabaseConnection();
     await redisClient.connect();
     logger.info("Redis connected");

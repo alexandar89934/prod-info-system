@@ -36,9 +36,6 @@ module.exports = {
         allowNull: true,
         type: Sequelize.JSON,
       },
-      // FIXME: Mozda bi bilo dobro da se ovo prebaci u posebnu tabelu
-      // Tipa PersonHistory ili samo EmploymentHistory zavisi sta bismo sve pratii
-      // FIXED Ovo shvatam kao sugestiju,ne bih za sad dok ne budem imao jasan use-case. Za sad ostaje samo kao infrmacija kada je neko poceo da radi
       startDate: {
         allowNull: false,
         type: Sequelize.DATE,

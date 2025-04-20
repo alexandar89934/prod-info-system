@@ -27,8 +27,6 @@ export const createPerson = catchAsync(async (req: Request, res: Response) => {
 
 export const updatePerson = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // FIXME: Pametna provera, takodje bih dodao za sve UUID funkciju da proveri da li je validan UUID
-  // FIXED
   if (!id || !isValidUUID(id)) {
     return res.status(httpStatus.BAD_REQUEST).send({
       success: false,
@@ -76,9 +74,6 @@ export const getAllPersons = catchAsync(async (req: Request, res: Response) => {
 
 export const deletePerson = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-
-  // FIXME: I ovde isto dodati proveru da li je UUID validan
-  // FIXED
   if (!id || !isValidUUID(id)) {
     return res.status(httpStatus.BAD_REQUEST).send({
       success: false,
@@ -94,8 +89,6 @@ export const deletePerson = catchAsync(async (req: Request, res: Response) => {
       message: "Person not found!",
     });
   }
-  // FIXME: Svuda vracas content a ovde nema nista?
-  // FIXED
   return res.status(httpStatus.OK).send({
     success: true,
     message: "Successfully deleted Person!",
@@ -107,8 +100,6 @@ export const deletePerson = catchAsync(async (req: Request, res: Response) => {
 
 export const deleteDocument = catchAsync(
   async (req: Request, res: Response) => {
-    // FIXME: A ovde nema provera za personId? Isto bih dodao da li je validan UUID
-    // FIXED
     const { personId } = req.params;
     const { documentName } = req.body;
 
@@ -173,8 +164,6 @@ export const deleteDocumentNewPerson = catchAsync(
 
 export const updateImagePath = catchAsync(
   async (req: Request, res: Response) => {
-    // FIXME: I ovde nema provera za personId? Isto bih dodao da li je validan UUID
-    // FIXED
     const { personId } = req.params;
     const { newImagePath } = req.body;
 
@@ -214,8 +203,6 @@ export const updateImagePath = catchAsync(
 
 export const getPersonById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // FIXME: I ovde isto dodati proveru da li je UUID validan
-  // FIXED
   if (!id || !isValidUUID(id)) {
     return res.status(httpStatus.BAD_REQUEST).send({
       success: false,
@@ -282,8 +269,6 @@ export const uploadProfileImage = (req: Request, res: Response) => {
 };
 
 export const uploadFile = catchAsync(async (req: Request, res: Response) => {
-  // FIXME: Provera za personID, da li je validan UUID
-  // FIXED
   const { personId } = req.body;
   if (!personId || !isValidUUID(personId)) {
     return res.status(httpStatus.BAD_REQUEST).send({

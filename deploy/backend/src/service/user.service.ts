@@ -14,8 +14,6 @@ export const getUserById = async (id: string) => {
   try {
     const fetchedUser = await getUserByIdQuery(id);
     if (!fetchedUser) {
-      // FIXME: 404 status
-      // FIXED
       throw new ApiError(
         `Error Getting User with id ${id}`,
         httpStatus.NOT_FOUND,
@@ -61,8 +59,6 @@ export const checkIfUser = async (token: string) => {
 };
 
 export const checkIfAdmin = async (userId: string) => {
-  // FIXME: Cela ova funkcija checkIfAdmin je 1 query
-  // FIXED
   try {
     await getUserById(userId);
     const result = await checkIfAdminQuery(userId);
@@ -80,8 +76,6 @@ export const checkIfAdmin = async (userId: string) => {
 };
 
 export const checkIfModerator = async (userId: string) => {
-  // FIXME: Isto vazi kao i za checkIfAdmin
-  // FIXED
   try {
     await getUserById(userId);
     const result = await checkIfModeratorQuery(userId);

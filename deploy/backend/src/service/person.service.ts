@@ -36,8 +36,6 @@ export const createPerson = async (
         httpStatus.CONFLICT,
       );
     }
-    // FIXME: Ovo bi trebao biti jedan query
-    // FIXED
     return await createPersonQuery(data, data.roles ?? []);
   } catch (error) {
     if (error instanceof ApiError) {
@@ -61,9 +59,6 @@ export const updatePerson = async (
         httpStatus.CONFLICT,
       );
     }
-    // TODO CHANCE EMPLOYEE NUMBER,IT IS WHAT IS CHANGED,SHOULD BE ORIGINAL PERSONS EMPLOYEE NUMBER
-    // FIXME: Ovo bi trebao biti jedan query
-    // FIXED
     return await updatePersonQuery(data);
   } catch (error) {
     if (error instanceof ApiError) {
@@ -83,17 +78,12 @@ export const deletePerson = async (id: string): Promise<boolean | null> => {
     if (!person) {
       throw new ApiError("Person not found!", 404);
     }
-    // FIXME: Ovo za dokumenta / fajlove izdvojiti u shared folder i koristiti u svim servisima
-    // Ako budes ikad menjao da izmenis samo na jednom mestu i da uvek imas isti input i output
-    // FIXED
     if (person.picture) {
       deleteFileIfExists(person.picture);
     }
     if (Array.isArray(person.documents)) {
       deleteFilesIfExist(person.documents.map((doc) => doc.path));
     }
-    // FIXME: Ovo nije moglo kao jedan spojeni query? Sasvim ti je okej da napravis query koji radi dve uvezane stvari ako one imaju smisla
-    // FIXED
     return await deletePersonQuery(id);
   } catch (error) {
     logger.error(error);
@@ -132,9 +122,6 @@ export const deleteDocument: (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
-    // FIXME: Dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
-    // Kako bi ti not found izasao iz catcha
-    // FIXED
     logger.error(error);
     if (error instanceof ApiError) {
       throw error;
@@ -191,8 +178,6 @@ export const updateImagePath: (
 
     return updatedPerson.picture;
   } catch (error) {
-    // FIXME: Isto dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
-    // FIXED
     logger.error(error);
     if (error instanceof ApiError) {
       throw error;
@@ -225,12 +210,6 @@ export const getAllPersons: (
       sortField,
       sortOrder,
     );
-
-    // FIXME: Ovo je greska, tako dajes netacne informacije frontendu,
-    // On je trazio odredjen uslov za korisnike i ti treba da vratis koliko ima takvih korisnika a ne ukupno
-    // Jer ce svako reci "u jebote ima 200 njih a posle trece stranice nema nikoga ko je ovo pravio"
-    // FIXED -> bilo je nekoliko komentara u vezi sa ovim,sad smatram da je greska sto sam uopste imao odvojeni
-    // query viska da dobavi broj takvih osoba kakve se pretrazuju,mislim da je dovoljno vratiti samo duzinu niza.
     const totalPersons = persons.length;
     const currentPage = Math.floor(offset / limit);
     const totalPages = Math.ceil(totalPersons / limit);
@@ -251,13 +230,9 @@ export const getPersonById: (
   id: string,
 ): Promise<CreatePersonData | null> => {
   try {
-    // FIXME: Ovo bi trebalo da bude jedan query
-    // FIXED
     const person = await getPersonByIdQuery(id);
 
     if (!person) {
-      // FIXME: fali 404 status
-      // FIXED
       throw new ApiError(
         `Person with ID ${id} not found!`,
         httpStatus.NOT_FOUND,
@@ -266,8 +241,6 @@ export const getPersonById: (
 
     return { ...person };
   } catch (error) {
-    // FIXME: Isto dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
-    // FIXED
     logger.error(error);
     if (error instanceof ApiError) {
       throw error;
@@ -329,8 +302,6 @@ export const updatePersonsDocuments = async (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
-    // FIXME: Dodati proveru da li je error tipa ApiError i ako jeste samo ga proslediti dalje
-    // FIXED
     logger.error(error);
     if (error instanceof ApiError) {
       throw error;

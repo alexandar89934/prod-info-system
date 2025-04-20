@@ -42,8 +42,6 @@ export const userSignIn = catchAsync(async (req: Request, res: Response) => {
 export const renewAccessToken = catchAsync(
   async (req: Request, res: Response) => {
     const { refreshValidity = 10 * 60 * 1000 } = config.jwt;
-    // FIXME: Ovde mozes koristiti cookie-parser paket da izvuces sve cookie lepse
-    // FIXED - Added cookie parser package
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
       throw new ApiError("No refresh token", httpStatus.BAD_REQUEST);

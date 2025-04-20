@@ -2,8 +2,6 @@ import { User } from "../service/user.service.types";
 
 import { callQuery } from "./utils/query";
 
-// FIXME: Napraviti user tip
-// FIXED
 export const getUserByEmployeeNumber = async (employeeNumber: string) => {
   const selectSQL = `
     SELECT u.*, p.name, p.picture

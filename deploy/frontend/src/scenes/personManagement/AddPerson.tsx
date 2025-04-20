@@ -119,8 +119,6 @@ const AddPerson = () => {
         await cleanup();
       })();
     };
-    // FIXME
-    // component is rendering on adding second document and deletes previously added document file.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

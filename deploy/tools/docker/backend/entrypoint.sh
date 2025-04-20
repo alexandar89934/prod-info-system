@@ -10,6 +10,11 @@ while ! nc -z postgres 5432; do
   sleep 1
 done
 
+echo "Running migrations..."
 yarn migrate
 
+echo "Seeding database..."
+yarn seed
+
+echo "Starting the application..."
 pm2-runtime start ecosystem.config.js

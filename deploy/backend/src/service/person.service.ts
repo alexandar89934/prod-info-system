@@ -1,100 +1,100 @@
-import fs from "fs";
-import path from "path";
-
 import httpStatus from "http-status";
+
+import { logger } from "#logger";
 
 import {
   checkEmployeeNumberExists,
   createPersonQuery,
   deletePersonQuery,
-  deleteUserQuery,
   getAllPersonsQuery,
   getPersonByEmployeeNumberQuery,
   getPersonByIdQuery,
-  getTotalPersonsCountQuery,
   updatePersonDocumentsQuery,
   updatePersonImagePathQuery,
   updatePersonQuery,
 } from "../models/person.model";
-import {
-  getUserByEmployeeNumber,
-  getUserRolesById,
-} from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
+import {
+  deleteFileIfExists,
+  deleteFilesIfExist,
+} from "../shared/utils/fileUtils";
 
 import {
   CreatePersonData,
   EditPersonData,
   GetAllPersonsData,
 } from "./person.service.types";
-import { createUser, updateUserRoles } from "./user.service";
 
 export const createPerson = async (
   data: CreatePersonData,
 ): Promise<CreatePersonData> => {
-  const existingPerson = await checkEmployeeNumberExists(data.employeeNumber);
-
-  if (existingPerson) {
-    throw new ApiError(
-      `Employee number ${data.employeeNumber} already exists!`,
-      httpStatus.CONFLICT,
-    );
+  try {
+    const { count } = await checkEmployeeNumberExists(data.employeeNumber);
+    if (count > 0) {
+      throw new ApiError(
+        `Employee number ${data.employeeNumber} already exists!`,
+        httpStatus.CONFLICT,
+      );
+    }
+    return await createPersonQuery(data, data.roles ?? []);
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError("Error while fetching person by ID!", 500);
   }
-  await createUser(String(data.employeeNumber), data.roles ?? []);
-  return createPersonQuery(data);
 };
+
 export const updatePerson = async (
   data: EditPersonData,
 ): Promise<EditPersonData> => {
-  const existingPerson = await checkEmployeeNumberExists(
-    data.employeeNumber,
-    data.id,
-  );
-  if (existingPerson) {
-    throw new ApiError(
-      `Employee number ${data.employeeNumber} already exists!`,
-      httpStatus.CONFLICT,
-    );
-  }
-  // TODO CHANCE EMPLOYEE NUMBER,IT IS WHAT IS CHANGED,SHOULD BE ORIGINAL PERSONS EMPLOYEE NUMBER
-  await updateUserRoles(String(data.employeeNumber), data.roles ?? []);
-  return updatePersonQuery(data);
-};
-
-const getTotalPersonsCount = async (): Promise<number> => {
   try {
-    return await getTotalPersonsCountQuery();
+    const { count } = await checkEmployeeNumberExists(
+      data.employeeNumber,
+      data.id,
+    );
+    if (count > 0) {
+      throw new ApiError(
+        `Employee number ${data.employeeNumber} already exists!`,
+        httpStatus.CONFLICT,
+      );
+    }
+    return await updatePersonQuery(data);
   } catch (error) {
-    throw new ApiError("Error while counting persons!");
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while fetching person by ID!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };
 
 export const deletePerson = async (id: string): Promise<boolean | null> => {
-  const person = await getPersonByIdQuery(id);
+  try {
+    const person = await getPersonByIdQuery(id);
 
-  if (!person) {
-    return null;
-  }
-
-  if (person.picture) {
-    const imagePath = path.join("/backend/src/", person.picture);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    if (!person) {
+      throw new ApiError("Person not found!", 404);
     }
+    if (person.picture) {
+      deleteFileIfExists(person.picture);
+    }
+    if (Array.isArray(person.documents)) {
+      deleteFilesIfExist(person.documents.map((doc) => doc.path));
+    }
+    return await deletePersonQuery(id);
+  } catch (error) {
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while fetching person by ID!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
-
-  if (Array.isArray(person.documents)) {
-    person.documents.forEach((doc) => {
-      const docPath = path.join("/backend/src/", doc.path);
-      if (fs.existsSync(docPath)) {
-        fs.unlinkSync(docPath);
-      }
-    });
-  }
-  await deleteUserQuery(String(person.employeeNumber));
-  await deletePersonQuery(id);
-
-  return true;
 };
 
 export const deleteDocument: (
@@ -104,14 +104,11 @@ export const deleteDocument: (
   try {
     const person = await getPersonByIdQuery(id);
     if (!person) {
-      throw new ApiError("Person not found!", 404);
+      throw new ApiError("Person not found!", httpStatus.NOT_FOUND);
     }
 
-    const documentPath = path.join("/backend/src/uploads/", docName);
+    deleteFileIfExists(`uploads/${docName}`);
 
-    if (fs.existsSync(documentPath)) {
-      fs.unlinkSync(documentPath);
-    }
     const updatedDocuments = Array.isArray(person.documents)
       ? [...person.documents]
       : [];
@@ -125,7 +122,14 @@ export const deleteDocument: (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
-    throw new ApiError("Error while deleting person!");
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while deleting document!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };
 
@@ -133,13 +137,17 @@ export const deleteDocumentNewPerson: (
   docPath: string,
 ) => Promise<string> = async (docPath: string): Promise<string> => {
   try {
-    const documentPath = path.join("/backend/src/", docPath);
-    if (fs.existsSync(documentPath)) {
-      fs.unlinkSync(documentPath);
-    }
+    deleteFileIfExists(docPath);
     return docPath;
   } catch (error) {
-    throw new ApiError("Error while deleting Document!");
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while deleting Document!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };
 
@@ -153,24 +161,31 @@ export const updateImagePath: (
   try {
     const person = await getPersonByIdQuery(id);
     if (!person) {
-      throw new ApiError("Person not found!", 404);
+      throw new ApiError("Person not found!", httpStatus.NOT_FOUND);
     }
-    const oldImagePath = person.picture;
-    if (oldImagePath) {
-      const oldImageFullPath = path.join("/backend/src/", oldImagePath);
-      if (fs.existsSync(oldImageFullPath)) {
-        fs.unlinkSync(oldImageFullPath);
-      }
+
+    if (person.picture) {
+      deleteFileIfExists(person.picture);
     }
 
     const updatedPerson = await updatePersonImagePathQuery(id, newImagePath);
     if (!updatedPerson) {
-      throw new ApiError("Error updating image path in database!", 500);
+      throw new ApiError(
+        "Error updating image path in database!",
+        httpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    return updatedPerson;
+    return updatedPerson.picture;
   } catch (error) {
-    throw new ApiError("Error while updating person image path!");
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while updating person image path!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };
 
@@ -195,12 +210,17 @@ export const getAllPersons: (
       sortField,
       sortOrder,
     );
+    const totalPersons = persons.length;
+    const currentPage = Math.floor(offset / limit);
+    const totalPages = Math.ceil(totalPersons / limit);
 
-    const totalPersons = await getTotalPersonsCount();
-
-    return { currentPage: 0, totalPages: 0, persons, totalPersons };
+    return { currentPage, totalPages, persons, totalPersons };
   } catch (error) {
-    throw new ApiError("Error while fetching persons!");
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError("Error while fetching persons!", httpStatus.NOT_FOUND);
   }
 };
 
@@ -211,36 +231,48 @@ export const getPersonById: (
 ): Promise<CreatePersonData | null> => {
   try {
     const person = await getPersonByIdQuery(id);
-    const user = await getUserByEmployeeNumber(String(person?.employeeNumber));
-    const roles = await getUserRolesById(user.id);
 
     if (!person) {
-      throw new ApiError(`Person with ID ${id} not found!`);
+      throw new ApiError(
+        `Person with ID ${id} not found!`,
+        httpStatus.NOT_FOUND,
+      );
     }
 
-    return { ...person, roles };
+    return { ...person };
   } catch (error) {
-    throw new ApiError("Error while fetching person by ID!");
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while fetching person by ID!",
+      httpStatus.NOT_FOUND,
+    );
   }
 };
 
-export const getPersonByEmployeeNumber: (
+export const getPersonByEmployeeNumber = async (
   employeeNumber: string,
-) => Promise<CreatePersonData | null> = async (
-  employeeNumber: string,
-): Promise<CreatePersonData | null> => {
+): Promise<CreatePersonData> => {
   try {
     const person = await getPersonByEmployeeNumberQuery(employeeNumber);
-    const user = await getUserByEmployeeNumber(employeeNumber);
-    const roles = await getUserRolesById(user.id);
-
     if (!person) {
-      throw new ApiError(`Person with ID ${employeeNumber} not found!`);
+      throw new ApiError(
+        `Person with employee number ${employeeNumber} not found!`,
+        httpStatus.NOT_FOUND,
+      );
     }
-
-    return { ...person, roles };
+    return person;
   } catch (error) {
-    throw new ApiError("Error while fetching person by ID!");
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while fetching person by employee number!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };
 
@@ -252,7 +284,7 @@ export const updatePersonsDocuments = async (
   try {
     const person = await getPersonByIdQuery(id);
     if (!person) {
-      throw new ApiError("Person not found!", 404);
+      throw new ApiError("Person not found!", httpStatus.NOT_FOUND);
     }
     const updatedDocuments = Array.isArray(person.documents)
       ? [...person.documents]
@@ -270,6 +302,13 @@ export const updatePersonsDocuments = async (
     );
     return updatedDocumentsInDb || [];
   } catch (error) {
-    throw new ApiError("Error while updating person documents!", 500);
+    logger.error(error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(
+      "Error while updating person documents!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 };

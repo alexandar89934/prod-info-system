@@ -1,6 +1,4 @@
 "use strict";
-
-const { Sequelize } = require("sequelize");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -16,6 +14,16 @@ module.exports = {
         defaultValue: Sequelize.literal("uuid_generate_v4()"),
         primaryKey: true,
         type: Sequelize.UUID,
+      },
+      personId: {
+        allowNull: false,
+        type: Sequelize.UUID,
+        references: {
+          model: "Person",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       employeeNumber: {
         allowNull: false,

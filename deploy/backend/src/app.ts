@@ -1,5 +1,6 @@
 import path from "path";
 
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -14,6 +15,7 @@ import { apiRouter } from "./routes/api";
 import { healthcheckRouter } from "./routes/healthcheck/healthcheck.route";
 
 export const app = express();
+app.use(cookieParser());
 
 if (config.env !== "test") {
   app.use(successHandler);

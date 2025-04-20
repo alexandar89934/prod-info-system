@@ -9,7 +9,6 @@ type Tokens = {
   primary: ColorToken;
   secondary: ColorToken;
 };
-
 export const tokensDark: Tokens = {
   grey: {
     0: '#ffffff',
@@ -163,6 +162,15 @@ export const themeSettings = (mode: ThemeMode): ThemeSettings => {
       h6: {
         fontFamily: ['Inter', 'sans-serif'].join(','),
         fontSize: 14,
+      },
+    },
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 600,
+        md: 960,
+        lg: 1280,
+        xl: 1920,
       },
     },
   } as ThemeSettings;

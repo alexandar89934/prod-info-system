@@ -7,10 +7,10 @@ export type Admin = {
 };
 
 export type User = {
-  picture: string;
-  name: string;
+  picture?: string;
+  name?: string;
   id: string;
   employeeNumber: string;
   password: string;
-  lastPasswordReset: string;
+  lastPasswordReset?: string;
 };

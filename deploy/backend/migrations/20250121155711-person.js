@@ -1,7 +1,4 @@
 "use strict";
-
-const { Sequelize } = require("sequelize");
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -14,14 +11,6 @@ module.exports = {
         defaultValue: Sequelize.literal("uuid_generate_v4()"),
         primaryKey: true,
         type: Sequelize.UUID,
-      },
-      employeeNumber: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-        unique: true,
-        validate: {
-          notNull: true,
-        },
       },
       name: {
         allowNull: false,
@@ -72,22 +61,6 @@ module.exports = {
         type: Sequelize.TEXT,
       },
     });
-    await queryInterface.sequelize.query(`
-      CREATE OR REPLACE FUNCTION prevent_employee_number_update()
-      RETURNS TRIGGER AS $$
-      BEGIN
-        IF NEW."employeeNumber" <> OLD."employeeNumber"THEN
-          RAISE EXCEPTION 'Updating employeeNumber is not allowed';
-        END IF;
-        RETURN NEW;
-      END;
-      $$ LANGUAGE plpgsql;
-
-      CREATE TRIGGER prevent_employee_number_update_trigger
-      BEFORE UPDATE ON "Person"
-      FOR EACH ROW
-      EXECUTE FUNCTION prevent_employee_number_update();
-    `);
   },
 
   async down(queryInterface, Sequelize) {
@@ -97,10 +70,5 @@ module.exports = {
     await queryInterface.dropTable("Person", {
       cascade: true,
     });
-
-    await queryInterface.sequelize.query(`
-      DROP TRIGGER IF EXISTS prevent_employee_number_update_trigger ON "Person";
-      DROP FUNCTION IF EXISTS prevent_employee_number_update;
-    `);
   },
 };

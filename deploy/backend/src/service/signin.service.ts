@@ -1,4 +1,4 @@
-import { deleteRefreshTokenByUserQuery } from "../models/refreshToken.model";
+import { deleteRefreshToken } from "../infrastructure/refreshToken.redis";
 import { getUserByEmployeeNumber } from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
 import { AuthError } from "../shared/error/AuthError";
@@ -28,10 +28,10 @@ export const userSignIn = async (employeeNumber: string, password: string) => {
   };
 };
 
-export const logout = async (userId: string) => {
+export const logout = async (userId: string, device: string) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError("User does not exist");
+    throw new ApiError("User does not exist", 404);
   }
-  await deleteRefreshTokenByUserQuery(user.id);
+  await deleteRefreshToken(user.id, device);
 };

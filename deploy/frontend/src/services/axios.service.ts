@@ -56,9 +56,7 @@ const handleTokenExpiredResponse = async (error: any) => {
       return {
         data: {
           success: false,
-          error: {
-            message: error.response.data.error.message,
-          },
+          message: error.response.data.message,
         },
       };
     } catch (refreshError) {
@@ -66,9 +64,7 @@ const handleTokenExpiredResponse = async (error: any) => {
       return {
         data: {
           success: false,
-          error: {
-            message: error.response.data.error.message,
-          },
+          message: error.response.data.message,
         },
       };
     }
@@ -77,19 +73,28 @@ const handleTokenExpiredResponse = async (error: any) => {
   return {
     data: {
       success: false,
-      error: { message: error.response.data.error.message },
+      message: error.response.data.message,
     },
   };
 };
 
 const handleUnauthorizedResponse = async (error: any) => {
-  if (error.response.data.error.tokenExpired) {
+  if (error.response.data.tokenExpired) {
     return handleTokenExpiredResponse(error);
+  }
+  if (error.response.data.tokenNotValid) {
+    await removeUser();
+    return {
+      data: {
+        success: false,
+        message: error.response.data.message,
+      },
+    };
   }
   return {
     data: {
       success: false,
-      error: { message: error.response.data.error.message },
+      message: error.response.data.message,
     },
   };
 };
@@ -98,7 +103,6 @@ axiosServer.interceptors.request.use(
   (reqConfig) => {
     // eslint-disable-next-line no-param-reassign
     reqConfig.headers.token = getFromLocalStorage('token');
-
     return reqConfig;
   },
   (error) => {
@@ -114,7 +118,6 @@ axiosServer.interceptors.response.use(
     if (error.response.status === 401) {
       return handleUnauthorizedResponse(error);
     }
-
     return error.response;
   }
 );

@@ -5,6 +5,7 @@ import { personController } from "../../controllers";
 import { validateRequestBody } from "../../middlewares/requestValidation";
 import {
   authorizeAdmin,
+  authorizeAdminOrSelf,
   authorizeModerator,
   authorizeSelf,
   verifyTokenMiddleware,
@@ -27,7 +28,11 @@ personRouter
 
 personRouter
   .route("/update/:id")
-  .put(validateRequestBody(UpdatePersonSchema), personController.updatePerson);
+  .put(
+    validateRequestBody(UpdatePersonSchema),
+    authorizeAdminOrSelf,
+    personController.updatePerson,
+  );
 
 personRouter.route("/").get(personController.getAllPersons);
 

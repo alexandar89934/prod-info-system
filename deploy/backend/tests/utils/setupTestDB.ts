@@ -4,7 +4,7 @@ import { Sequelize } from "sequelize";
 import { Umzug } from "umzug";
 import { config } from "../../src/config/config";
 import * as path from "path";
-import { pool } from "../../src";
+import { pool } from "../../src/infrastructure/db";
 
 const sequelize = new Sequelize(
   config.database.database_name,

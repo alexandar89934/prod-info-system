@@ -14,6 +14,23 @@ interface DataGridCustomToolbarProps {
   setSearch: React.Dispatch<React.SetStateAction<string>>;
 }
 
+// @ts-ignore
+interface CustomGridProps
+  extends React.ComponentProps<typeof GridToolbarColumnsButton> {
+  onPointerEnterCapture?: React.PointerEventHandler<any>;
+  onPointerLeaveCapture?: React.PointerEventHandler<any>;
+}
+
+const CustomGridToolbarColumnsButton: React.FC<CustomGridProps> = (props) => {
+  // @ts-ignore
+  return <GridToolbarColumnsButton {...props} />;
+};
+
+const CustomGridToolbarDensitySelector: React.FC<CustomGridProps> = (props) => {
+  // @ts-ignore
+  return <GridToolbarDensitySelector {...props} />;
+};
+
 const DataGridCustomToolbar: React.FC<DataGridCustomToolbarProps> = ({
   setSearch,
 }) => {
@@ -21,26 +38,18 @@ const DataGridCustomToolbar: React.FC<DataGridCustomToolbarProps> = ({
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      setSearch(searchInput); // Trigger search after delay
+      setSearch(searchInput);
     }, 1000);
 
-    return () => clearTimeout(delayDebounceFn); // Cleanup on unmount or change
+    return () => clearTimeout(delayDebounceFn);
   }, [searchInput, setSearch]);
 
   return (
     <GridToolbarContainer style={{ width: '100%', padding: 0 }}>
       <FlexBetween width="100%">
         <FlexBetween>
-          <GridToolbarColumnsButton
-            placeholder="Collumn selection"
-            onPointerEnterCapture={undefined}
-            onPointerLeaveCapture={undefined}
-          />
-          <GridToolbarDensitySelector
-            placeholder="Density selection"
-            onPointerEnterCapture={undefined}
-            onPointerLeaveCapture={undefined}
-          />
+          <CustomGridToolbarColumnsButton placeholder="Columns selection" />
+          <CustomGridToolbarDensitySelector placeholder="Density selection" />
           <GridToolbarExport />
         </FlexBetween>
         <TextField
@@ -53,11 +62,11 @@ const DataGridCustomToolbar: React.FC<DataGridCustomToolbarProps> = ({
             input: {
               endAdornment: (
                 <InputAdornment position="end">
-                  {searchInput && (
+                  {searchInput ? (
                     <IconButton onClick={() => setSearchInput('')}>
                       <Clear fontSize="small" />
                     </IconButton>
-                  )}
+                  ) : null}
                   <IconButton
                     onClick={() => setSearch(searchInput)}
                     disabled={!searchInput}

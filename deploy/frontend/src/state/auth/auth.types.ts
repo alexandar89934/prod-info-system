@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export type ErrorResponse = {
   code: number;
   message: string;
@@ -10,3 +12,10 @@ export type DefaultResponse = {
   error?: ErrorResponse;
   content?: never;
 };
+
+export const loginSchema = z.object({
+  employeeNumber: z.string().min(1, 'Employee Number is required'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export type LoginFormData = z.infer<typeof loginSchema>;

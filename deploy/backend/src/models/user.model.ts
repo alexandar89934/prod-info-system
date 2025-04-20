@@ -2,30 +2,28 @@ import { User } from "../service/user.service.types";
 
 import { callQuery } from "./utils/query";
 
-export const createUserQuery = async (
-  employeeNumber: string,
-  password: string,
-): Promise<any> => {
-  const sql = `
-        INSERT INTO "User" ("employeeNumber", "password", "createdAt", "updatedAt") 
-        VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *;
-    `;
-  return callQuery<any>(sql, [employeeNumber, password]);
-};
-
 export const getUserByEmployeeNumber = async (employeeNumber: string) => {
   const selectSQL = `
     SELECT u.*, p.name, p.picture
     FROM "User" u
-           JOIN "Person" p ON u."employeeNumber" = p."employeeNumber"
+           JOIN "Person" p ON u."personId" = p."id"
     WHERE u."employeeNumber" = CAST($1 AS INTEGER);
   `;
 
   const values = [employeeNumber];
+
   return callQuery<User>(selectSQL, values);
 };
 
-export const getUserRolesById = async (userId: string): Promise<number[]> => {
+export const getUserByIdQuery = async (id: string) => {
+  const selectSQL = `SELECT * FROM "User" WHERE "id" = $1;`;
+
+  const values = [id];
+
+  return callQuery<User>(selectSQL, values);
+};
+
+export const getUserRolesById = async (userId: string) => {
   const selectSQL = `
     SELECT "roleId"
     FROM "UserRoles"
@@ -34,15 +32,43 @@ export const getUserRolesById = async (userId: string): Promise<number[]> => {
 
   const values = [userId];
 
-  const result = await callQuery<{ roleId: number }[]>(selectSQL, values, true);
-
-  return result ? result.map((row) => row.roleId) : [];
+  return callQuery<{ roleId: number }[]>(selectSQL, values, true);
 };
 
-export const getUserByIdQuery = async (id: string) => {
-  const selectSQL = `SELECT * FROM "User" WHERE "id" = $1;`;
-  const values = [id];
-  return callQuery<User>(selectSQL, values);
+export const checkIfAdminQuery = async (
+  userId: string,
+): Promise<{ isAdmin: boolean }[]> => {
+  const selectSQL = `
+    SELECT EXISTS (
+      SELECT 1
+      FROM "UserRoles" ur
+             JOIN "Role" r ON ur."roleId" = r."id"
+      WHERE ur."userId" = $1
+        AND r."name" = 'Admin'
+    ) AS "isAdmin";
+  `;
+
+  const values = [userId];
+
+  return callQuery<{ isAdmin: boolean }[]>(selectSQL, values, true);
+};
+
+export const checkIfModeratorQuery = async (
+  userId: string,
+): Promise<{ isModerator: boolean }[]> => {
+  const selectSQL = `
+    SELECT EXISTS (
+      SELECT 1
+      FROM "UserRoles" ur
+             JOIN "Role" r ON ur."roleId" = r."id"
+      WHERE ur."userId" = $1
+        AND r."name" = 'Moderator'
+    ) AS "isModerator";
+  `;
+
+  const values = [userId];
+
+  return callQuery<{ isModerator: boolean }[]>(selectSQL, values, true);
 };
 
 export const updateUserPasswordQuery = async (

@@ -28,10 +28,7 @@ export const authorizeAdmin = async (
     if (!isAdmin) {
       res.status(httpStatus.UNAUTHORIZED).send({
         success: false,
-        error: {
-          code: httpStatus.UNAUTHORIZED,
-          message: "This action requires administrator role.",
-        },
+        message: "This action requires administrator role.",
       });
       return;
     }
@@ -57,10 +54,7 @@ export const authorizeSelf = async (
     if (person?.id === targetUserId) {
       return res.status(httpStatus.FORBIDDEN).json({
         success: false,
-        error: {
-          code: httpStatus.FORBIDDEN,
-          message: "You cannot perform this action on yourself.",
-        },
+        message: "You cannot perform this action on yourself.",
       });
     }
 
@@ -84,7 +78,10 @@ export const authorizeAdminOrSelf = async (
     const targetUser = await getUserByEmployeeNumber(targetEmployeeNumber);
     const { roles: newRoles } = req.body;
 
-    const currentUserRoles = await getUserRolesById(targetUser.id);
+    const userRoles = await getUserRolesById(targetUser.id);
+    const currentUserRoles = userRoles
+      ? userRoles.map((row) => row.roleId)
+      : [];
 
     const isChangingRoles =
       newRoles &&
@@ -95,10 +92,7 @@ export const authorizeAdminOrSelf = async (
       if (isChangingRoles && !(await checkIfAdmin(userId))) {
         return res.status(httpStatus.FORBIDDEN).json({
           success: false,
-          error: {
-            code: httpStatus.FORBIDDEN,
-            message: "You are not allowed to change roles.",
-          },
+          message: "You are not allowed to change roles.",
         });
       }
       return next();
@@ -109,10 +103,7 @@ export const authorizeAdminOrSelf = async (
     }
     return res.status(httpStatus.UNAUTHORIZED).json({
       success: false,
-      error: {
-        code: httpStatus.UNAUTHORIZED,
-        message: "You are not authorized to perform this action.",
-      },
+      message: "You are not authorized to perform this action.",
     });
   } catch (error) {
     return res.status(401).json({ message: error.message });
@@ -131,10 +122,7 @@ export const authorizeModerator = async (
     if (!isModerator) {
       res.status(httpStatus.UNAUTHORIZED).send({
         success: false,
-        error: {
-          code: httpStatus.UNAUTHORIZED,
-          message: "This action requires Moderator role.",
-        },
+        message: "This action requires Moderator role.",
       });
       return;
     }
@@ -153,10 +141,7 @@ export const verifyTokenMiddleware = async (
   if (!token) {
     res.status(httpStatus.FORBIDDEN).send({
       success: false,
-      error: {
-        code: httpStatus.FORBIDDEN,
-        message: "Token not provided",
-      },
+      message: "Token not provided, Please Login.",
     });
     return;
   }
@@ -167,10 +152,7 @@ export const verifyTokenMiddleware = async (
     if (!isValidUSer) {
       res.status(httpStatus.UNAUTHORIZED).send({
         success: false,
-        error: {
-          code: httpStatus.UNAUTHORIZED,
-          message: "Token not valid for user",
-        },
+        message: "Token not valid for user.",
       });
       return;
     }
@@ -179,23 +161,15 @@ export const verifyTokenMiddleware = async (
     if (ex.name === "TokenExpiredError") {
       res.status(httpStatus.UNAUTHORIZED).send({
         success: false,
-        error: {
-          code: httpStatus.UNAUTHORIZED,
-          message: "Token expired",
-          tokenExpired: true,
-        },
+        message: "Token expired, Please Login.",
+        tokenExpired: true,
       });
       return;
     }
-    res
-      .status(httpStatus.UNAUTHORIZED)
-      .clearCookie("refreshToken")
-      .send({
-        success: false,
-        error: {
-          code: httpStatus.UNAUTHORIZED,
-          message: "Refresh Token not valid",
-        },
-      });
+    res.status(httpStatus.UNAUTHORIZED).clearCookie("refreshToken").send({
+      success: false,
+      message: "Token not valid.",
+      tokenNotValid: true,
+    });
   }
 };

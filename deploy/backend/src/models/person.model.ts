@@ -1,24 +1,42 @@
+import { config } from "#config";
+
 import {
   CreatePersonData,
   EditPersonData,
 } from "../service/person.service.types";
+import { hashSensitiveData } from "../shared/utils/hash";
 
 import { callQuery } from "./utils/query";
 
 export const createPersonQuery = async (
   personData: CreatePersonData,
+  roles: number[],
 ): Promise<CreatePersonData> => {
+  const { password } = config.adminCredentials;
+  const hashedPassword = await hashSensitiveData(password);
+
   const insertSQL = `
+    WITH inserted_person AS (
     INSERT INTO "Person" (
-      "employeeNumber", "name", "address", "mail", "picture",
-      "additionalInfo", "documents","startDate","endDate", "createdAt", "updatedAt", "createdBy", "updatedBy"
+      "name", "address", "mail", "picture", "additionalInfo", "documents",
+      "startDate", "endDate", "createdAt", "updatedAt", "createdBy", "updatedBy"
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      RETURNING id AS "personId"
+      ),
+      inserted_user AS (
+    INSERT INTO "User" ("employeeNumber", "password", "createdAt", "updatedAt", "personId")
+    SELECT $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ip."personId"
+    FROM inserted_person ip
+      RETURNING id AS "userId", "personId"
+      )
+    INSERT INTO "UserRoles" ("userId", "roleId", "createdAt", "updatedAt")
+    SELECT iu."userId", unnest($15::int[]), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    FROM inserted_user iu
       RETURNING *;
   `;
 
   const values = [
-    personData.employeeNumber,
     personData.name,
     personData.address,
     personData.mail,
@@ -31,6 +49,9 @@ export const createPersonQuery = async (
     new Date(personData.updatedAt).toISOString(),
     personData.createdBy,
     personData.updatedBy,
+    personData.employeeNumber,
+    hashedPassword,
+    roles,
   ];
 
   return callQuery<CreatePersonData>(insertSQL, values);
@@ -40,24 +61,38 @@ export const updatePersonQuery = async (
   personData: EditPersonData,
 ): Promise<EditPersonData> => {
   const updateSQL = `
-    UPDATE "Person" 
-    SET 
-      "employeeNumber" = $2, 
-      "name" = $3, 
-      "address" = $4, 
-      "mail" = $5, 
-      "picture" = $6,
-      "additionalInfo" = $7,
-      "startDate" = $8,
-      "endDate" = $9,
-      "updatedAt" = $10,
-      "updatedBy" = $11
+    WITH updated_person AS (
+    UPDATE "Person"
+    SET
+      "name" = $2,
+      "address" = $3,
+      "mail" = $4,
+      "picture" = $5,
+      "additionalInfo" = $6,
+      "startDate" = $7,
+      "endDate" = $8,
+      "updatedAt" = $9,
+      "updatedBy" = $10
     WHERE "id" = $1
-    RETURNING *;
+      RETURNING "id"
+    ),
+    user_data AS (
+    SELECT id AS "userId" FROM "User" WHERE "employeeNumber" = $11
+      ),
+      deleted_roles AS (
+    DELETE FROM "UserRoles"
+    WHERE "userId" IN (SELECT "userId" FROM user_data)
+      ),
+      inserted_roles AS (
+    INSERT INTO "UserRoles" ("userId", "roleId", "createdAt", "updatedAt")
+    SELECT ud."userId", unnest($12::int[]), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+    FROM user_data ud
+      )
+    SELECT * FROM "Person" WHERE "id" = $1;
   `;
+
   const values = [
     personData.id,
-    personData.employeeNumber,
     personData.name,
     personData.address,
     personData.mail,
@@ -67,6 +102,8 @@ export const updatePersonQuery = async (
     personData.endDate || null,
     new Date(personData.updatedAt).toISOString(),
     personData.updatedBy,
+    personData.employeeNumber, // $11
+    personData.roles || [], // $12
   ];
 
   return callQuery<EditPersonData>(updateSQL, values);
@@ -74,86 +111,69 @@ export const updatePersonQuery = async (
 
 export const deletePersonQuery = async (id: string): Promise<boolean> => {
   const deleteSQL = `
+    WITH deleted_user AS (
+    DELETE FROM "User"
+    WHERE "personId" = $1
+      )
     DELETE FROM "Person"
     WHERE "id" = $1
       RETURNING *;
   `;
 
-  try {
-    const result = await callQuery<number>(deleteSQL, [id]);
-
-    return result > 0;
-  } catch (error) {
-    return false;
-  }
-};
-export const deleteUserQuery = async (id: string): Promise<boolean> => {
-  const deleteSQL = `
-    DELETE FROM "User"
-    WHERE "employeeNumber" = $1
-      RETURNING *;
-  `;
-
-  try {
-    const result = await callQuery<number>(deleteSQL, [id]);
-
-    return result > 0;
-  } catch (error) {
-    return false;
-  }
+  return callQuery<boolean>(deleteSQL, [id]);
 };
 
 export const getPersonByIdQuery = async (
   id: string,
 ): Promise<CreatePersonData | null> => {
   const selectSQL = `
-    SELECT * FROM "Person"
-    WHERE "id" = $1;
+    SELECT
+      p.*,
+      u."employeeNumber", u."id" AS "userId",
+      array_agg(r."id") AS "roles"
+    FROM "Person" p
+           LEFT JOIN "User" u ON u."personId" = p."id"
+           LEFT JOIN "UserRoles" ur ON ur."userId" = u."id"
+           LEFT JOIN "Role" r ON ur."roleId" = r."id"
+    WHERE p."id" = $1
+    GROUP BY p."id", u."id";
   `;
 
-  try {
-    return await callQuery<CreatePersonData>(selectSQL, [id]);
-  } catch (error) {
-    console.error("Error fetching person by ID:", error);
-    return null;
-  }
+  return callQuery<CreatePersonData>(selectSQL, [id]);
 };
 
 export const getPersonByEmployeeNumberQuery = async (
   employeeNumber: string,
-): Promise<CreatePersonData | null> => {
+): Promise<CreatePersonData> => {
   const selectSQL = `
-    SELECT * FROM "Person"
-    WHERE "employeeNumber" = $1;
-  `;
+  SELECT
+  p.*,
+      u."employeeNumber", u."id" AS "userId",
+      array_agg(r."id") AS "roles"  
+  FROM "Person" p
+  JOIN "User" u ON u."personId" = p."id"
+  LEFT JOIN "UserRoles" ur ON ur."userId" = u."id"
+  LEFT JOIN "Role" r ON ur."roleId" = r."id"
+  WHERE u."employeeNumber" = CAST($1 AS INTEGER)
+  GROUP BY p."id", u."id"; 
+      `;
 
-  try {
-    return await callQuery<CreatePersonData>(selectSQL, [employeeNumber]);
-  } catch (error) {
-    console.error("Error fetching person by ID:", error);
-    return null;
-  }
+  return callQuery<CreatePersonData>(selectSQL, [employeeNumber]);
 };
 
 export const checkEmployeeNumberExists = async (
   employeeNumber: number,
   excludeId?: string,
-): Promise<boolean> => {
+): Promise<{ count: number }> => {
   const selectSQL = `
-    SELECT COUNT(*) FROM "Person"
+    SELECT COUNT(*) FROM "User"
     WHERE "employeeNumber" = $1
-    ${excludeId ? `AND "id" <> $2` : ""};
+    ${excludeId ? `AND "personId" <> $2` : ""};
   `;
 
   const params = excludeId ? [employeeNumber, excludeId] : [employeeNumber];
 
-  try {
-    const result = await callQuery<{ count: number }>(selectSQL, params);
-    return result.count > 0; // Return true if employeeNumber exists
-  } catch (error) {
-    console.error("Error checking employee number:", error);
-    throw new Error("Database error while checking employee number");
-  }
+  return callQuery<{ count: number }>(selectSQL, params);
 };
 
 export const updatePersonDocumentsQuery = async (
@@ -167,18 +187,13 @@ export const updatePersonDocumentsQuery = async (
       RETURNING "documents";
   `;
 
-  try {
-    return await callQuery<[]>(updateSQL, [JSON.stringify(documents), id]);
-  } catch (error) {
-    console.error("Error updating person documents:", error);
-    return [];
-  }
+  return callQuery<[]>(updateSQL, [JSON.stringify(documents), id]);
 };
 
 export const updatePersonImagePathQuery = async (
   id: string,
   picture: string,
-): Promise<string | null> => {
+): Promise<{ picture: string }> => {
   const updateSQL = `
     UPDATE "Person"
     SET "picture" = $1
@@ -186,16 +201,7 @@ export const updatePersonImagePathQuery = async (
     RETURNING "picture";
   `;
 
-  try {
-    const result = await callQuery<{ picture: string }>(updateSQL, [
-      picture,
-      id,
-    ]);
-    return result.picture;
-  } catch (error) {
-    console.error("Error updating person image path:", error);
-    return null;
-  }
+  return callQuery<{ picture: string }>(updateSQL, [picture, id]);
 };
 
 export const getAllPersonsQuery = async (
@@ -222,28 +228,20 @@ export const getAllPersonsQuery = async (
 
   const selectSQL = `
     SELECT
-      "id", "employeeNumber", "name", "address", "mail", "picture",
-      "additionalInfo", "documents", "createdAt", "updatedAt", "createdBy", "updatedBy"
-    FROM "Person"
+      p."id", u."employeeNumber", p."name", p."address", p."mail", p."picture",
+      p."additionalInfo", p."startDate", p."documents", p."createdAt", p."updatedAt", p."createdBy", p."updatedBy"
+    FROM "Person" p
+           JOIN "User" u ON u."personId" = p."id"
     WHERE
-      "name" ILIKE $3 OR
-      "employeeNumber"::TEXT ILIKE $3 OR
-      "address" ILIKE $3 OR
-      "mail" ILIKE $3
+      p."name" ILIKE $3 OR
+      u."employeeNumber"::TEXT ILIKE $3 OR
+      p."address" ILIKE $3 OR
+      p."mail" ILIKE $3
     ORDER BY "${orderBy}" ${orderDirection}
-    LIMIT $1 OFFSET $2;
+      LIMIT $1 OFFSET $2;
   `;
 
   const values = [Number(limit), Number(offset), `%${search}%`];
 
-  const result = await callQuery<CreatePersonData[]>(selectSQL, values, true);
-
-  return result || [];
-};
-
-export const getTotalPersonsCountQuery = async (): Promise<number> => {
-  const countSQL = `SELECT COUNT(*) FROM "Person";`;
-
-  const result = await callQuery<{ count: string }>(countSQL, []);
-  return parseInt(result.count, 10);
+  return callQuery<CreatePersonData[]>(selectSQL, values, true) || [];
 };

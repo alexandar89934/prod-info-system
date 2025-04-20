@@ -15,7 +15,7 @@ export interface RoleState {
   success: string | null;
 }
 
-export interface AddPersonFormData {
+export interface PersonFormDataBase {
   profileImage: string;
   employeeNumber: number;
   name: string;
@@ -23,7 +23,6 @@ export interface AddPersonFormData {
   mail: string;
   picture: string;
   additionalInfo: string;
-  documents: DocumentData[];
   roles: number[];
   startDate: string;
   endDate: string;
@@ -33,24 +32,51 @@ export interface AddPersonFormData {
   updatedBy: string;
 }
 
-export interface EditPersonFormData {
-  profileImage: string;
-  id: string;
-  employeeNumber: number;
-  name: string;
-  address: string;
-  mail: string;
-  picture: string;
-  additionalInfo: string;
-  documents: number[];
-  roles: number[];
-  startDate: string;
-  endDate: string;
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: string;
-  updatedBy: string;
+export interface AddPersonFormData extends PersonFormDataBase {
+  documents: DocumentData[];
 }
+
+export interface EditPersonFormData extends PersonFormDataBase {
+  id: string;
+  documents: number[];
+}
+
+// export interface AddPersonFormData {
+//   profileImage: string;
+//   employeeNumber: number;
+//   name: string;
+//   address: string;
+//   mail: string;
+//   picture: string;
+//   additionalInfo: string;
+//   documents: DocumentData[];
+//   roles: number[];
+//   startDate: string;
+//   endDate: string;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   createdBy: string;
+//   updatedBy: string;
+// }
+//
+// export interface EditPersonFormData {
+//   profileImage: string;
+//   id: string;
+//   employeeNumber: number;
+//   name: string;
+//   address: string;
+//   mail: string;
+//   picture: string;
+//   additionalInfo: string;
+//   documents: number[];
+//   roles: number[];
+//   startDate: string;
+//   endDate: string;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   createdBy: string;
+//   updatedBy: string;
+// }
 
 export interface PersonState {
   persons: EditPersonFormData[];

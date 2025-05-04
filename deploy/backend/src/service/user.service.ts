@@ -38,14 +38,25 @@ export const checkIfUser = async (token: string) => {
       userId: string;
       iat: number;
     }>(token);
+
     const user = await getUserById(userId);
     if (!user) {
       return false;
     }
-    return !(
-      user.lastPasswordReset &&
-      new Date(user.lastPasswordReset) > new Date(iat * 1000)
-    );
+
+    if (user.lastPasswordReset) {
+      const tokenIssuedAt = new Date(iat * 1000);
+      const lastPasswordReset = new Date(user.lastPasswordReset);
+
+      if (lastPasswordReset > tokenIssuedAt) {
+        const timeDifference =
+          lastPasswordReset.getTime() - tokenIssuedAt.getTime();
+        if (timeDifference > 1000) {
+          return false;
+        }
+      }
+    }
+    return true;
   } catch (error) {
     logger.error(error);
     if (error instanceof ApiError) {

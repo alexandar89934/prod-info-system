@@ -10,50 +10,52 @@ import {
   Typography,
 } from '@mui/material';
 import Alert from '@mui/material/Alert';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { z } from 'zod';
 
-import { userLogin } from '@/state/auth/auth.actions.ts'; // Update to import the thunk
+import { getFromLocalStorage } from '@/services/local.storage.ts';
+import { resetPassword } from '@/state/auth/auth.actions.ts';
 import { clearNotifications } from '@/state/auth/auth.slice.ts';
-import { useAppDispatch, useAppSelector } from '@/state/hooks.ts';
-import { loginSchema } from '@/zodValidationSchemas/login.schema.ts';
+import { useAppDispatch } from '@/state/hooks.ts';
+import { RootState } from '@/state/store.ts';
+import { resetPasswordSchema } from '@/zodValidationSchemas/login.schema.ts';
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
-const Login: React.FC = () => {
-  const [showPassword, setShowPassword] = useState(false);
+const ResetPassword: React.FC = () => {
   const dispatch = useAppDispatch();
-  const router = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
-  const { loading, error, success, isLoggedIn } = useAppSelector(
-    (state) => state.reducer.auth
+  const { loading, error, success } = useSelector(
+    (state: RootState) => state.reducer.auth
   );
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
   });
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      router('/');
-    }
-  }, [isLoggedIn, router]);
+  const handleReset = async (data: ResetPasswordFormData) => {
+    const employeeNumber = getFromLocalStorage('employeeNumber');
+
+    const payload = {
+      ...data,
+      employeeNumber,
+    };
+
+    await dispatch(resetPassword(payload));
+  };
 
   useEffect(() => {
     return () => {
       dispatch(clearNotifications());
     };
   }, [dispatch]);
-
-  const handleLogin = async (data: LoginFormData) => {
-    dispatch(userLogin(data));
-  };
 
   return (
     <Box
@@ -74,8 +76,9 @@ const Login: React.FC = () => {
         boxShadow={1}
       >
         <Typography variant="h4" component="h1" align="center" mb={2}>
-          Login
+          Reset Password
         </Typography>
+
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -86,25 +89,39 @@ const Login: React.FC = () => {
             {success}
           </Alert>
         )}
-        <form onSubmit={handleSubmit(handleLogin)}>
+
+        <form onSubmit={handleSubmit(handleReset)}>
           <TextField
             fullWidth
-            label="Employee Number"
-            variant="outlined"
-            margin="normal"
-            {...register('employeeNumber')}
-            error={!!errors.employeeNumber}
-            helperText={errors.employeeNumber?.message}
-          />
-          <TextField
-            fullWidth
-            label="Password"
+            label="Old Password"
             type={showPassword ? 'text' : 'password'}
             variant="outlined"
             margin="normal"
-            {...register('password')}
-            error={!!errors.password}
-            helperText={errors.password?.message}
+            {...register('oldPassword')}
+            error={!!errors.oldPassword}
+            helperText={errors.oldPassword?.message}
+          />
+
+          <TextField
+            fullWidth
+            label="New Password"
+            type={showPassword ? 'text' : 'password'}
+            variant="outlined"
+            margin="normal"
+            {...register('newPassword')}
+            error={!!errors.newPassword}
+            helperText={errors.newPassword?.message}
+          />
+
+          <TextField
+            fullWidth
+            label="Confirm New Password"
+            type={showPassword ? 'text' : 'password'}
+            variant="outlined"
+            margin="normal"
+            {...register('confirmPassword')}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword?.message}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -119,6 +136,7 @@ const Login: React.FC = () => {
               ),
             }}
           />
+
           <Button
             fullWidth
             variant="contained"
@@ -130,7 +148,7 @@ const Login: React.FC = () => {
               loading ? <CircularProgress size={20} color="inherit" /> : null
             }
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Updating...' : 'Reset Password'}
           </Button>
         </form>
       </Box>
@@ -138,4 +156,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;

@@ -39,6 +39,58 @@ export const userSignIn = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+export const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const { oldPassword, newPassword, confirmPassword, employeeNumber } =
+    req.body;
+
+  if (!employeeNumber) {
+    return res.status(httpStatus.UNAUTHORIZED).send({
+      success: false,
+      error: { message: "Unauthorized access" },
+    });
+  }
+
+  await signInService.resetPassword(
+    employeeNumber,
+    oldPassword,
+    newPassword,
+    confirmPassword,
+  );
+
+  const signInData = await signInService.userSignIn(
+    employeeNumber,
+    newPassword,
+  );
+
+  const { refreshValidity = 10 * 60 * 1000 } = config.jwt;
+  const refreshTokenData = await refreshTokenService.createRefreshToken(
+    signInData.user.id,
+    req.header("user-agent") as string,
+  );
+
+  res.clearCookie("refreshToken");
+
+  return res
+    .status(httpStatus.OK)
+    .header("token", signInData.token)
+    .cookie("refreshToken", refreshTokenData.refreshToken, {
+      maxAge: Number(refreshValidity) * 1000,
+      secure: false,
+      httpOnly: true,
+      sameSite: "lax",
+    })
+    .send({
+      success: true,
+      message: "Password has been successfully updated",
+      content: {
+        name: signInData.user.name,
+        id: signInData.user.id,
+        picture: signInData.user.picture,
+        employeeNumber: signInData.user.employeeNumber,
+      },
+    });
+});
+
 export const renewAccessToken = catchAsync(
   async (req: Request, res: Response) => {
     const { refreshValidity = 10 * 60 * 1000 } = config.jwt;

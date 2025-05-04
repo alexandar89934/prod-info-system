@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import profile from '@/assets/profile.jpeg';
 import PersonForm from '@/components/PersonForm.tsx';
 import { getEmployeeNumber, getName } from '@/state/auth/auth.selectors.ts';
-import { setProfilePicture } from '@/state/auth/auth.slice.ts';
 import {
   fetchPersonByEmployeeNumber,
   updatePerson,
@@ -103,7 +102,6 @@ const ProfilePage = () => {
         createdBy: person.createdBy,
         updatedBy: getName(),
       });
-      setProfilePicture(person.picture);
     }
   }, [person, employeeNumber, reset]);
 
@@ -139,7 +137,6 @@ const ProfilePage = () => {
       imagePath={profilePicture}
       onImageUpload={(uploadedPath: string) => {
         localStorage.setItem('profilePicture', uploadedPath);
-        dispatch(setProfilePicture({ profilePicture: uploadedPath }));
         setValue('picture', uploadedPath);
       }}
       personId={id}

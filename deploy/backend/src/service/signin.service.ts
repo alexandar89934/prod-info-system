@@ -1,8 +1,11 @@
 import { deleteRefreshToken } from "../infrastructure/refreshToken.redis";
-import { getUserByEmployeeNumber } from "../models/user.model";
+import {
+  getUserByEmployeeNumber,
+  updateUserPasswordQuery,
+} from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
 import { AuthError } from "../shared/error/AuthError";
-import { compareHashedData } from "../shared/utils/hash";
+import { compareHashedData, hashSensitiveData } from "../shared/utils/hash";
 import { encodeJWT } from "../shared/utils/token";
 
 import { getUserById } from "./user.service";
@@ -25,6 +28,35 @@ export const userSignIn = async (employeeNumber: string, password: string) => {
       userId: user.id,
     }),
     user,
+  };
+};
+
+export const resetPassword = async (
+  employeeNumber: string,
+  oldPassword: string,
+  newPassword: string,
+  confirmPassword: string,
+) => {
+  const user = await getUserByEmployeeNumber(employeeNumber);
+  if (!user) {
+    throw new AuthError("User not found");
+  }
+
+  const isMatch = compareHashedData(oldPassword, user.password);
+  if (!isMatch) {
+    throw new AuthError("Old password is incorrect");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new AuthError("New passwords do not match");
+  }
+
+  const hashedNewPassword = await hashSensitiveData(newPassword);
+  await updateUserPasswordQuery(user.id, hashedNewPassword);
+
+  return {
+    success: true,
+    message: "Password updated successfully",
   };
 };
 

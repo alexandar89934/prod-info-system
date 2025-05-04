@@ -4,7 +4,7 @@ import { redisClient } from "./redis";
 
 const { refreshValidity } = config.jwt;
 
-const getKey = (userId: string, device: string) =>
+export const getKey = (userId: string, device: string) =>
   `refresh:${userId}:${device}`;
 
 export const setRefreshToken = async (

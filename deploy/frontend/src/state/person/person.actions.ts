@@ -120,6 +120,29 @@ export const updatePerson = createAsyncThunk(
   }
 );
 
+export const updatePassword = createAsyncThunk(
+  'auth/updatePassword',
+  async (
+    { oldPassword, newPassword }: { oldPassword: string; newPassword: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await axiosServer.put('/auth/password', {
+        oldPassword,
+        newPassword,
+      });
+      if (!response.data.success) {
+        return rejectWithValue(
+          response.data.message || 'Failed to update password'
+        );
+      }
+      return response.data.message;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 export const deletePerson = createAsyncThunk(
   'person/deletePerson',
   async (personId: string, { rejectWithValue }) => {

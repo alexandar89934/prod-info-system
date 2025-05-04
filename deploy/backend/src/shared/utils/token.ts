@@ -20,7 +20,10 @@ export const encodeJWTRefresh = <T extends object>(
   objectToEncode: T,
 ): string => {
   const { secret, refreshValidity } = config.jwt;
-  const options: SignOptions = { expiresIn: Number(refreshValidity) };
+  const options: SignOptions = {
+    expiresIn: Number(refreshValidity),
+    jwtid: crypto.randomUUID(),
+  };
 
   return sign(objectToEncode, secret, options);
 };

@@ -145,7 +145,6 @@ export const verifyTokenMiddleware = async (
     });
     return;
   }
-
   try {
     jwt.verify(token, config.jwt.secret);
     const isValidUSer = await checkIfUser(token);

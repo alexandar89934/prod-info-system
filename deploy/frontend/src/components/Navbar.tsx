@@ -29,6 +29,7 @@ import FlexBetween from './FlexBetween.tsx';
 import { logout } from '@/state/auth/auth.actions.ts';
 import { getIsLoggedIn, getName } from '@/state/auth/auth.selectors.ts';
 import { getProfilePicture } from '@/state/auth/auth.selectors.ts';
+import type { AppDispatch } from '@/state/store';
 import { setMode } from '@/state/theme/theme.slice.ts';
 
 type NavbarProps = {
@@ -44,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({
   isNonMobile,
   isTablet,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const isMobile = !isNonMobile;
   const isMobileOrTablet = isMobile || isTablet;
@@ -61,11 +62,15 @@ const Navbar: React.FC<NavbarProps> = ({
     setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   const onLogoutClick = () => {
-    logout({ dispatch });
+    dispatch(logout());
     navigate('/');
   };
+
   const handleProfileClick = () => {
     navigate('/profilePage');
+  };
+  const onChangePassword = () => {
+    navigate('/passwordReset');
   };
   const toggleSearch = () => setSearchOpen(!searchOpen);
 
@@ -243,6 +248,9 @@ const Navbar: React.FC<NavbarProps> = ({
                         </MenuItem>
                       </>
                     ) : null}
+                    <MenuItem onClick={onChangePassword}>
+                      Change Password
+                    </MenuItem>
                     <MenuItem onClick={onLogoutClick}>Log Out</MenuItem>
                   </Menu>
                 </FlexBetween>

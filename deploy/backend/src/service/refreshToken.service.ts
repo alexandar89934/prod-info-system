@@ -15,6 +15,7 @@ import { RefreshToken } from "./refreshToken.service.model";
 
 export const createRefreshToken = async (userId: string, device: string) => {
   try {
+    await deleteRefreshToken(userId, device);
     const refreshToken = encodeJWTRefresh<{ userId: string; device: string }>({
       userId,
       device,

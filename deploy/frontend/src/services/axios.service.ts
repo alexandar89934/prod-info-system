@@ -3,15 +3,12 @@ import axios from 'axios';
 import { config } from '../config/config.ts';
 
 import { getFromLocalStorage } from '@/services/local.storage.ts';
-import { logoutState } from '@/state/auth/auth.slice.ts';
-import store from '@/state/store.ts';
 
 const removeUser = async () => {
   localStorage.removeItem('token');
   localStorage.removeItem('name');
   localStorage.removeItem('employeeNumber');
   localStorage.removeItem('profilePicture');
-  store.dispatch(logoutState());
 };
 const axiosServer = axios.create({
   baseURL: config.backend.apiUrl,

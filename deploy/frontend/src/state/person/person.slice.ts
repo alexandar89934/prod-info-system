@@ -12,6 +12,7 @@ import {
   fetchPersonByEmployeeNumber,
   fetchPersonById,
   fetchPersons,
+  updatePassword,
   updatePerson,
   updatePersonsImagePath,
   uploadFile,
@@ -130,6 +131,18 @@ const personSlice = createSlice({
         }
       })
       .addCase(updatePerson.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updatePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = action.payload;
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

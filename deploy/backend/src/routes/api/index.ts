@@ -3,6 +3,8 @@ import express, { Router } from "express";
 import { personRouter } from "./person.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
+import { workplaceRouter } from "./workplace.route";
+import { workplaceCategoryRouter } from "./workplaceCategory.route";
 
 export const apiRouter = express.Router();
 
@@ -18,6 +20,14 @@ const defaultRoutes = [
   {
     path: "/role",
     route: roleRouter,
+  },
+  {
+    path: "/workplace",
+    route: workplaceRouter,
+  },
+  {
+    path: "/workplace-category",
+    route: workplaceCategoryRouter,
   },
 ];
 

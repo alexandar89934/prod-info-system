@@ -9,6 +9,7 @@ import {
   getAllPersonsQuery,
   getPersonByEmployeeNumberQuery,
   getPersonByIdQuery,
+  getTotalPersonsCountQuery,
   updatePersonDocumentsQuery,
   updatePersonImagePathQuery,
   updatePersonQuery,
@@ -36,7 +37,11 @@ export const createPerson = async (
         httpStatus.CONFLICT,
       );
     }
-    return await createPersonQuery(data, data.roles ?? []);
+    return await createPersonQuery(
+      data,
+      data.roles ?? [],
+      data.workplaces ?? [],
+    );
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -189,13 +194,7 @@ export const updateImagePath: (
   }
 };
 
-export const getAllPersons: (
-  limit: number,
-  offset: number,
-  search: string,
-  sortField: string,
-  sortOrder: string,
-) => Promise<GetAllPersonsData> = async (
+export const getAllPersons = async (
   limit: number,
   offset: number,
   search: string,
@@ -210,7 +209,8 @@ export const getAllPersons: (
       sortField,
       sortOrder,
     );
-    const totalPersons = persons.length;
+
+    const totalPersons = await getTotalPersonsCountQuery(search);
     const currentPage = Math.floor(offset / limit);
     const totalPages = Math.ceil(totalPersons / limit);
 

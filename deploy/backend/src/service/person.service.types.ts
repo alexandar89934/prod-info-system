@@ -8,6 +8,7 @@ type PersonData = {
   additionalInfo?: string;
   documents?: Record<string, unknown>;
   roles?: number[];
+  workplaces?: number[];
   startDate: Date;
   endDate?: Date;
   createdAt: Date;

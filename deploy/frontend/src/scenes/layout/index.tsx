@@ -3,9 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 
-import Navbar from '../../components/Navbar.tsx';
-import Sidebar from '../../components/Sidebar.tsx';
-
+import Navbar from '@/reusableComponents/Navbar.tsx';
+import Sidebar from '@/reusableComponents/Sidebar.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 
 type LayoutProps = object;

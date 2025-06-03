@@ -74,8 +74,8 @@ export const authorizeAdminOrSelf = async (
     res.locals.user = tryExtractTokenFromHeaders(req);
     const { userId } = res.locals.user;
     const user = await getUserById(userId);
-    const { employeeNumber: targetEmployeeNumber } = req.body; // Target employee number to be updated
-    const targetUser = await getUserByEmployeeNumber(targetEmployeeNumber);
+    const { employeeNumber: targetEmployeeNumber } = req.body;
+    const targetUser = await getUserByEmployeeNumber(user.employeeNumber);
     const { roles: newRoles } = req.body;
 
     const userRoles = await getUserRolesById(targetUser.id);

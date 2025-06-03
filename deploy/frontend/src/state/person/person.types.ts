@@ -24,26 +24,20 @@ export interface PersonFormDataBase {
   picture: string;
   additionalInfo: string;
   roles: number[];
-  startDate: string;
-  endDate: string;
+  workplaces: number[];
+  startDate: string | Date | null;
+  endDate: string | Date | null;
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
   updatedBy: string;
-}
-
-export interface AddPersonFormData extends PersonFormDataBase {
-  documents: DocumentData[];
-}
-
-export interface EditPersonFormData extends PersonFormDataBase {
-  id: string;
-  documents: number[];
+  id?: string;
+  documents: DocumentData[] | number[];
 }
 
 export interface PersonState {
-  persons: EditPersonFormData[];
-  person: AddPersonFormData;
+  persons: PersonFormDataBase[];
+  person: PersonFormDataBase;
   total: number;
   loading: boolean;
   error: string | null;

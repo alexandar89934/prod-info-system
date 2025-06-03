@@ -2,14 +2,14 @@ import { Box, FormControl, Button } from '@mui/material';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import profile from './../assets/profile.jpeg';
+import profile from '../../../assets/profile.jpeg';
 
 import {
   uploadImage,
   updatePersonsImagePath,
   deleteFileNewPerson,
-} from '@/state/person/person.actions';
-import { AppDispatch } from '@/state/store';
+} from '@/state/person/person.actions.ts';
+import { AppDispatch } from '@/state/store.ts';
 
 interface ProfileImageUploadProps {
   profilePicture: string;

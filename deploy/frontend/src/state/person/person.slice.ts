@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { PersonState } from './person.types';
+import { DocumentData, PersonState } from './person.types';
 
 import profileImage from '@/assets/profile.jpeg';
 import { getName } from '@/state/auth/auth.selectors.ts';
@@ -31,6 +31,7 @@ const initialPerson: PersonState['person'] = {
   startDate: '',
   endDate: '',
   roles: [],
+  workplaces: [],
   createdAt: null,
   updatedAt: null,
   createdBy: getName(),
@@ -225,9 +226,20 @@ const personSlice = createSlice({
       })
       .addCase(deleteFileNewPerson.fulfilled, (state, action) => {
         state.loading = false;
-        state.person.documents = state.person.documents.filter(
-          (doc) => doc.path !== action.payload
-        );
+
+        const docs = state.person.documents;
+
+        if (
+          Array.isArray(docs) &&
+          docs.length > 0 &&
+          typeof docs[0] === 'object' &&
+          docs[0] !== null &&
+          'path' in docs[0]
+        ) {
+          state.person.documents = (docs as DocumentData[]).filter(
+            (doc) => doc.path !== action.payload
+          );
+        }
       })
       .addCase(deleteFileNewPerson.rejected, (state, action) => {
         state.loading = false;

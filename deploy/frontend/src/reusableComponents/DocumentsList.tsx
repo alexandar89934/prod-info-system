@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import DocumentTableHead from './DocumentTableHead';
 
-import ConfirmDialog from '@/components/ConfirmDialog.tsx';
+import ConfirmDialog from '@/reusableComponents/ConfirmDialog.tsx';
 import {
   deleteFile,
   deleteFileNewPerson,
@@ -117,7 +117,6 @@ const DocumentList: React.FC<DocumentListProps> = ({
       }}
     >
       {isMobile ? (
-        // Mobile layout - list view
         <Box
           sx={{
             border: '1px solid #ccc',
@@ -186,7 +185,6 @@ const DocumentList: React.FC<DocumentListProps> = ({
           )}
         </Box>
       ) : (
-        // Desktop layout - table view
         <TableContainer
           sx={{
             flexGrow: 1,

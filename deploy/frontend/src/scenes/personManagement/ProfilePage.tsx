@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import profile from '@/assets/profile.jpeg';
-import PersonForm from '@/components/PersonForm.tsx';
+import PersonForm from '@/scenes/personManagement/relatedComponents/PersonForm.tsx';
 import { getEmployeeNumber, getName } from '@/state/auth/auth.selectors.ts';
 import {
   fetchPersonByEmployeeNumber,
@@ -21,7 +21,7 @@ import {
   clearNotifications,
   clearPerson,
 } from '@/state/person/person.slice.ts';
-import { EditPersonFormData } from '@/state/person/person.types.ts';
+import { PersonFormDataBase } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
@@ -29,7 +29,7 @@ const ProfilePage = () => {
   const employeeNumber = getEmployeeNumber();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const person = useSelector(selectPerson) as unknown as EditPersonFormData;
+  const person = useSelector(selectPerson) as unknown as PersonFormDataBase;
   const profilePicture = person?.picture ?? profile;
   const id = person?.id;
   const error = useSelector(selectError);
@@ -49,13 +49,12 @@ const ProfilePage = () => {
   }, [error, success, dispatch]);
 
   const {
-    register,
     setValue,
     handleSubmit,
     control,
     reset,
     formState: { errors },
-  } = useForm<EditPersonFormData>({
+  } = useForm<PersonFormDataBase>({
     resolver: zodResolver(personSchema),
     defaultValues: {
       id: '',
@@ -68,6 +67,7 @@ const ProfilePage = () => {
       startDate: '',
       endDate: '',
       roles: [],
+      workplaces: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: getName(),
@@ -97,6 +97,7 @@ const ProfilePage = () => {
           ? new Date(person.endDate).toISOString().split('T')[0]
           : '',
         roles: person.roles || [],
+        workplaces: person.workplaces || [],
         createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,
@@ -105,7 +106,7 @@ const ProfilePage = () => {
     }
   }, [person, employeeNumber, reset]);
 
-  const onSubmit = async (data: EditPersonFormData) => {
+  const onSubmit = async (data: PersonFormDataBase) => {
     const response = await dispatch(updatePerson({ ...data, id })).unwrap();
     if (!response.success) {
       return;
@@ -126,7 +127,6 @@ const ProfilePage = () => {
       title="Edit Profile"
       control={control}
       errors={errors}
-      register={register}
       onSubmit={onSubmit}
       handleSubmit={handleSubmit}
       loading={loading}

@@ -1,20 +1,20 @@
 services:
-  postgres-webui:
-    image: dpage/pgadmin4
-    container_name: pg-webui
-    restart: always
-    ports:
-      - "8888:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: dev@2c-solution.net
-      PGADMIN_DEFAULT_PASSWORD: dev@2c-solution.net
-      GUNICORN_ACCESS_LOGFILE: '/dev/null'
-    logging:
-      driver: none
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    networks:
-      - local_net
+#  postgres-webui:
+#    image: dpage/pgadmin4
+#    container_name: pg-webui
+#    restart: always
+#    ports:
+#      - "8888:80"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: dev@2c-solution.net
+#      PGADMIN_DEFAULT_PASSWORD: dev@2c-solution.net
+#      GUNICORN_ACCESS_LOGFILE: '/dev/null'
+#    logging:
+#      driver: none
+#    volumes:
+#      - pgadmin-data:/var/lib/pgadmin
+#    networks:
+#      - local_net
   database:
     image: postgres:14.2-alpine
     container_name: postgres
@@ -96,7 +96,7 @@ services:
 
 volumes:
   postgres-data: {}
-  pgadmin-data: {}
+#  pgadmin-data: {}
   redis_data: {}
 
 networks:

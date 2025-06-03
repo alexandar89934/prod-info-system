@@ -15,6 +15,12 @@ import AddPerson from '@/scenes/personManagement/AddPerson.tsx';
 import EditPerson from '@/scenes/personManagement/EditPerson.tsx';
 import ProfilePage from '@/scenes/personManagement/ProfilePage.tsx';
 import ResetPasswordPage from '@/scenes/personManagement/ResetPasswordPage.tsx';
+import WorkplaceCategoryList from '@/scenes/workplaceCategoryManagement';
+import AddWorkplaceCategory from '@/scenes/workplaceCategoryManagement/AddWorkplaceCategory.tsx';
+import EditWorkplaceCategory from '@/scenes/workplaceCategoryManagement/EditWorkplaceCategory.tsx';
+import WorkplaceManagement from '@/scenes/workplaceManagement';
+import AddWorkplace from '@/scenes/workplaceManagement/AddWorkplace.tsx';
+import EditWorkplace from '@/scenes/workplaceManagement/EditWorkplace.tsx';
 import { RootState } from '@/state/store.ts';
 import { selectThemeMode } from '@/state/theme/theme.selectors.ts';
 import { ThemeMode } from '@/state/theme/theme.types.ts';
@@ -39,6 +45,21 @@ function App() {
               <Route path="/editPerson/:id" element={<EditPerson />} />
               <Route path="/profilePage" element={<ProfilePage />} />
               <Route path="/passwordReset" element={<ResetPasswordPage />} />
+              <Route path="/workplace" element={<WorkplaceManagement />} />
+              <Route path="/addWorkplace" element={<AddWorkplace />} />
+              <Route path="/editWorkplace/:id" element={<EditWorkplace />} />
+              <Route
+                path="/workplaceCategories"
+                element={<WorkplaceCategoryList />}
+              />
+              <Route
+                path="/addWorkplaceCategory"
+                element={<AddWorkplaceCategory />}
+              />
+              <Route
+                path="/editWorkplaceCategory/:id"
+                element={<EditWorkplaceCategory />}
+              />
             </Route>
           </Routes>
         </ThemeProvider>
@@ -46,5 +67,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

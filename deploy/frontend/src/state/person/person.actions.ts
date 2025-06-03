@@ -1,12 +1,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import { EditPersonFormData, AddPersonFormData } from './person.types';
+import { PersonFormDataBase } from './person.types';
 import { mimeTypes } from './person.types';
 
 import axiosServer from '@/services/axios.service.ts';
 
 export const fetchPersons = createAsyncThunk<
-  { content: { persons: EditPersonFormData[]; pagination: { total: number } } },
+  { content: { persons: PersonFormDataBase[]; pagination: { total: number } } },
   {
     page: number;
     limit: number;
@@ -81,7 +81,7 @@ export const fetchPersonByEmployeeNumber = createAsyncThunk(
 
 export const addPerson = createAsyncThunk(
   'person/addPerson',
-  async (person: AddPersonFormData, { rejectWithValue }) => {
+  async (person: PersonFormDataBase, { rejectWithValue }) => {
     try {
       const response = await axiosServer.post(`/person/create`, person);
       if (!response.data.success) {
@@ -100,7 +100,7 @@ export const addPerson = createAsyncThunk(
 
 export const updatePerson = createAsyncThunk(
   'person/updatePerson',
-  async (person: EditPersonFormData, { rejectWithValue }) => {
+  async (person: PersonFormDataBase, { rejectWithValue }) => {
     try {
       const response = await axiosServer.put(
         `/person/update/${person.id}`,

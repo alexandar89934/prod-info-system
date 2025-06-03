@@ -4,21 +4,25 @@ import { FieldError } from 'react-hook-form';
 interface DateFieldProps {
   id: string;
   label: string;
-  register: any;
+  value: string | number | Date | number[];
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error?: FieldError;
   minWidth?: string;
+  fullWidth?: boolean;
 }
 
 export const DateField = ({
   id,
   label,
-  register,
+  value,
+  onChange,
   error,
   minWidth = '150px',
+  fullWidth = true,
 }: DateFieldProps) => {
   return (
     <FormControl
-      fullWidth
+      fullWidth={fullWidth}
       margin="normal"
       sx={{
         display: 'flex',
@@ -40,13 +44,13 @@ export const DateField = ({
       </InputLabel>
       <TextField
         id={id}
+        type="date"
+        value={value}
+        onChange={onChange}
         variant="outlined"
-        {...register(id)}
         error={!!error}
         helperText={error?.message}
-        sx={{ flexGrow: 1 }}
-        type="date"
-        fullWidth
+        fullWidth={fullWidth}
         InputLabelProps={{
           shrink: true,
         }}

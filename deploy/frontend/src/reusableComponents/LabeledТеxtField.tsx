@@ -1,30 +1,33 @@
-import { TextField, InputLabel, FormControl } from '@mui/material';
+import { TextField, InputLabel, FormControl, useTheme } from '@mui/material';
 import { FieldError } from 'react-hook-form';
 
 interface FormFieldProps {
   id: string;
   label: string;
-  type?: 'text' | 'number' | 'email' | 'password';
-  register: any;
+  type?: 'number' | 'text' | 'email' | 'password' | 'string';
+  value: string | number;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error?: FieldError;
   multiline?: boolean;
   rows?: number;
   minWidth?: string;
   fullWidth?: boolean;
-  valueAsNumber?: boolean;
 }
 
 export const LabeledXtField = ({
   id,
   label,
   type = 'text',
-  register,
+  value,
+  onChange,
   error,
   multiline = false,
   rows = 1,
   minWidth = '150px',
   fullWidth = true,
 }: FormFieldProps) => {
+  const theme = useTheme();
+
   return (
     <FormControl
       fullWidth={fullWidth}
@@ -50,19 +53,31 @@ export const LabeledXtField = ({
       <TextField
         id={id}
         type={type}
+        value={value}
+        onChange={onChange}
         variant="outlined"
-        {...register(
-          id,
-          type === 'number' ? { valueAsNumber: true } : undefined
-        )}
         error={!!error}
         helperText={error?.message}
-        sx={{
-          flexGrow: 1,
-        }}
         multiline={multiline}
         rows={rows}
         fullWidth={fullWidth}
+        sx={{
+          '& textarea': {
+            maxHeight: '25vh',
+            overflowY: 'auto',
+            scrollbarWidth: 'thin',
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: theme.palette.primary.main,
+              borderRadius: '4px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: theme.palette.background.default,
+            },
+          },
+        }}
       />
     </FormControl>
   );

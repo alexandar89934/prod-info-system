@@ -6,7 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import profile from '../../assets/profile.jpeg';
 
-import PersonForm from '@/components/PersonForm.tsx';
+import PersonForm from '@/scenes/personManagement/relatedComponents/PersonForm.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import {
   fetchPersonById,
@@ -22,7 +22,7 @@ import {
   clearNotifications,
   clearPerson,
 } from '@/state/person/person.slice.ts';
-import { EditPersonFormData } from '@/state/person/person.types.ts';
+import { PersonFormDataBase } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
@@ -51,13 +51,12 @@ const EditPerson = () => {
   }, [error, success, dispatch, navigate]);
 
   const {
-    register,
     setValue,
     handleSubmit,
     control,
     reset,
     formState: { errors },
-  } = useForm<EditPersonFormData>({
+  } = useForm<PersonFormDataBase>({
     resolver: zodResolver(personSchema),
     defaultValues: {
       id: '',
@@ -70,6 +69,7 @@ const EditPerson = () => {
       startDate: '',
       endDate: '',
       roles: [],
+      workplaces: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: getName(),
@@ -99,6 +99,7 @@ const EditPerson = () => {
           ? new Date(person.endDate).toISOString().split('T')[0]
           : '',
         roles: person.roles || [],
+        workplaces: person.workplaces || [],
         createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,
@@ -107,7 +108,7 @@ const EditPerson = () => {
     }
   }, [person, id, reset]);
 
-  const onSubmit = async (data: EditPersonFormData) => {
+  const onSubmit = async (data: PersonFormDataBase) => {
     await dispatch(updatePerson({ ...data, id })).unwrap();
     setTimeout(() => {
       navigate('/person');
@@ -127,7 +128,6 @@ const EditPerson = () => {
       title="Edit Person"
       control={control}
       errors={errors}
-      register={register}
       onSubmit={onSubmit}
       handleSubmit={handleSubmit}
       loading={loading}

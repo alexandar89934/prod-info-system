@@ -14,6 +14,7 @@ export const personSchema = z
     picture: z.string().optional(),
     documents: z.array(z.any()).optional().default([]),
     roles: z.array(z.any()).optional().default([]),
+    workplaces: z.array(z.any()).optional().default([]),
     startDate: z.string().min(1, 'Start date is required'),
     endDate: z.string().optional(),
     createdAt: z.date().default(() => new Date()),

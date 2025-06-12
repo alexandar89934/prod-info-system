@@ -1,0 +1,59 @@
+services:
+  database:
+    image: postgres:14.2-alpine
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      PGUSER: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: database
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: 'exit 0'
+    networks:
+      - local_net
+    command: ["postgres", "-c", "max_connections=200"]
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - local_net
+    volumes:
+      - redis_data:/data
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: deploy/tools/docker/backend/Dockerfile.test
+    image: cdashboard-backend
+    entrypoint: /backend/entrypoint.test.sh
+    env_file:
+      - deploy/tools/env.tests/backend.test.env
+    ports:
+      - 3000:3000
+    depends_on:
+      database:
+        condition: service_started
+    volumes:
+      - ./deploy/backend/node_modules:/backend/node_modules
+      - ./deploy/backend/src:/backend/src
+      - ./deploy/backend/migrations:/backend/migrations
+    networks:
+      - local_net
+
+
+volumes:
+  postgres-data: {}
+  redis_data: {}
+
+
+networks:
+  local_net:
+    driver: bridge

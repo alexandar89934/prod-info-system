@@ -1,5 +1,6 @@
 import { setupTestDB } from "./setupTestDB";
 
 module.exports = async () => {
-    await setupTestDB();
+  console.log("Setting up test DB");
+  await setupTestDB();
 };

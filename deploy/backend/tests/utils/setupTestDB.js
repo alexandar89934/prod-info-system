@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.teardownTestDB = exports.setupTestDB = void 0;
+exports.teardownTestDB = exports.setupTestDB = exports.umzug = void 0;
 // @ts-ignore
 var http_status_1 = require("http-status");
 var sequelize_1 = require("sequelize");
@@ -44,13 +44,30 @@ var umzug_1 = require("umzug");
 var config_1 = require("../../src/config/config");
 var path = require("path");
 var db_1 = require("../../src/infrastructure/db");
+console.log(config_1.config);
 var sequelize = new sequelize_1.Sequelize(config_1.config.database.database_name, config_1.config.database.options.user, config_1.config.database.options.pass, {
     host: config_1.config.database.connection_url,
     dialect: "postgres",
 });
-var umzug = new umzug_1.Umzug({
-    migrations: { glob: path.resolve(__dirname, "../../migrations/*.js") },
+exports.umzug = new umzug_1.Umzug({
+    migrations: {
+        glob: path.resolve(__dirname, "../../migrations/*.js"),
+        resolve: function (_a) {
+            var name = _a.name, path = _a.path, context = _a.context;
+            var migration = require(path);
+            return {
+                name: name,
+                up: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+                    return [2 /*return*/, migration.up({ context: context }, sequelize_1.Sequelize)];
+                }); }); },
+                down: function () { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+                    return [2 /*return*/, migration.down({ context: context }, sequelize_1.Sequelize)];
+                }); }); },
+            };
+        },
+    },
     context: sequelize.getQueryInterface(),
+    storage: new umzug_1.SequelizeStorage({ sequelize: sequelize }),
     logger: console,
 });
 var setupTestDB = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -64,13 +81,13 @@ var setupTestDB = function () { return __awaiter(void 0, void 0, void 0, functio
                 console.log("Connection established successfully.");
                 console.log("Reverting migrations...");
                 // @ts-ignore
-                return [4 /*yield*/, umzug.down({ to: 0 })];
+                return [4 /*yield*/, exports.umzug.down({ to: 0 })];
             case 2:
                 // @ts-ignore
                 _a.sent();
                 console.log("Migrations reverted.");
                 console.log("Running migrations...");
-                return [4 /*yield*/, umzug.up()];
+                return [4 /*yield*/, exports.umzug.up()];
             case 3:
                 _a.sent();
                 console.log("Migrations completed.");
@@ -87,7 +104,7 @@ var teardownTestDB = function () { return __awaiter(void 0, void 0, void 0, func
                 console.log("afterAll");
                 console.log("Reverting all migrations...");
                 // @ts-ignore
-                return [4 /*yield*/, umzug.down({ to: 0 })];
+                return [4 /*yield*/, exports.umzug.down({ to: 0 })];
             case 1:
                 // @ts-ignore
                 _a.sent();

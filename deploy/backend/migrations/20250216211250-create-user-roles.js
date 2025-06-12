@@ -1,8 +1,13 @@
 "use strict";
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
+    await queryInterface.sequelize.query(
+      'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";',
+    );
     await queryInterface.createTable("UserRoles", {
       userId: {
         type: Sequelize.UUID,
@@ -33,7 +38,10 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
     await queryInterface.dropTable("UserRoles");
   },
 };

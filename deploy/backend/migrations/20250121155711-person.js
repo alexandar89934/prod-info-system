@@ -1,10 +1,13 @@
 "use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    queryInterface.context
-      ? (queryInterface = queryInterface.context)
-      : queryInterface;
+  async up(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
+    await queryInterface.sequelize.query(
+      'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";',
+    );
     await queryInterface.createTable("Person", {
       id: {
         allowNull: false,
@@ -63,10 +66,10 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
-    queryInterface.context
-      ? (queryInterface = queryInterface.context)
-      : queryInterface;
+  async down(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
     await queryInterface.dropTable("Person", {
       cascade: true,
     });

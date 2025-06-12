@@ -1,8 +1,10 @@
 "use strict";
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
     await queryInterface.createTable("WorkplaceCategory", {
       id: {
         allowNull: false,
@@ -32,7 +34,10 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
     await queryInterface.dropTable("WorkplaceCategory");
   },
 };

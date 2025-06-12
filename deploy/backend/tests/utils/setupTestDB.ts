@@ -1,11 +1,11 @@
 // @ts-ignore
 import httpStatus from "http-status";
 import { Sequelize } from "sequelize";
-import { Umzug } from "umzug";
+import { SequelizeStorage, Umzug } from "umzug";
 import { config } from "../../src/config/config";
 import * as path from "path";
 import { pool } from "../../src/infrastructure/db";
-
+console.log(config);
 const sequelize = new Sequelize(
   config.database.database_name,
   config.database.options.user,
@@ -16,12 +16,22 @@ const sequelize = new Sequelize(
   },
 );
 
-const umzug = new Umzug({
-  migrations: { glob: path.resolve(__dirname, "../../migrations/*.js") },
+export const umzug = new Umzug({
+  migrations: {
+    glob: path.resolve(__dirname, "../../migrations/*.js"),
+    resolve: ({ name, path, context }) => {
+      const migration = require(path);
+      return {
+        name,
+        up: async () => migration.up({ context }, Sequelize),
+        down: async () => migration.down({ context }, Sequelize),
+      };
+    },
+  },
   context: sequelize.getQueryInterface(),
+  storage: new SequelizeStorage({ sequelize }),
   logger: console,
 });
-
 export const setupTestDB = async () => {
   console.log("Connecting to database...");
   await sequelize.authenticate();

@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /backend
+
+COPY deploy/backend/package*.json ./
+COPY deploy/backend/yarn.lock ./
+
+RUN yarn install
+
+RUN yarn global add pm2
+RUN npm install -g nodemon
+
+COPY deploy/backend/ ./
+
+COPY deploy/tools/docker/backend/entrypoint.test.sh ./
+RUN chmod +x ./entrypoint.test.sh
+
+RUN apk --no-cache add curl
+
+EXPOSE 3000

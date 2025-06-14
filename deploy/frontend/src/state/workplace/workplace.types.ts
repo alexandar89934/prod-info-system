@@ -24,6 +24,14 @@ export type WorkplaceListResponse = ApiResponse<{
   };
 }>;
 
+export type FetchWorkplacesParams = {
+  page: number;
+  limit: number;
+  search: string;
+  sortField?: string;
+  sortOrder?: string;
+};
+
 export type WorkplaceState = {
   currentWorkplace: Workplace | null;
   workplaces: Workplace[];

@@ -5,21 +5,47 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import React, { useEffect } from 'react';
-import { Controller, Control } from 'react-hook-form';
+import { ChangeEvent, FC, useEffect } from 'react';
+import { Controller, Control, FieldPath } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { PersonFormDataBase } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 import { fetchWorkplaces } from '@/state/workplace/workplace.actions.ts';
 import { selectWorkplaces } from '@/state/workplace/workplace.selectors.ts';
 import { Workplace } from '@/state/workplace/workplace.types.ts';
 
-interface EmployeeWorkplaceSelectProps {
-  control: Control<any>;
-  name: string;
-}
+type EmployeeWorkplaceSelectProps = {
+  control: Control<PersonFormDataBase>;
+  name: FieldPath<PersonFormDataBase>; // npr. 'workplaces' ili 'roles'
+};
+const renderSelectedWorkplaces = (
+  selected: number[],
+  workplaceOptions: Workplace[]
+): string => {
+  return (selected ?? [])
+    .filter((id): id is number => typeof id === 'number' && !Number.isNaN(id))
+    .map((id) => {
+      const workplace = workplaceOptions.find((w) => w.id === id);
+      return workplace?.name ?? `Unknown (${id})`;
+    })
+    .join(', ');
+};
 
-const EmployeeWorkplaceSelect: React.FC<EmployeeWorkplaceSelectProps> = ({
+const extractSelectedNumbers = (
+  event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  onChange: (value: number[]) => void
+) => {
+  const rawValue = event.target.value;
+
+  const selected = (
+    Array.isArray(rawValue) ? rawValue : String(rawValue).split(',').map(Number)
+  ).filter((id): id is number => typeof id === 'number' && !Number.isNaN(id));
+
+  onChange(selected);
+};
+
+const EmployeeWorkplaceSelect: FC<EmployeeWorkplaceSelectProps> = ({
   control,
   name,
 }) => {
@@ -55,28 +81,10 @@ const EmployeeWorkplaceSelect: React.FC<EmployeeWorkplaceSelectProps> = ({
           SelectProps={{
             multiple: true,
             renderValue: (selected: number[]) =>
-              (selected ?? [])
-                .filter(
-                  (id): id is number =>
-                    typeof id === 'number' && !Number.isNaN(id)
-                )
-                .map((id) => {
-                  const workplace = workplaceOptions.find((w) => w.id === id);
-                  return workplace?.name ?? `Unknown (${id})`;
-                })
-                .join(', '),
+              renderSelectedWorkplaces(selected, workplaceOptions),
           }}
           value={field.value ?? []}
-          onChange={(event) => {
-            const selected = (
-              Array.isArray(event.target.value)
-                ? event.target.value
-                : event.target.value.split(',').map(Number)
-            ).filter(
-              (id): id is number => typeof id === 'number' && !Number.isNaN(id)
-            );
-            field.onChange(selected);
-          }}
+          onChange={(event) => extractSelectedNumbers(event, field.onChange)}
         >
           {workplaceOptions.map((workplace: Workplace) => (
             <MenuItem key={workplace.id} value={workplace.id}>
@@ -87,7 +95,7 @@ const EmployeeWorkplaceSelect: React.FC<EmployeeWorkplaceSelectProps> = ({
                     color: theme.palette.primary.dark,
                   },
                 }}
-                checked={(field.value ?? []).includes(workplace.id)}
+                checked={(field.value as number[])?.includes(workplace.id)}
               />
               <ListItemText
                 primary={workplace.name}

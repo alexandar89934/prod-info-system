@@ -37,3 +37,11 @@ export type WorkplaceCategoryState = {
   success: string | null;
   total: number;
 };
+
+export type FetchParams = {
+  page: number;
+  limit: number;
+  search: string;
+  sortField?: string;
+  sortOrder?: string;
+};

@@ -5,7 +5,6 @@ import { SequelizeStorage, Umzug } from "umzug";
 import { config } from "../../src/config/config";
 import * as path from "path";
 import { pool } from "../../src/infrastructure/db";
-console.log(config);
 const sequelize = new Sequelize(
   config.database.database_name,
   config.database.options.user,

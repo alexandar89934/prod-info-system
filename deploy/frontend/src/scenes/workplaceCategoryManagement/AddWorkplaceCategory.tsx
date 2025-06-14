@@ -27,8 +27,8 @@ const AddWorkplaceCategory = () => {
   const dispatch = useAppDispatch();
 
   const loading = useSelector(selectLoading);
-  const error = useSelector(selectError);
-  const success = useSelector(selectSuccess);
+  let error = useSelector(selectError);
+  let success = useSelector(selectSuccess);
 
   const {
     control,
@@ -52,9 +52,14 @@ const AddWorkplaceCategory = () => {
   }, [error, success, dispatch]);
 
   const onSubmit = async (data: AddWorkplaceCategoryFormData) => {
-    await dispatch(addWorkplaceCategory(data)).unwrap();
-    reset();
-    navigate('/workplaceCategories');
+    try {
+      await dispatch(addWorkplaceCategory(data)).unwrap();
+      reset();
+      navigate('/workplaceCategories');
+    } catch (err) {
+      error = typeof error === 'string' ? err : 'Unknown error occurred';
+      success = null;
+    }
   };
 
   const onCancel = () => {

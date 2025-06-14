@@ -16,7 +16,7 @@ import {
   UseFormHandleSubmit,
 } from 'react-hook-form';
 
-import { DateField } from '@/reusableComponents/DateField.tsx';
+import DateField from '@/reusableComponents/DateField.tsx';
 import DocumentList from '@/reusableComponents/DocumentsList.tsx';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField.tsx';
 import EmployeeWorkplaceSelect from '@/scenes/personManagement/relatedComponents/EmployeeWorkplaceSelect.tsx';
@@ -142,7 +142,6 @@ const PersonForm = ({
         </Typography>
 
         <Box display="flex" flexWrap="wrap" gap={2}>
-          {/* Left Column */}
           <Box flex="1 1 65%" display="flex" flexDirection="column" gap={2}>
             <FormField
               control={control}
@@ -165,7 +164,6 @@ const PersonForm = ({
             />
           </Box>
 
-          {/* Right Column (Image Upload) */}
           <Box flex="1 1 25%" display="flex" justifyContent="center">
             <ProfileImageUpload
               profilePicture={imagePath}
@@ -219,7 +217,6 @@ const PersonForm = ({
           />
         </Box>
 
-        {/* Roles Select */}
         <FormControl
           fullWidth
           margin="normal"
@@ -243,8 +240,6 @@ const PersonForm = ({
           </InputLabel>
           <UserRolesSelect control={control} name="roles" />
         </FormControl>
-
-        {/* Workplaces Select */}
         <FormControl
           fullWidth
           margin="normal"
@@ -269,7 +264,6 @@ const PersonForm = ({
           <EmployeeWorkplaceSelect control={control} name="workplaces" />
         </FormControl>
 
-        {/* Documents List */}
         <FormControl
           fullWidth
           margin="normal"
@@ -294,7 +288,6 @@ const PersonForm = ({
           <DocumentList personId={personId} isEdit={isEdit} fullWidth />
         </FormControl>
 
-        {/* Alerts and Buttons */}
         <Box
           mt={3}
           px={2}

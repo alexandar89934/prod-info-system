@@ -44,7 +44,6 @@ var umzug_1 = require("umzug");
 var config_1 = require("../../src/config/config");
 var path = require("path");
 var db_1 = require("../../src/infrastructure/db");
-console.log(config_1.config);
 var sequelize = new sequelize_1.Sequelize(config_1.config.database.database_name, config_1.config.database.options.user, config_1.config.database.options.pass, {
     host: config_1.config.database.connection_url,
     dialect: "postgres",

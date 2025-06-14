@@ -3,19 +3,16 @@
 /** @type {import('sequelize-cli').Seeder} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // First fetch the category IDs from the WorkplaceCategory table
     const categories = await queryInterface.sequelize.query(
       `SELECT id, name FROM "WorkplaceCategory";`,
       { type: Sequelize.QueryTypes.SELECT },
     );
 
-    // Create a mapping of category names to IDs
     const categoryMap = {};
     categories.forEach((cat) => {
       categoryMap[cat.name] = cat.id;
     });
 
-    // Seed workplaces
     await queryInterface.bulkInsert(
       "Workplace",
       [

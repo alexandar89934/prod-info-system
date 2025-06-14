@@ -15,7 +15,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
-import { userLogin } from '@/state/auth/auth.actions.ts'; // Update to import the thunk
+import { userLogin } from '@/state/auth/auth.actions.ts';
 import { clearNotifications } from '@/state/auth/auth.slice.ts';
 import { useAppDispatch, useAppSelector } from '@/state/hooks.ts';
 import { loginSchema } from '@/zodValidationSchemas/login.schema.ts';

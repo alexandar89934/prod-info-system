@@ -16,7 +16,7 @@ export const resetPasswordSchema = z
     confirmPassword: z.string(),
   })
   .extend({
-    employeeNumber: z.string().optional(), // not validated in the form, only added before request
+    employeeNumber: z.string().optional(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'Passwords do not match',

@@ -13,13 +13,13 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import ConfirmDialog from '@/reusableComponents/ConfirmDialog';
 import DataGridCustomToolbar from '@/reusableComponents/DataGridCustomToolbar';
 import Header from '@/reusableComponents/Header';
-import { AppDispatch } from '@/state/store';
+import { useAppDispatch } from '@/state/hooks.ts';
 import {
   fetchWorkplaces,
   deleteWorkplace,
@@ -38,24 +38,27 @@ import {
 } from '@/state/workplace/workplace.slice';
 
 const WorkplaceList = () => {
+  type SelectedItem = {
+    id: string;
+    name: string;
+  };
+
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(isMobile ? 10 : 20);
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: string; name: string } | null>(
-    null
-  );
+  const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [sortModel, setSortModel] = useState<any[]>([]);
+  const [sortModel, setSortModel] = useState([]);
   const [reload, setReload] = useState(false);
 
   const workplaces = useSelector(selectWorkplaces);
@@ -94,8 +97,8 @@ const WorkplaceList = () => {
 
   const handleAdd = () => navigate('/addWorkplace');
   const handleManageCategories = () => navigate('/workplaceCategories');
-  const handleEdit = (row: any) => navigate(`/editWorkplace/${row.id}`);
-  const handleDelete = (row: any) => {
+  const handleEdit = (row) => navigate(`/editWorkplace/${row.id}`);
+  const handleDelete = (row) => {
     setSelected(row);
     setOpen(true);
   };

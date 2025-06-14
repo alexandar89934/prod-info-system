@@ -3,6 +3,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
   AddWorkplaceCategoryFormData,
   EditWorkplaceCategoryFormData,
+  FetchParams,
   WorkplaceCategoryListResponse,
   WorkplaceCategorySingleResponse,
 } from './workplaceCategory.types';
@@ -11,13 +12,7 @@ import axiosServer from '@/services/axios.service.ts';
 
 export const fetchWorkplaceCategories = createAsyncThunk<
   WorkplaceCategoryListResponse,
-  {
-    page: number;
-    limit: number;
-    search: string;
-    sortField?: string;
-    sortOrder?: string;
-  },
+  FetchParams,
   { rejectValue: string }
 >(
   'workplaceCategory/fetchWorkplaceCategories',

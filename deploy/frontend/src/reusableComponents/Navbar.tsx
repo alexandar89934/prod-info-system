@@ -94,7 +94,6 @@ const Navbar: React.FC<NavbarProps> = ({
           minHeight: '64px',
         }}
       >
-        {/* LEFT SIDE */}
         <FlexBetween
           sx={{ flex: searchOpen && isMobileOrTablet ? 1 : 'unset' }}
         >

@@ -1,24 +1,29 @@
 import { TextField, InputLabel, FormControl } from '@mui/material';
+import { ChangeEvent, FC } from 'react';
 import { FieldError } from 'react-hook-form';
 
-interface DateFieldProps {
+type DateFieldProps = {
   id: string;
   label: string;
-  register: any;
+  value: string | number | Date | number[];
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   error?: FieldError;
   minWidth?: string;
-}
+  fullWidth?: boolean;
+};
 
-export const DateField = ({
+const DateField: FC<DateFieldProps> = ({
   id,
   label,
-  register,
+  value,
+  onChange,
   error,
   minWidth = '150px',
-}: DateFieldProps) => {
+  fullWidth = true,
+}) => {
   return (
     <FormControl
-      fullWidth
+      fullWidth={fullWidth}
       margin="normal"
       sx={{
         display: 'flex',
@@ -40,13 +45,13 @@ export const DateField = ({
       </InputLabel>
       <TextField
         id={id}
+        type="date"
+        value={value}
+        onChange={onChange}
         variant="outlined"
-        {...register(id)}
         error={!!error}
         helperText={error?.message}
-        sx={{ flexGrow: 1 }}
-        type="date"
-        fullWidth
+        fullWidth={fullWidth}
         InputLabelProps={{
           shrink: true,
         }}
@@ -54,3 +59,5 @@ export const DateField = ({
     </FormControl>
   );
 };
+
+export default DateField;

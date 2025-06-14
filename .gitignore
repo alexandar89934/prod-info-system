@@ -10,3 +10,4 @@ deploy/tools/env/.env
 deploy/tools/env/.env.*
 deploy/tools/env/*.*.env
 deploy/tools/env/*.*.env.*
+deploy/tools/env.tests/backend.test.env

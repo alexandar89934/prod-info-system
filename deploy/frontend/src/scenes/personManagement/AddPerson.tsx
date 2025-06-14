@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import profile from '../../assets/profile.jpeg';
 
-import PersonForm from '@/components/PersonForm.tsx';
+import PersonForm from '@/scenes/personManagement/relatedComponents/PersonForm.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import { useAppDispatch } from '@/state/hooks.ts';
 import {
@@ -23,7 +23,7 @@ import {
   clearNotifications,
   clearPerson,
 } from '@/state/person/person.slice.ts';
-import { AddPersonFormData } from '@/state/person/person.types.ts';
+import { PersonFormDataBase } from '@/state/person/person.types.ts';
 import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 
 const AddPerson = () => {
@@ -50,13 +50,12 @@ const AddPerson = () => {
   }, [error, success, dispatch]);
 
   const {
-    register,
     handleSubmit,
     setValue,
     control,
     reset,
     formState: { errors },
-  } = useForm<AddPersonFormData>({
+  } = useForm<PersonFormDataBase>({
     resolver: zodResolver(personSchema),
     defaultValues: {
       employeeNumber: 0,
@@ -76,7 +75,7 @@ const AddPerson = () => {
     },
   });
 
-  const handleAddPerson = async (data: AddPersonFormData) => {
+  const handleAddPerson = async (data: PersonFormDataBase) => {
     const payload = {
       ...data,
       picture: currentImagePath,
@@ -104,7 +103,7 @@ const AddPerson = () => {
     navigate('/person');
   };
 
-  const onSubmit = async (data: AddPersonFormData) => {
+  const onSubmit = async (data: PersonFormDataBase) => {
     await handleAddPerson(data);
   };
 
@@ -131,7 +130,6 @@ const AddPerson = () => {
       title="Add Person"
       control={control}
       errors={errors}
-      register={register}
       onSubmit={onSubmit}
       handleSubmit={handleSubmit}
       loading={loading}

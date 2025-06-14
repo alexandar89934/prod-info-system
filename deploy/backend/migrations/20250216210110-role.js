@@ -1,11 +1,9 @@
 "use strict";
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
-    queryInterface.context
-      ? (queryInterface = queryInterface.context)
-      : queryInterface;
+  async up(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
 
     await queryInterface.createTable("Role", {
       id: {
@@ -29,10 +27,10 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
-    queryInterface.context
-      ? (queryInterface = queryInterface.context)
-      : queryInterface;
+  async down(queryInterfaceOrObject, Sequelize) {
+    const queryInterface =
+      queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
+
     await queryInterface.dropTable("Role", {
       cascade: true,
     });

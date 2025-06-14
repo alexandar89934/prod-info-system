@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import { cleanEnv, EnvError, EnvMissingError, num, str } from "envalid";
 
 dotenv.config({ path: path.resolve(`${__dirname}/../../.env`) });
-
 const envVars = cleanEnv(
   process.env,
   {

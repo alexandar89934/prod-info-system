@@ -2,7 +2,7 @@ import { Box, BoxProps } from '@mui/material';
 import { styled } from '@mui/system';
 
 interface FlexBetweenProps extends BoxProps {
-  backgroundColor?: string; // optional backgroundColor prop
+  backgroundColor?: string;
 }
 
 const FlexBetween = styled(Box)<FlexBetweenProps>(({ theme }) => ({

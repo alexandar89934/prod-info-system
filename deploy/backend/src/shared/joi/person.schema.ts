@@ -21,6 +21,10 @@ export const CreatePersonSchema = Joi.object({
     .items(Joi.number().integer().positive().required())
     .min(1)
     .required(),
+  workplaces: Joi.array()
+    .items(Joi.number().integer().positive().required())
+    .min(1)
+    .required(),
   startDate: Joi.date().required(),
   endDate: Joi.date().greater(Joi.ref("startDate")).optional().empty(""),
   createdAt: Joi.date().iso().required(),
@@ -47,6 +51,10 @@ export const UpdatePersonSchema = Joi.object({
     )
     .optional(),
   roles: Joi.array()
+    .items(Joi.number().integer().positive().required())
+    .min(1)
+    .required(),
+  workplaces: Joi.array()
     .items(Joi.number().integer().positive().required())
     .min(1)
     .required(),

@@ -16,10 +16,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import profileImage from '../../assets/profile.jpeg';
-import DataGridCustomToolbar from '../../components/DataGridCustomToolbar.tsx';
-import Header from '../../components/Header.tsx';
 
-import ConfirmDialog from '@/components/ConfirmDialog.tsx';
+import ConfirmDialog from '@/reusableComponents/ConfirmDialog.tsx';
+import DataGridCustomToolbar from '@/reusableComponents/DataGridCustomToolbar.tsx';
+import Header from '@/reusableComponents/Header.tsx';
 import {
   getEmployeeNumber,
   getIsLoggedIn,

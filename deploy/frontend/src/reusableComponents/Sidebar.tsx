@@ -12,6 +12,7 @@ import {
   AdminPanelSettingsOutlined,
   TrendingUpOutlined,
   PieChartOutlined,
+  CheckCircleOutline,
 } from '@mui/icons-material';
 import {
   Box,
@@ -54,6 +55,7 @@ const navItems: NavItem[] = [
   { text: 'Person Manage', icon: null },
   { text: 'Person', icon: <Groups2Outlined /> },
   { text: 'Workplace', icon: <ReceiptLongOutlined /> },
+  { text: 'machineAvailabilityStatus', icon: <CheckCircleOutline /> },
   { text: 'Geography', icon: <PublicOutlined /> },
   { text: 'Sales', icon: null },
   { text: 'Overview', icon: <PointOfSaleOutlined /> },

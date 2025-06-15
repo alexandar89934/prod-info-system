@@ -42,8 +42,8 @@ export const getAllWorkplaceCategoriesQuery = async (
       OFFSET $2
   `;
 
-  const params: any[] = [limit, offset];
-  if (search) params.push(`%${search}%`);
+  const params = [limit, offset];
+  if (search) params.push(Number(`%${search}%`));
 
   return callQuery<WorkplaceCategory[]>(sql, params, true);
 };

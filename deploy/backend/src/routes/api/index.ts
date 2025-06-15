@@ -1,5 +1,6 @@
 import express, { Router } from "express";
 
+import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
 import { personRouter } from "./person.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
@@ -28,6 +29,10 @@ const defaultRoutes = [
   {
     path: "/workplace-category",
     route: workplaceCategoryRouter,
+  },
+  {
+    path: "/machine-availability-status",
+    route: machineAvailabilityStatusRouter,
   },
 ];
 

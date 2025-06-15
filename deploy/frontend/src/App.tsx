@@ -10,6 +10,9 @@ import { themeSettings } from './theme.tsx';
 
 import Dashboard from '@/scenes/dashboard';
 import Login from '@/scenes/login';
+import MachineAvailabilityStatusList from '@/scenes/machineManagement/machineAvailabilityStatus';
+import AddMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvailabilityStatus/addMachineAvailabilityStatus.tsx';
+import EditMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvailabilityStatus/editMachineAvailabilityStatus.tsx';
 import Person from '@/scenes/personManagement';
 import AddPerson from '@/scenes/personManagement/AddPerson.tsx';
 import EditPerson from '@/scenes/personManagement/EditPerson.tsx';
@@ -59,6 +62,18 @@ function App() {
               <Route
                 path="/editWorkplaceCategory/:id"
                 element={<EditWorkplaceCategory />}
+              />
+              <Route
+                path="/machineAvailabilityStatus"
+                element={<MachineAvailabilityStatusList />}
+              />
+              <Route
+                path="/addMachineAvailabilityStatus"
+                element={<AddMachineAvailabilityStatus />}
+              />
+              <Route
+                path="/editMachineAvailabilityStatus/:id"
+                element={<EditMachineAvailabilityStatus />}
               />
             </Route>
           </Routes>

@@ -5,7 +5,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - deploy/tools/env.tests/database.test.env
+      - deploy/tools/env.tests/backend.test.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped

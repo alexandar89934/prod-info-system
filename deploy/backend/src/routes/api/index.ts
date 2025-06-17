@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
+import { machineEquipmentTypeRouter } from "./machineEquipmentType.router";
 import { personRouter } from "./person.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
@@ -33,6 +34,10 @@ const defaultRoutes = [
   {
     path: "/machine-availability-status",
     route: machineAvailabilityStatusRouter,
+  },
+  {
+    path: "/machine-equipment-type",
+    route: machineEquipmentTypeRouter,
   },
 ];
 

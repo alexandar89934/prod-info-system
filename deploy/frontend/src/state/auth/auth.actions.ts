@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react';
 import { LoginFormData } from '@/scenes/login';
 import { ResetPasswordFormData } from '@/scenes/personManagement/ResetPasswordPage.tsx';
 import axiosServer from '@/services/axios.service.ts';
-import { DefaultResponse } from '@/state/auth/auth.types.ts';
+import { DefaultResponse } from '@/state/defaultResponse.ts';
 
 export const userLogin = createAsyncThunk<DefaultResponse, LoginFormData>(
   'auth/userLogin',

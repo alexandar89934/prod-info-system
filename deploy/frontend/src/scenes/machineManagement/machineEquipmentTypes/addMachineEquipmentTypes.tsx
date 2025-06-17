@@ -9,35 +9,35 @@ import Header from '@/reusableComponents/Header';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import { useAppDispatch } from '@/state/hooks';
-import { addMachineAvailabilityStatus } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.actions.ts';
+import { addMachineEquipmentType } from '@/state/machineEquipmentTypes/machineEquipmentTypes.actions.ts';
 import {
-  selectMachineAvailabilityStatusLoading as selectLoading,
-  selectMachineAvailabilityStatusError as selectError,
-  selectMachineAvailabilityStatusSuccess as selectSuccess,
-} from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.selectors.ts';
+  selectMachineEquipmentTypeLoading as selectLoading,
+  selectMachineEquipmentTypeError as selectError,
+  selectMachineEquipmentTypeSuccess as selectSuccess,
+} from '@/state/machineEquipmentTypes/machineEquipmentTypes.selectors.ts';
 import {
   clearError,
   clearSuccess,
-} from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.slice.ts';
-import { AddMachineAvailabilityStatusFormData } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.types.ts';
-import { machineAvailabilityStatusSchema } from '@/zodValidationSchemas/machineAvailabilityStatus.schema.ts';
+} from '@/state/machineEquipmentTypes/machineEquipmentTypes.slice.ts';
+import { AddMachineEquipmentTypeFormData } from '@/state/machineEquipmentTypes/machineEquipmentTypes.types.ts';
+import { machineEquipmentTypeSchema } from '@/zodValidationSchemas/machineEquipmentType.schema.ts';
 
-const AddMachineAvailabilityStatus = () => {
+const AddMachineEquipmentType = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const loading = useSelector(selectLoading);
-  let error = useSelector(selectError);
-  let success = useSelector(selectSuccess);
+  const error = useSelector(selectError);
+  const success = useSelector(selectSuccess);
 
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<AddMachineAvailabilityStatusFormData>({
-    resolver: zodResolver(machineAvailabilityStatusSchema),
+  } = useForm<AddMachineEquipmentTypeFormData>({
+    resolver: zodResolver(machineEquipmentTypeSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -53,20 +53,19 @@ const AddMachineAvailabilityStatus = () => {
     return () => clearTimeout(timer);
   }, [error, success, dispatch]);
 
-  const onSubmit = async (data: AddMachineAvailabilityStatusFormData) => {
+  const onSubmit = async (data: AddMachineEquipmentTypeFormData) => {
     try {
-      await dispatch(addMachineAvailabilityStatus(data)).unwrap();
+      await dispatch(addMachineEquipmentType(data)).unwrap();
       reset();
-      navigate('/machineAvailabilityStatus');
+      navigate('/machineEquipmentTypes');
     } catch (err) {
-      error = typeof error === 'string' ? err : 'Unknown error occurred';
-      success = null;
+      console.error(err);
     }
   };
 
   const onCancel = () => {
     reset();
-    navigate('/machineAvailabilityStatus');
+    navigate('/machineEquipmentTypes');
   };
 
   return (
@@ -91,7 +90,7 @@ const AddMachineAvailabilityStatus = () => {
           maxHeight: '80vh',
         }}
       >
-        <Header title="Add Availability Status" subtitle="" />
+        <Header title="Add Equipment Type" subtitle="" />
         <form onSubmit={handleSubmit(onSubmit)}>
           <Box flex="1 1 65%" display="flex" flexDirection="column" gap={2}>
             <Controller
@@ -149,7 +148,7 @@ const AddMachineAvailabilityStatus = () => {
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : undefined}
               >
-                {loading ? 'Adding...' : 'Add Status'}
+                {loading ? 'Adding...' : 'Add Type'}
               </Button>
               <Button
                 variant="outlined"
@@ -176,4 +175,4 @@ const AddMachineAvailabilityStatus = () => {
   );
 };
 
-export default AddMachineAvailabilityStatus;
+export default AddMachineEquipmentType;

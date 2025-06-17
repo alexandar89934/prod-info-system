@@ -13,6 +13,9 @@ import Login from '@/scenes/login';
 import MachineAvailabilityStatusList from '@/scenes/machineManagement/machineAvailabilityStatus';
 import AddMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvailabilityStatus/addMachineAvailabilityStatus.tsx';
 import EditMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvailabilityStatus/editMachineAvailabilityStatus.tsx';
+import MachineEquipmentTypeList from '@/scenes/machineManagement/machineEquipmentTypes';
+import AddMachineEquipmentType from '@/scenes/machineManagement/machineEquipmentTypes/addMachineEquipmentTypes.tsx';
+import EditMachineEquipmentType from '@/scenes/machineManagement/machineEquipmentTypes/editMachineEquipmentTypes.tsx';
 import Person from '@/scenes/personManagement';
 import AddPerson from '@/scenes/personManagement/AddPerson.tsx';
 import EditPerson from '@/scenes/personManagement/EditPerson.tsx';
@@ -74,6 +77,18 @@ function App() {
               <Route
                 path="/editMachineAvailabilityStatus/:id"
                 element={<EditMachineAvailabilityStatus />}
+              />
+              <Route
+                path="/machineEquipmentTypes"
+                element={<MachineEquipmentTypeList />}
+              />
+              <Route
+                path="/addMachineEquipmentType"
+                element={<AddMachineEquipmentType />}
+              />
+              <Route
+                path="/editMachineEquipmentType/:id"
+                element={<EditMachineEquipmentType />}
               />
             </Route>
           </Routes>

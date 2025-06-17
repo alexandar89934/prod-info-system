@@ -56,6 +56,7 @@ const navItems: NavItem[] = [
   { text: 'Person', icon: <Groups2Outlined /> },
   { text: 'Workplace', icon: <ReceiptLongOutlined /> },
   { text: 'machineAvailabilityStatus', icon: <CheckCircleOutline /> },
+  { text: 'machineEquipmentTypes', icon: <CheckCircleOutline /> },
   { text: 'Geography', icon: <PublicOutlined /> },
   { text: 'Sales', icon: null },
   { text: 'Overview', icon: <PointOfSaleOutlined /> },

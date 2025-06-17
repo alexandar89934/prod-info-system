@@ -3,47 +3,70 @@ import { Box, Button, CircularProgress, Alert, useTheme } from '@mui/material';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import Header from '@/reusableComponents/Header';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
-import { getName } from '@/state/auth/auth.selectors.ts';
+import { getName } from '@/state/auth/auth.selectors';
 import { useAppDispatch } from '@/state/hooks';
-import { addMachineAvailabilityStatus } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.actions.ts';
 import {
-  selectMachineAvailabilityStatusLoading as selectLoading,
-  selectMachineAvailabilityStatusError as selectError,
-  selectMachineAvailabilityStatusSuccess as selectSuccess,
-} from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.selectors.ts';
+  fetchMachineEquipmentTypeById,
+  updateMachineEquipmentType,
+} from '@/state/machineEquipmentTypes/machineEquipmentTypes.actions';
+import {
+  selectCurrentMachineEquipmentType,
+  selectMachineEquipmentTypeLoading as selectLoading,
+  selectMachineEquipmentTypeError as selectError,
+  selectMachineEquipmentTypeSuccess as selectSuccess,
+} from '@/state/machineEquipmentTypes/machineEquipmentTypes.selectors';
 import {
   clearError,
   clearSuccess,
-} from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.slice.ts';
-import { AddMachineAvailabilityStatusFormData } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.types.ts';
-import { machineAvailabilityStatusSchema } from '@/zodValidationSchemas/machineAvailabilityStatus.schema.ts';
+} from '@/state/machineEquipmentTypes/machineEquipmentTypes.slice';
+import { EditMachineEquipmentTypeFormData } from '@/state/machineEquipmentTypes/machineEquipmentTypes.types';
+import { machineEquipmentTypeSchema } from '@/zodValidationSchemas/machineEquipmentType.schema';
 
-const AddMachineAvailabilityStatus = () => {
+const EditMachineEquipmentType = () => {
   const theme = useTheme();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const loading = useSelector(selectLoading);
-  let error = useSelector(selectError);
-  let success = useSelector(selectSuccess);
+  const error = useSelector(selectError);
+  const success = useSelector(selectSuccess);
+  const equipmentType = useSelector(selectCurrentMachineEquipmentType);
 
   const {
+    register,
     control,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<AddMachineAvailabilityStatusFormData>({
-    resolver: zodResolver(machineAvailabilityStatusSchema),
+  } = useForm<EditMachineEquipmentTypeFormData>({
+    resolver: zodResolver(machineEquipmentTypeSchema),
     defaultValues: {
       name: '',
       description: '',
-      createdBy: getName(),
     },
   });
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchMachineEquipmentTypeById(id));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (equipmentType?.name) {
+      reset({
+        id: Number(equipmentType.id),
+        name: equipmentType.name,
+        description: equipmentType.description ?? '',
+        updatedBy: getName(),
+      });
+    }
+  }, [equipmentType, reset]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,20 +76,13 @@ const AddMachineAvailabilityStatus = () => {
     return () => clearTimeout(timer);
   }, [error, success, dispatch]);
 
-  const onSubmit = async (data: AddMachineAvailabilityStatusFormData) => {
-    try {
-      await dispatch(addMachineAvailabilityStatus(data)).unwrap();
-      reset();
-      navigate('/machineAvailabilityStatus');
-    } catch (err) {
-      error = typeof error === 'string' ? err : 'Unknown error occurred';
-      success = null;
-    }
+  const onSubmit = async (data: EditMachineEquipmentTypeFormData) => {
+    await dispatch(updateMachineEquipmentType(data)).unwrap();
+    navigate('/machineEquipmentTypes');
   };
 
   const onCancel = () => {
-    reset();
-    navigate('/machineAvailabilityStatus');
+    navigate('/machineEquipmentTypes');
   };
 
   return (
@@ -91,9 +107,14 @@ const AddMachineAvailabilityStatus = () => {
           maxHeight: '80vh',
         }}
       >
-        <Header title="Add Availability Status" subtitle="" />
+        <Header title="Edit Equipment Type" subtitle="" />
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Box flex="1 1 65%" display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={2} mb={2}>
+            <input
+              type="hidden"
+              value={equipmentType?.id ?? ''}
+              {...register('id', { valueAsNumber: true })}
+            />
             <Controller
               name="name"
               control={control}
@@ -149,7 +170,7 @@ const AddMachineAvailabilityStatus = () => {
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : undefined}
               >
-                {loading ? 'Adding...' : 'Add Status'}
+                {loading ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button
                 variant="outlined"
@@ -163,7 +184,6 @@ const AddMachineAvailabilityStatus = () => {
                     backgroundColor: theme.palette.primary[100],
                     color: theme.palette.common.white,
                   },
-                  width: 'auto',
                 }}
               >
                 Cancel
@@ -176,4 +196,4 @@ const AddMachineAvailabilityStatus = () => {
   );
 };
 
-export default AddMachineAvailabilityStatus;
+export default EditMachineEquipmentType;

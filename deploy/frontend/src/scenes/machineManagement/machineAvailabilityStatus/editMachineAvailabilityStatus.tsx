@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import Header from '@/reusableComponents/Header';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
+import { getName } from '@/state/auth/auth.selectors';
 import { useAppDispatch } from '@/state/hooks';
 import {
   fetchMachineAvailabilityStatusById,
@@ -57,13 +58,12 @@ const EditMachineAvailabilityStatus = () => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    console.log('AAA');
-    console.log(status);
     if (status && status.name) {
       reset({
         id: Number(status.id),
         name: status.name,
         description: status.description ?? '',
+        updatedBy: getName(),
       });
     }
   }, [status, reset]);

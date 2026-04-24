@@ -6,7 +6,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect } from 'react';
-import { Controller, Control, useController } from 'react-hook-form';
+import { Controller, Control, FieldValues, useController } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { fetchRoles } from '@/state/role/role.actions.ts';
@@ -14,7 +14,7 @@ import { selectRoles } from '@/state/role/role.selectors.ts';
 import { AppDispatch } from '@/state/store.ts';
 
 interface UserRolesSelectProps {
-  control: Control<any>;
+  control: Control<FieldValues>;
   name: string;
 }
 const UserRolesSelect: React.FC<UserRolesSelectProps> = ({ control, name }) => {

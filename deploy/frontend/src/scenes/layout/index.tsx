@@ -1,4 +1,4 @@
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Toolbar, useMediaQuery, useTheme } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
@@ -33,14 +33,17 @@ const Layout: React.FC<LayoutProps> = () => {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
-      <Box flexGrow={1}>
+      <Box flexGrow={1} display="flex" flexDirection="column" sx={{ height: '100vh', overflow: 'hidden' }}>
         <Navbar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
           isNonMobile={isNonMobile}
           isTablet={isTablet}
         />
-        <Outlet />
+        <Toolbar />
+        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

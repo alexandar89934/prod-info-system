@@ -1,15 +1,23 @@
 import express, { Router } from "express";
 
+import { fileUploadRouter } from "./fileUpload.router";
+import { jobPositionRouter } from "./jobPosition.route";
+import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
+import { machineEquipmentRouter } from "./machineEquipment.router";
+import { machineEquipmentTypeRouter } from "./machineEquipmentType.router";
 import { personRouter } from "./person.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
-import { workplaceRouter } from "./workplace.route";
-import { workplaceCategoryRouter } from "./workplaceCategory.route";
 
 export const apiRouter = express.Router();
 
-const defaultRoutes = [
+interface RouteDefinition {
+  path: string;
+  route: Router | RouteDefinition[];
+}
+
+const defaultRoutes: RouteDefinition[] = [
   {
     path: "/auth",
     route: signInRouter,
@@ -23,20 +31,32 @@ const defaultRoutes = [
     route: roleRouter,
   },
   {
-    path: "/workplace",
-    route: workplaceRouter,
+    path: "/job-position",
+    route: jobPositionRouter,
   },
   {
-    path: "/workplace-category",
-    route: workplaceCategoryRouter,
+    path: "/job-position-category",
+    route: jobPositionCategoryRouter,
   },
   {
     path: "/machine-availability-status",
     route: machineAvailabilityStatusRouter,
   },
+  {
+    path: "/machine-equipment-type",
+    route: machineEquipmentTypeRouter,
+  },
+  {
+    path: "/machine-equipment",
+    route: machineEquipmentRouter,
+  },
+  {
+    path: "/file-upload",
+    route: fileUploadRouter,
+  },
 ];
 
-const addRoutes = (router: Router, routes: any[]) => {
+const addRoutes = (router: Router, routes: RouteDefinition[]) => {
   routes.forEach((route) => {
     if (Array.isArray(route.route)) {
       const nestedRouter = express.Router();

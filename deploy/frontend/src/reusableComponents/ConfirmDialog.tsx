@@ -7,6 +7,7 @@ import {
   Button,
   useTheme,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -24,6 +25,7 @@ const ConfirmDialog = ({
   onConfirm,
 }: ConfirmDialogProps) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
@@ -36,10 +38,10 @@ const ConfirmDialog = ({
           onClick={onClose}
           color="primary"
         >
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button onClick={onConfirm} color="error">
-          Delete
+          {t('common.delete')}
         </Button>
       </DialogActions>
     </Dialog>

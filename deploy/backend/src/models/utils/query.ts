@@ -6,7 +6,7 @@ import { DBError } from "../../shared/error/DBError";
 
 export const callQuery = async <T>(
   sqlQuery: string,
-  queryValues: any[],
+  queryValues: (string | number | boolean | null | undefined | Date | object)[],
   getAll: boolean = false,
 ): Promise<T> => {
   let client: PoolClient | undefined;

@@ -97,6 +97,7 @@ const ResetPassword: React.FC = () => {
             type={showPassword ? 'text' : 'password'}
             variant="outlined"
             margin="normal"
+            autoComplete="current-password"
             {...register('oldPassword')}
             error={!!errors.oldPassword}
             helperText={errors.oldPassword?.message}
@@ -108,6 +109,7 @@ const ResetPassword: React.FC = () => {
             type={showPassword ? 'text' : 'password'}
             variant="outlined"
             margin="normal"
+            autoComplete="new-password"
             {...register('newPassword')}
             error={!!errors.newPassword}
             helperText={errors.newPassword?.message}
@@ -119,6 +121,7 @@ const ResetPassword: React.FC = () => {
             type={showPassword ? 'text' : 'password'}
             variant="outlined"
             margin="normal"
+            autoComplete="new-password"
             {...register('confirmPassword')}
             error={!!errors.confirmPassword}
             helperText={errors.confirmPassword?.message}

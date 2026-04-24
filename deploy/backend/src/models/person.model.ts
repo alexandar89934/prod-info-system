@@ -10,7 +10,7 @@ import { callQuery } from "./utils/query";
 export const createPersonQuery = async (
   personData: CreatePersonData,
   roles: number[],
-  workplaces: number[],
+  jobPositions: number[],
 ): Promise<CreatePersonData> => {
   const { password } = config.adminCredentials;
   const hashedPassword = await hashSensitiveData(password);
@@ -38,8 +38,8 @@ export const createPersonQuery = async (
              FROM inserted_user iu
              RETURNING *
          ),
-         inserted_workplaces AS (
-           INSERT INTO "EmployeeWorkplaces" ("userId", "workplaceId", "createdAt", "updatedAt")
+         inserted_job_positions AS (
+           INSERT INTO "EmployeeJobPositions" ("userId", "jobPositionId", "createdAt", "updatedAt")
              SELECT iu."userId", unnest($16::int[]), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
              FROM inserted_user iu
              RETURNING *
@@ -66,7 +66,7 @@ export const createPersonQuery = async (
     personData.employeeNumber,
     hashedPassword,
     roles,
-    workplaces,
+    jobPositions,
   ];
 
   return callQuery<CreatePersonData>(insertSQL, values);
@@ -103,12 +103,12 @@ export const updatePersonQuery = async (
              SELECT ud."userId", unnest($12::int[]), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
              FROM user_data ud
          ),
-         deleted_workplaces AS (
-           DELETE FROM "EmployeeWorkplaces"
+         deleted_job_positions AS (
+           DELETE FROM "EmployeeJobPositions"
              WHERE "userId" IN (SELECT "userId" FROM user_data)
          ),
-         inserted_workplaces AS (
-           INSERT INTO "EmployeeWorkplaces" ("userId", "workplaceId", "createdAt", "updatedAt")
+         inserted_job_positions AS (
+           INSERT INTO "EmployeeJobPositions" ("userId", "jobPositionId", "createdAt", "updatedAt")
              SELECT ud."userId", unnest($13::int[]), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
              FROM user_data ud
          )
@@ -128,7 +128,7 @@ export const updatePersonQuery = async (
     personData.updatedBy,
     personData.employeeNumber,
     personData.roles || [],
-    personData.workplaces || [],
+    personData.jobPositions || [],
   ];
 
   return callQuery<EditPersonData>(updateSQL, values);
@@ -157,12 +157,12 @@ export const getPersonByIdQuery = async (
       u."employeeNumber",
       u."id" AS "userId",
       array_agg(DISTINCT r."id") AS "roles",
-      array_agg(DISTINCT ew."workplaceId") AS "workplaces"
+      array_agg(DISTINCT ej."jobPositionId") AS "jobPositions"
     FROM "Person" p
            LEFT JOIN "User" u ON u."personId" = p."id"
            LEFT JOIN "UserRoles" ur ON ur."userId" = u."id"
            LEFT JOIN "Role" r ON ur."roleId" = r."id"
-           LEFT JOIN "EmployeeWorkplaces" ew ON ew."userId" = u."id"
+           LEFT JOIN "EmployeeJobPositions" ej ON ej."userId" = u."id"
     WHERE p."id" = $1
     GROUP BY p."id", u."id";
   `;
@@ -179,17 +179,32 @@ export const getPersonByEmployeeNumberQuery = async (
       u."employeeNumber",
       u."id" AS "userId",
       array_agg(DISTINCT r."id") AS "roles",
-      array_agg(DISTINCT ew."workplaceId") AS "workplaces"
+      array_agg(DISTINCT ej."jobPositionId") AS "jobPositions"
     FROM "Person" p
            JOIN "User" u ON u."personId" = p."id"
            LEFT JOIN "UserRoles" ur ON ur."userId" = u."id"
            LEFT JOIN "Role" r ON ur."roleId" = r."id"
-           LEFT JOIN "EmployeeWorkplaces" ew ON ew."userId" = u."id"
+           LEFT JOIN "EmployeeJobPositions" ej ON ej."userId" = u."id"
     WHERE u."employeeNumber" = CAST($1 AS INTEGER)
     GROUP BY p."id", u."id";
   `;
 
   return callQuery<CreatePersonData>(selectSQL, [employeeNumber]);
+};
+
+export const checkMailExists = async (
+  mail: string,
+  excludeId?: string,
+): Promise<{ count: number }> => {
+  const selectSQL = `
+    SELECT COUNT(*) FROM "Person"
+    WHERE "mail" = $1
+    ${excludeId ? `AND "id" <> $2` : ""};
+  `;
+
+  const params = excludeId ? [mail, excludeId] : [mail];
+
+  return callQuery<{ count: number }>(selectSQL, params);
 };
 
 export const checkEmployeeNumberExists = async (

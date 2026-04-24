@@ -8,7 +8,6 @@ const Dashboard: React.FC = () => {
   const persons = useSelector(selectPersons);
 
   console.log(persons);
-
   const isLoggedIn: boolean = useSelector(getIsLoggedIn);
 
   console.log(isLoggedIn);

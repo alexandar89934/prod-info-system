@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import Link from '@mui/material/Link';
 import React, { useState, MouseEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,8 +48,15 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
+  const { t, i18n } = useTranslation();
   const isMobile = !isNonMobile;
   const isMobileOrTablet = isMobile || isTablet;
+
+  const toggleLanguage = () => {
+    const next = i18n.language === 'en' ? 'sr' : 'en';
+    i18n.changeLanguage(next);
+    localStorage.setItem('language', next);
+  };
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -124,7 +132,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 </IconButton>
               ) : null}
               <InputBase
-                placeholder="Search..."
+                placeholder={t('navbar.search')}
                 sx={{
                   height: '100%',
                   flex: 1,
@@ -159,6 +167,23 @@ const Navbar: React.FC<NavbarProps> = ({
                 )}
               </IconButton>
             ) : null}
+
+            <Button
+              size="small"
+              onClick={toggleLanguage}
+              sx={{
+                minWidth: 'auto',
+                px: 1,
+                py: 0.5,
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                color: theme.palette.secondary[100],
+                border: `1px solid ${theme.palette.secondary[300]}`,
+                borderRadius: 1,
+              }}
+            >
+              {i18n.language === 'en' ? 'SR' : 'EN'}
+            </Button>
 
             {isLoggedIn ? (
               <>
@@ -238,19 +263,19 @@ const Navbar: React.FC<NavbarProps> = ({
                     {isMobileOrTablet ? (
                       <>
                         <MenuItem onClick={handleProfileClick}>
-                          Profile
+                          {t('navbar.profile')}
                         </MenuItem>
                         <MenuItem onClick={() => dispatch(setMode())}>
                           {theme.palette.mode === 'dark'
-                            ? 'Light Mode'
-                            : 'Dark Mode'}
+                            ? t('navbar.lightMode')
+                            : t('navbar.darkMode')}
                         </MenuItem>
                       </>
                     ) : null}
                     <MenuItem onClick={onChangePassword}>
-                      Change Password
+                      {t('navbar.changePassword')}
                     </MenuItem>
-                    <MenuItem onClick={onLogoutClick}>Log Out</MenuItem>
+                    <MenuItem onClick={onLogoutClick}>{t('navbar.logout')}</MenuItem>
                   </Menu>
                 </FlexBetween>
               </>
@@ -275,7 +300,7 @@ const Navbar: React.FC<NavbarProps> = ({
                     fontSize: '0.85rem',
                   }}
                 >
-                  Log In
+                  {t('navbar.login')}
                 </Link>
               </Button>
             )}

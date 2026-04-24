@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -29,6 +30,7 @@ import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 const EditPerson = () => {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const person = useSelector(selectPerson);
   const imagePath = person?.picture ?? profile;
@@ -69,7 +71,7 @@ const EditPerson = () => {
       startDate: '',
       endDate: '',
       roles: [],
-      workplaces: [],
+      jobPositions: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: getName(),
@@ -99,7 +101,7 @@ const EditPerson = () => {
           ? new Date(person.endDate).toISOString().split('T')[0]
           : '',
         roles: person.roles || [],
-        workplaces: person.workplaces || [],
+        jobPositions: person.jobPositions || [],
         createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,
@@ -125,7 +127,7 @@ const EditPerson = () => {
 
   return (
     <PersonForm
-      title="Edit Person"
+      title={t('person.form.editTitle')}
       control={control}
       errors={errors}
       onSubmit={onSubmit}
@@ -134,7 +136,7 @@ const EditPerson = () => {
       error={error}
       success={success}
       onCancel={handleCancel}
-      submitButtonText="Update Person"
+      submitButtonText={t('person.form.updateSubmit')}
       imagePath={imagePath}
       onImageUpload={(uploadedPath: string) => {
         setValue('picture', uploadedPath);

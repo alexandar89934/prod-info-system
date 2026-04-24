@@ -8,7 +8,7 @@ module.exports = {
     await queryInterface.sequelize.query(
       'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";',
     );
-    await queryInterface.createTable("EmployeeWorkplaces", {
+    await queryInterface.createTable("EmployeeJobPositions", {
       userId: {
         allowNull: false,
         type: Sequelize.UUID,
@@ -19,11 +19,11 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      workplaceId: {
+      jobPositionId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: "Workplace",
+          model: "JobPosition",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -46,6 +46,6 @@ module.exports = {
     const queryInterface =
       queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
 
-    await queryInterface.dropTable("EmployeeWorkplaces");
+    await queryInterface.dropTable("EmployeeJobPositions");
   },
 };

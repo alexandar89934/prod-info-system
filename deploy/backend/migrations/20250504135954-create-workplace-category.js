@@ -5,7 +5,7 @@ module.exports = {
     const queryInterface =
       queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
 
-    await queryInterface.createTable("WorkplaceCategory", {
+    await queryInterface.createTable("JobPositionCategory", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -38,6 +38,6 @@ module.exports = {
     const queryInterface =
       queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
 
-    await queryInterface.dropTable("WorkplaceCategory");
+    await queryInterface.dropTable("JobPositionCategory");
   },
 };

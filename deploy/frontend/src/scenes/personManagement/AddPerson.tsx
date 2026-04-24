@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,12 +30,18 @@ import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 const AddPerson = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const person = useSelector(selectPerson);
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
   const success = useSelector(selectSuccess);
   const documentsRef = useRef(person.documents);
   const [currentImagePath, setCurrentImagePath] = useState<string>(profile);
+  const currentImagePathRef = useRef(currentImagePath);
+
+  useEffect(() => {
+    currentImagePathRef.current = currentImagePath;
+  }, [currentImagePath]);
 
   useEffect(() => {
     if (error || success) {
@@ -86,17 +93,17 @@ const AddPerson = () => {
     setCurrentImagePath(profile);
   };
 
-  const cleanup = async () => {
+  const cleanup = useCallback(async () => {
     await Promise.all(
       documentsRef.current.map((doc) =>
         dispatch(deleteFileNewPerson({ documentPath: doc.path }))
       )
     );
-    if (currentImagePath !== profile) {
-      dispatch(deleteFileNewPerson({ documentPath: currentImagePath }));
+    if (currentImagePathRef.current !== profile) {
+      dispatch(deleteFileNewPerson({ documentPath: currentImagePathRef.current }));
     }
     reset();
-  };
+  }, [dispatch, reset]);
 
   const handleCancel = async () => {
     await cleanup();
@@ -118,8 +125,7 @@ const AddPerson = () => {
         await cleanup();
       })();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cleanup]);
 
   useEffect(() => {
     documentsRef.current = person.documents;
@@ -127,7 +133,7 @@ const AddPerson = () => {
 
   return (
     <PersonForm
-      title="Add Person"
+      title={t('person.form.addTitle')}
       control={control}
       errors={errors}
       onSubmit={onSubmit}
@@ -136,7 +142,7 @@ const AddPerson = () => {
       error={error}
       success={success}
       onCancel={handleCancel}
-      submitButtonText="Add Person"
+      submitButtonText={t('person.form.addSubmit')}
       imagePath={currentImagePath}
       onImageUpload={handleImageUpload}
       isEdit={false}

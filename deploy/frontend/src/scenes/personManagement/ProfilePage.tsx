@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,6 +29,7 @@ import { personSchema } from '@/zodValidationSchemas/person.schema.ts';
 const ProfilePage = () => {
   const employeeNumber = getEmployeeNumber();
   const dispatch = useDispatch<AppDispatch>();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const person = useSelector(selectPerson) as unknown as PersonFormDataBase;
   const profilePicture = person?.picture ?? profile;
@@ -67,7 +69,7 @@ const ProfilePage = () => {
       startDate: '',
       endDate: '',
       roles: [],
-      workplaces: [],
+      jobPositions: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: getName(),
@@ -97,7 +99,7 @@ const ProfilePage = () => {
           ? new Date(person.endDate).toISOString().split('T')[0]
           : '',
         roles: person.roles || [],
-        workplaces: person.workplaces || [],
+        jobPositions: person.jobPositions || [],
         createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,
@@ -124,7 +126,7 @@ const ProfilePage = () => {
 
   return (
     <PersonForm
-      title="Edit Profile"
+      title={t('person.form.editProfileTitle')}
       control={control}
       errors={errors}
       onSubmit={onSubmit}
@@ -133,7 +135,7 @@ const ProfilePage = () => {
       error={error}
       success={success}
       onCancel={handleCancel}
-      submitButtonText="Update Profile"
+      submitButtonText={t('person.form.updateProfileSubmit')}
       imagePath={profilePicture}
       onImageUpload={(uploadedPath: string) => {
         localStorage.setItem('profilePicture', uploadedPath);

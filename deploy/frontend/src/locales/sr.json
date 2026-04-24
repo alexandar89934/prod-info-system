@@ -1,0 +1,227 @@
+{
+  "person": {
+    "title": "ZAPOSLENI",
+    "subtitle": "Lista svih zaposlenih",
+    "addButton": "Dodaj novog zaposlenog",
+    "columns": {
+      "employee": "Zaposleni",
+      "actions": "Akcije",
+      "picture": "Slika",
+      "employeeNumber": "Broj zap.",
+      "name": "Ime",
+      "email": "Email",
+      "startDate": "Datum početka"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete {{name}}?"
+    },
+    "form": {
+      "addTitle": "Dodaj zaposlenog",
+      "editTitle": "Izmeni zaposlenog",
+      "editProfileTitle": "Izmeni profil",
+      "addSubmit": "Dodaj zaposlenog",
+      "updateSubmit": "Ažuriraj zaposlenog",
+      "updateProfileSubmit": "Ažuriraj profil",
+      "employeeNumber": "Broj zaposlenog",
+      "name": "Ime",
+      "address": "Adresa",
+      "mail": "Email",
+      "startDate": "Datum početka",
+      "endDate": "Datum završetka",
+      "additionalInfo": "Dodatne informacije",
+      "roles": "Uloge:",
+      "jobPositions": "Radna mesta:",
+      "documents": "Dokumenta:",
+      "back": "Nazad"
+    }
+  },
+  "jobPosition": {
+    "title": "RADNA MESTA",
+    "subtitle": "Lista svih radnih mesta",
+    "addButton": "Dodaj novo radno mesto",
+    "manageCategories": "Upravljaj kategorijama radnih mesta",
+    "columns": {
+      "id": "ID",
+      "name": "Naziv",
+      "jobPosition": "Radno mesto",
+      "description": "Opis",
+      "category": "Kategorija",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj radno mesto",
+      "editTitle": "Izmeni radno mesto",
+      "addSubmit": "Dodaj radno mesto",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "description": "Opis",
+      "category": "Kategorija",
+      "addCategory": "Dodaj kategoriju radnog mesta"
+    }
+  },
+  "jobPositionCategory": {
+    "title": "KATEGORIJE RADNIH MESTA",
+    "subtitle": "Lista svih kategorija",
+    "addButton": "Dodaj novu kategoriju",
+    "columns": {
+      "id": "ID",
+      "name": "Naziv",
+      "description": "Opis",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj kategoriju radnog mesta",
+      "editTitle": "Izmeni kategoriju radnog mesta",
+      "addSubmit": "Dodaj kategoriju",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "description": "Opis"
+    }
+  },
+  "machineEquipment": {
+    "title": "OPREMA MAŠINA",
+    "subtitle": "Lista sve opreme mašina",
+    "addButton": "Dodaj novu opremu",
+    "columns": {
+      "id": "ID",
+      "name": "Naziv",
+      "model": "Model",
+      "description": "Opis",
+      "serialNumber": "Serijski broj",
+      "equipmentType": "Tip opreme",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj opremu mašine",
+      "editTitle": "Izmeni opremu mašine",
+      "addSubmit": "Dodaj opremu",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "model": "Model",
+      "serialNumber": "Serijski broj",
+      "equipmentType": "Tip opreme",
+      "selectType": "Izaberite tip",
+      "description": "Opis"
+    }
+  },
+  "machineEquipmentType": {
+    "title": "TIPOVI OPREME MAŠINA",
+    "subtitle": "Lista svih tipova opreme",
+    "addButton": "Dodaj novi tip",
+    "columns": {
+      "id": "ID",
+      "name": "Naziv",
+      "description": "Opis",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj tip opreme",
+      "editTitle": "Izmeni tip opreme",
+      "addSubmit": "Dodaj tip",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "description": "Opis"
+    }
+  },
+  "machineAvailabilityStatus": {
+    "title": "STATUSI DOSTUPNOSTI MAŠINA",
+    "subtitle": "Lista svih statusa mašina",
+    "addButton": "Dodaj novi status",
+    "columns": {
+      "id": "ID",
+      "name": "Naziv",
+      "description": "Opis",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj status dostupnosti",
+      "editTitle": "Izmeni status dostupnosti mašine",
+      "addSubmit": "Dodaj status",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "description": "Opis"
+    }
+  },
+  "login": {
+    "title": "Prijava",
+    "employeeNumber": "Broj zaposlenog",
+    "password": "Lozinka",
+    "loginButton": "Prijavi se",
+    "loggingIn": "Prijavljivanje..."
+  },
+  "navbar": {
+    "profile": "Profil",
+    "lightMode": "Svetli režim",
+    "darkMode": "Tamni režim",
+    "changePassword": "Promeni lozinku",
+    "logout": "Odjavi se",
+    "login": "Prijavi se",
+    "search": "Pretraži..."
+  },
+  "sidebar": {
+    "dashboard": "Početna",
+    "personManagement": "Upravljanje zaposlenima",
+    "persons": "Zaposleni",
+    "jobPositions": "Radna mesta",
+    "jobPositionCategories": "Kategorije radnih mesta",
+    "machineManagement": "Upravljanje mašinama",
+    "availabilityStatuses": "Statusi dostupnosti",
+    "equipmentTypes": "Tipovi opreme",
+    "equipment": "Oprema"
+  },
+  "common": {
+    "cancel": "Otkaži",
+    "delete": "Obriši",
+    "search": "Pretraži..."
+  },
+  "dataGrid": {
+    "toolbarColumns": "Kolone",
+    "toolbarDensity": "Gustina",
+    "toolbarDensityCompact": "Kompaktno",
+    "toolbarDensityStandard": "Standardno",
+    "toolbarDensityComfortable": "Udobno",
+    "toolbarExport": "Izvezi",
+    "toolbarExportCSV": "Preuzmi kao CSV",
+    "toolbarExportPrint": "Štampaj",
+    "columnsPanelTextFieldLabel": "Pronađi kolonu",
+    "columnsPanelTextFieldPlaceholder": "Naziv kolone",
+    "columnsPanelShowAllButton": "Prikaži sve",
+    "columnsPanelHideAllButton": "Sakrij sve"
+  }
+}

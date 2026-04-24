@@ -10,8 +10,9 @@ import {
   Alert,
   useMediaQuery,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,10 +21,8 @@ import profileImage from '../../assets/profile.jpeg';
 import ConfirmDialog from '@/reusableComponents/ConfirmDialog.tsx';
 import DataGridCustomToolbar from '@/reusableComponents/DataGridCustomToolbar.tsx';
 import Header from '@/reusableComponents/Header.tsx';
-import {
-  getEmployeeNumber,
-  getIsLoggedIn,
-} from '@/state/auth/auth.selectors.ts';
+import { useDataGridLocaleText } from '@/reusableComponents/useDataGridLocaleText';
+import { getEmployeeNumber } from '@/state/auth/auth.selectors.ts';
 import { deletePerson, fetchPersons } from '@/state/person/person.actions.ts';
 import {
   selectError,
@@ -37,11 +36,14 @@ import {
   clearPerson,
   clearPersons,
 } from '@/state/person/person.slice.ts';
+import { PersonFormDataBase } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 
 const Person = () => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { t } = useTranslation();
+  const localeText = useDataGridLocaleText();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(isMobile ? 10 : 20);
@@ -61,7 +63,6 @@ const Person = () => {
   const success = useSelector(selectSuccess);
   const total = useSelector(selectTotal);
   const employeeNumber = getEmployeeNumber();
-  const isLoggedIn = useSelector(getIsLoggedIn);
 
   const handleSortModelChange = (newModel) => {
     setSortModel(newModel);
@@ -116,15 +117,6 @@ const Person = () => {
   }, [dispatch, page, pageSize, search, reload, sortModel]);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      setNotification({
-        message: `Error Fetching Persons! ${error ?? (error || '')}`,
-        type: 'error',
-      });
-    }
-  }, [error, isLoggedIn, navigate]);
-
-  useEffect(() => {
     if (success) {
       setNotification({ message: String(success), type: 'success' });
       setTimeout(() => {
@@ -145,9 +137,9 @@ const Person = () => {
   const mobileColumns = [
     {
       field: 'name',
-      headerName: 'Employee',
+      headerName: t('person.columns.employee'),
       flex: 1,
-      renderCell: (params: any) => (
+      renderCell: (params: GridRenderCellParams<PersonFormDataBase>) => (
         <Box display="flex" alignItems="center">
           <img
             src={params.row.picture || profileImage}
@@ -171,9 +163,9 @@ const Person = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('person.columns.actions'),
       flex: 0.5,
-      renderCell: (params: { row: any }) => (
+      renderCell: (params: GridRenderCellParams<PersonFormDataBase>) => (
         <Box>
           <IconButton onClick={() => handleEdit(params.row)} size="small">
             <EditIcon fontSize="small" />
@@ -189,12 +181,12 @@ const Person = () => {
   const desktopColumns = [
     {
       field: 'picture',
-      headerName: 'Picture',
+      headerName: t('person.columns.picture'),
       flex: 0.3,
-      renderCell: (params: any) => {
+      renderCell: (params: GridRenderCellParams<PersonFormDataBase>) => {
         return (
           <img
-            src={params.value || profileImage}
+            src={(params.value as string) || profileImage}
             alt="Person"
             style={{
               width: 50,
@@ -206,17 +198,19 @@ const Person = () => {
         );
       },
     },
-    { field: 'employeeNumber', headerName: 'Employee #', flex: 0.5 },
-    { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'mail', headerName: 'Email', flex: 1.5 },
+    { field: 'employeeNumber', headerName: t('person.columns.employeeNumber'), flex: 0.5 },
+    { field: 'name', headerName: t('person.columns.name'), flex: 1 },
+    { field: 'mail', headerName: t('person.columns.email'), flex: 1.5 },
     {
       field: 'startDate',
-      headerName: 'Start Date',
+      headerName: t('person.columns.startDate'),
       flex: 0.6,
+      valueFormatter: ({ value }: { value: string }) =>
+        value ? new Date(value).toLocaleDateString('en-GB') : '—',
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('person.columns.actions'),
       flex: 0.8,
       renderCell: (params: { row: { id: string; employeeNumber: number } }) => (
         <Box
@@ -241,7 +235,7 @@ const Person = () => {
   const columns = isMobile ? mobileColumns : desktopColumns;
 
   return (
-    <Box m={isMobile ? '1rem' : '5rem 5rem'}>
+    <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 1, display: 'flex', flexDirection: 'column', height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } }}>
       <Box
         display="flex"
         flexDirection={isMobile ? 'column' : 'row'}
@@ -250,7 +244,7 @@ const Person = () => {
         mb={2}
         gap={isMobile ? 2 : 0}
       >
-        <Header title="EMPLOYEES" subtitle="List of all employees" />
+        <Header title={t('person.title')} subtitle={t('person.subtitle')} />
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -258,14 +252,15 @@ const Person = () => {
           fullWidth={isMobile}
           size={isMobile ? 'medium' : 'large'}
         >
-          Add new person
+          {t('person.addButton')}
         </Button>
       </Box>
       <Box
-        height={isMobile ? '70vh' : '78vh'}
         width="100%"
-        overflow="auto"
         sx={{
+          flexGrow: 1,
+          minHeight: 0,
+          overflow: 'auto',
           '& .MuiDataGrid-root': {
             border: 'none',
           },
@@ -291,7 +286,6 @@ const Person = () => {
         }}
       >
         <DataGrid
-          density="comfortable"
           loading={loading}
           getRowId={(row) => row.id}
           rows={persons ?? []}
@@ -310,6 +304,8 @@ const Person = () => {
           componentsProps={{
             toolbar: { searchInput, setSearchInput, setSearch },
           }}
+          density="comfortable"
+          localeText={localeText}
           sx={{
             '& .MuiDataGrid-virtualScroller': {
               overflow: 'auto',
@@ -333,8 +329,8 @@ const Person = () => {
       </Box>
       <ConfirmDialog
         open={open}
-        title="Confirm Delete"
-        message={`Are you sure you want to delete ${selectedPerson?.name}?`}
+        title={t('person.confirmDelete.title')}
+        message={t('person.confirmDelete.message', { name: selectedPerson?.name })}
         onClose={handleClose}
         onConfirm={handleConfirmDelete}
       />

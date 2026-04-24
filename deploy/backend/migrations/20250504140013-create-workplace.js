@@ -5,7 +5,7 @@ module.exports = {
     const queryInterface =
       queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
 
-    await queryInterface.createTable("Workplace", {
+    await queryInterface.createTable("JobPosition", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -21,7 +21,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: "WorkplaceCategory",
+          model: "JobPositionCategory",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -48,6 +48,6 @@ module.exports = {
     const queryInterface =
       queryInterfaceOrObject?.context ?? queryInterfaceOrObject;
 
-    await queryInterface.dropTable("Workplace");
+    await queryInterface.dropTable("JobPosition");
   },
 };

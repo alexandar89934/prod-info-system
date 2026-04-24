@@ -1,0 +1,227 @@
+{
+  "person": {
+    "title": "EMPLOYEES",
+    "subtitle": "List of all employees",
+    "addButton": "Add new person",
+    "columns": {
+      "employee": "Employee",
+      "actions": "Actions",
+      "picture": "Picture",
+      "employeeNumber": "Employee #",
+      "name": "Name",
+      "email": "Email",
+      "startDate": "Start Date"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete {{name}}?"
+    },
+    "form": {
+      "addTitle": "Add Person",
+      "editTitle": "Edit Person",
+      "editProfileTitle": "Edit Profile",
+      "addSubmit": "Add Person",
+      "updateSubmit": "Update Person",
+      "updateProfileSubmit": "Update Profile",
+      "employeeNumber": "Employee Number",
+      "name": "Name",
+      "address": "Address",
+      "mail": "Mail",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "additionalInfo": "Additional Info",
+      "roles": "Roles:",
+      "jobPositions": "Job Positions:",
+      "documents": "Documents:",
+      "back": "Back"
+    }
+  },
+  "jobPosition": {
+    "title": "JOB POSITIONS",
+    "subtitle": "List of all job positions",
+    "addButton": "Add new job position",
+    "manageCategories": "Manage Job Position Categories",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "jobPosition": "Job Position",
+      "description": "Description",
+      "category": "Category",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Job Position",
+      "editTitle": "Edit Job Position",
+      "addSubmit": "Add Job Position",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "name": "Name",
+      "description": "Description",
+      "category": "Category",
+      "addCategory": "Add Job Position Category"
+    }
+  },
+  "jobPositionCategory": {
+    "title": "JOB POSITION CATEGORIES",
+    "subtitle": "List of all categories",
+    "addButton": "Add new category",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Job Position Category",
+      "editTitle": "Edit Job Position Category",
+      "addSubmit": "Add Category",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "name": "Name",
+      "description": "Description"
+    }
+  },
+  "machineEquipment": {
+    "title": "MACHINE EQUIPMENT",
+    "subtitle": "List of all machine equipment",
+    "addButton": "Add new equipment",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "model": "Model",
+      "description": "Description",
+      "serialNumber": "Serial Number",
+      "equipmentType": "Equipment Type",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Machine Equipment",
+      "editTitle": "Edit Machine Equipment",
+      "addSubmit": "Add Equipment",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "name": "Name",
+      "model": "Model",
+      "serialNumber": "Serial Number",
+      "equipmentType": "Equipment Type",
+      "selectType": "Select type",
+      "description": "Description"
+    }
+  },
+  "machineEquipmentType": {
+    "title": "MACHINE EQUIPMENT TYPES",
+    "subtitle": "List of all equipment types",
+    "addButton": "Add new type",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Equipment Type",
+      "editTitle": "Edit Equipment Type",
+      "addSubmit": "Add Type",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "name": "Name",
+      "description": "Description"
+    }
+  },
+  "machineAvailabilityStatus": {
+    "title": "MACHINE AVAILABILITY STATUSES",
+    "subtitle": "List of all machine statuses",
+    "addButton": "Add new status",
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Availability Status",
+      "editTitle": "Edit Machine Availability Status",
+      "addSubmit": "Add Status",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "name": "Name",
+      "description": "Description"
+    }
+  },
+  "login": {
+    "title": "Login",
+    "employeeNumber": "Employee Number",
+    "password": "Password",
+    "loginButton": "Login",
+    "loggingIn": "Logging in..."
+  },
+  "navbar": {
+    "profile": "Profile",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "changePassword": "Change Password",
+    "logout": "Log Out",
+    "login": "Log In",
+    "search": "Search..."
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "personManagement": "Person Management",
+    "persons": "Persons",
+    "jobPositions": "Job Positions",
+    "jobPositionCategories": "Job Position Categories",
+    "machineManagement": "Machine Management",
+    "availabilityStatuses": "Availability Statuses",
+    "equipmentTypes": "Equipment Types",
+    "equipment": "Equipment"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "search": "Search..."
+  },
+  "dataGrid": {
+    "toolbarColumns": "Columns",
+    "toolbarDensity": "Density",
+    "toolbarDensityCompact": "Compact",
+    "toolbarDensityStandard": "Standard",
+    "toolbarDensityComfortable": "Comfortable",
+    "toolbarExport": "Export",
+    "toolbarExportCSV": "Download as CSV",
+    "toolbarExportPrint": "Print",
+    "columnsPanelTextFieldLabel": "Find column",
+    "columnsPanelTextFieldPlaceholder": "Column title",
+    "columnsPanelShowAllButton": "Show all",
+    "columnsPanelHideAllButton": "Hide all"
+  }
+}

@@ -1,12 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, CircularProgress, Alert, useTheme } from '@mui/material';
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, FieldError, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import Header from '@/reusableComponents/Header';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
+import { getName } from '@/state/auth/auth.selectors.ts';
 import { useAppDispatch } from '@/state/hooks';
 import { addMachineAvailabilityStatus } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.actions.ts';
 import {
@@ -22,6 +24,7 @@ import { AddMachineAvailabilityStatusFormData } from '@/state/machineAvailabilit
 import { machineAvailabilityStatusSchema } from '@/zodValidationSchemas/machineAvailabilityStatus.schema.ts';
 
 const AddMachineAvailabilityStatus = () => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -40,6 +43,7 @@ const AddMachineAvailabilityStatus = () => {
     defaultValues: {
       name: '',
       description: '',
+      createdBy: getName(),
     },
   });
 
@@ -70,13 +74,14 @@ const AddMachineAvailabilityStatus = () => {
   return (
     <Box
       display="flex"
-      flexDirection="column"
-      alignItems="center"
       justifyContent="center"
-      minHeight="100vh"
-      sx={{ p: 2, overflowY: 'auto' }}
+      alignItems="center"
+      height="100%"
+      sx={{ p: 2, overflow: 'hidden' }}
     >
       <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
         width="100%"
         maxWidth="600px"
         p={3}
@@ -87,88 +92,89 @@ const AddMachineAvailabilityStatus = () => {
         sx={{
           backgroundColor: theme.palette.background.default,
           maxHeight: '80vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <Header title="Add Availability Status" subtitle="" />
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Box flex="1 1 65%" display="flex" flexDirection="column" gap={2}>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <LabeledXtField
-                  id="name"
-                  label="Name"
-                  error={errors.name as any}
-                  {...field}
-                />
-              )}
-            />
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <LabeledXtField
-                  id="description"
-                  label="Description"
-                  multiline
-                  rows={4}
-                  error={errors.description as any}
-                  {...field}
-                />
-              )}
-            />
-          </Box>
+        <Header title={t('machineAvailabilityStatus.form.addTitle')} subtitle="" />
+        <Box sx={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain', display: 'flex', flexDirection: 'column', gap: 2, pb: 2, '&::-webkit-scrollbar': { width: 8 }, '&::-webkit-scrollbar-thumb': { backgroundColor: theme.palette.primary.main, borderRadius: 4 }, '&::-webkit-scrollbar-track': { backgroundColor: theme.palette.background.default } }}>
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <LabeledXtField
+                id="name"
+                label={t('machineAvailabilityStatus.form.name')}
+                error={errors.name as FieldError}
+                {...field}
+              />
+            )}
+          />
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <LabeledXtField
+                id="description"
+                label={t('machineAvailabilityStatus.form.description')}
+                multiline
+                rows={4}
+                error={errors.description as FieldError}
+                {...field}
+              />
+            )}
+          />
+        </Box>
 
-          <Box
-            sx={{
-              position: 'sticky',
-              bottom: 0,
-              left: 0,
-              width: '100%',
-              p: 2,
-              backgroundColor: theme.palette.background.default,
-            }}
-          >
-            {error && (
-              <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2, width: '100%' }}>
-                {success}
-              </Alert>
-            )}
-            <Box display="flex" gap={2}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : undefined}
-              >
-                {loading ? 'Adding...' : 'Add Status'}
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={onCancel}
-                disabled={loading}
-                sx={{
-                  color: theme.palette.primary[100],
-                  borderColor: theme.palette.primary[100],
-                  '&:hover': {
-                    borderColor: theme.palette.primary[200],
-                    backgroundColor: theme.palette.primary[100],
-                    color: theme.palette.common.white,
-                  },
-                  width: 'auto',
-                }}
-              >
-                Cancel
-              </Button>
-            </Box>
+        <Box
+          sx={{
+            flexShrink: 0,
+            pt: 2,
+            pb: 2,
+            px: 2,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: theme.palette.background.default,
+          }}
+        >
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2, width: '100%' }}>
+              {success}
+            </Alert>
+          )}
+          <Box display="flex" gap={2}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              startIcon={loading ? <CircularProgress size={20} /> : undefined}
+            >
+              {loading ? t('machineAvailabilityStatus.form.addSubmitLoading') : t('machineAvailabilityStatus.form.addSubmit')}
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={onCancel}
+              disabled={loading}
+              sx={{
+                color: theme.palette.primary[100],
+                borderColor: theme.palette.primary[100],
+                '&:hover': {
+                  borderColor: theme.palette.primary[200],
+                  backgroundColor: theme.palette.primary[100],
+                  color: theme.palette.common.white,
+                },
+              }}
+            >
+              {t('machineAvailabilityStatus.form.cancel')}
+            </Button>
           </Box>
-        </form>
+        </Box>
       </Box>
     </Box>
   );

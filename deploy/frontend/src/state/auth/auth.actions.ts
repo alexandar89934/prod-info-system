@@ -1,10 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import * as Sentry from '@sentry/react';
+import { AxiosError } from 'axios';
 
 import { LoginFormData } from '@/scenes/login';
 import { ResetPasswordFormData } from '@/scenes/personManagement/ResetPasswordPage.tsx';
 import axiosServer from '@/services/axios.service.ts';
-import { DefaultResponse } from '@/state/auth/auth.types.ts';
+import { DefaultResponse } from '@/state/defaultResponse.ts';
 
 export const userLogin = createAsyncThunk<DefaultResponse, LoginFormData>(
   'auth/userLogin',
@@ -17,18 +18,20 @@ export const userLogin = createAsyncThunk<DefaultResponse, LoginFormData>(
       }
 
       const { token } = response.headers;
-      const { name, employeeNumber, picture } = response.data.content;
+      const { name, employeeNumber, picture, id } = response.data.content;
 
       localStorage.setItem('token', token);
       localStorage.setItem('name', name);
       localStorage.setItem('employeeNumber', employeeNumber);
       localStorage.setItem('profilePicture', picture);
+      localStorage.setItem('id', String(id));
 
       return response.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       Sentry.captureException(err);
+      const axiosErr = err as AxiosError<{ error?: { message?: string } }>;
       return rejectWithValue(
-        err?.response?.data?.error?.message || 'An error occurred during login.'
+        axiosErr?.response?.data?.error?.message || 'An error occurred during login.'
       );
     }
   }
@@ -49,10 +52,11 @@ export const resetPassword = createAsyncThunk<
     const { token } = response.headers;
     localStorage.setItem('token', token);
     return response.data;
-  } catch (err: any) {
+  } catch (err: unknown) {
     Sentry.captureException(err);
+    const axiosErr = err as AxiosError<{ message?: string }>;
     return rejectWithValue(
-      err?.response?.data?.message || 'An unexpected error occurred.'
+      axiosErr?.response?.data?.message || 'An unexpected error occurred.'
     );
   }
 });
@@ -74,7 +78,7 @@ export const logout = createAsyncThunk(
       localStorage.removeItem('profilePicture');
 
       return response.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       Sentry.captureException(err);
       return rejectWithValue('An error occurred during logout.');
     }

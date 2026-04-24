@@ -1,6 +1,7 @@
 import { setupListeners } from '@reduxjs/toolkit/query';
 import ReactDOM from 'react-dom/client';
 import './main.css';
+import './i18n';
 import { Provider } from 'react-redux';
 
 import App from './App';

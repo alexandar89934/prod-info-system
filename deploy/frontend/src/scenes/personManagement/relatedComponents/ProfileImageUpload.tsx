@@ -1,5 +1,5 @@
 import { Box, FormControl, Button } from '@mui/material';
-import React, { useState } from 'react';
+import { useState, FC, ChangeEvent } from 'react';
 import { useDispatch } from 'react-redux';
 
 import profile from '../../../assets/profile.jpeg';
@@ -17,7 +17,7 @@ interface ProfileImageUploadProps {
   onImageUpload?: (uploadedPath: string) => void;
 }
 
-const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
+const ProfileImageUpload: FC<ProfileImageUploadProps> = ({
   profilePicture,
   personId,
   onImageUpload,
@@ -25,9 +25,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const [currentImagePath, setCurrentImagePath] = useState<string>(profile);
 
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       dispatch(deleteFileNewPerson({ documentPath: currentImagePath }));

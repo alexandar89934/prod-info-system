@@ -8,6 +8,7 @@ import {
   Alert,
   useTheme,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   Control,
   Controller,
@@ -19,7 +20,7 @@ import {
 import DateField from '@/reusableComponents/DateField.tsx';
 import DocumentList from '@/reusableComponents/DocumentsList.tsx';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField.tsx';
-import EmployeeWorkplaceSelect from '@/scenes/personManagement/relatedComponents/EmployeeWorkplaceSelect.tsx';
+import EmployeeJobPositionSelect from '@/scenes/personManagement/relatedComponents/EmployeeJobPositionSelect.tsx';
 import ProfileImageUpload from '@/scenes/personManagement/relatedComponents/ProfileImageUpload.tsx';
 import UserRolesSelect from '@/scenes/personManagement/relatedComponents/UserRolesSelect.tsx';
 import { PersonFormDataBase } from '@/state/person/person.types.ts';
@@ -50,7 +51,7 @@ const FormField = ({
   multiline = false,
   rows = 1,
 }: {
-  control: Control<any>;
+  control: Control<PersonFormDataBase>;
   name: string;
   label: string;
   type?: 'number' | 'text' | 'email' | 'password' | 'string';
@@ -103,14 +104,15 @@ const PersonForm = ({
   isEdit = false,
 }: PersonFormProps) => {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Box
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="100vh"
-      sx={{ p: 2, overflowY: 'auto' }}
+      height="100%"
+      sx={{ p: 2, overflow: 'hidden' }}
     >
       <Box
         component="form"
@@ -126,178 +128,188 @@ const PersonForm = ({
         sx={{
           backgroundColor: theme.palette.background.default,
           maxHeight: '80vh',
-          overflowY: 'auto',
-          '&::-webkit-scrollbar': { width: 8 },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: theme.palette.primary.main,
-            borderRadius: 4,
-          },
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: theme.palette.background.default,
-          },
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        <Typography variant="h4" align="center" mb={2}>
-          {title}
-        </Typography>
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            overscrollBehavior: 'contain',
+            '&::-webkit-scrollbar': { width: 8 },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: theme.palette.primary.main,
+              borderRadius: 4,
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: theme.palette.background.default,
+            },
+          }}
+        >
+          <Typography variant="h4" align="center" mb={2}>
+            {title}
+          </Typography>
 
-        <Box display="flex" flexWrap="wrap" gap={2}>
-          <Box flex="1 1 65%" display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexWrap="wrap" gap={2}>
+            <Box flex="1 1 65%" display="flex" flexDirection="column" gap={2}>
+              <FormField
+                control={control}
+                name="employeeNumber"
+                label={t('person.form.employeeNumber')}
+                type="number"
+                error={errors.employeeNumber as FieldError}
+              />
+              <FormField
+                control={control}
+                name="name"
+                label={t('person.form.name')}
+                error={errors.name as FieldError}
+              />
+              <FormField
+                control={control}
+                name="address"
+                label={t('person.form.address')}
+                error={errors.address as FieldError}
+              />
+            </Box>
+
+            <Box flex="1 1 25%" display="flex" justifyContent="center">
+              <ProfileImageUpload
+                profilePicture={imagePath}
+                personId={personId}
+                onImageUpload={onImageUpload}
+              />
+            </Box>
+          </Box>
+
+          <Box display="flex" flexWrap="wrap" gap={2} mt={2}>
             <FormField
               control={control}
-              name="employeeNumber"
-              label="Employee Number"
-              type="number"
-              error={errors.employeeNumber as FieldError}
+              name="mail"
+              label={t('person.form.mail')}
+              type="email"
+              error={errors.mail as FieldError}
+            />
+            <Controller
+              name="startDate"
+              control={control}
+              render={({ field }) => (
+                <DateField
+                  id="startDate"
+                  label={t('person.form.startDate')}
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  error={errors.startDate as FieldError}
+                />
+              )}
+            />
+            <Controller
+              name="endDate"
+              control={control}
+              render={({ field }) => (
+                <DateField
+                  id="endDate"
+                  label={t('person.form.endDate')}
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  error={errors.endDate as FieldError}
+                />
+              )}
             />
             <FormField
               control={control}
-              name="name"
-              label="Name"
-              error={errors.name as FieldError}
-            />
-            <FormField
-              control={control}
-              name="address"
-              label="Address"
-              error={errors.address as FieldError}
+              name="additionalInfo"
+              label={t('person.form.additionalInfo')}
+              error={errors.additionalInfo as FieldError}
+              multiline
+              rows={4}
             />
           </Box>
 
-          <Box flex="1 1 25%" display="flex" justifyContent="center">
-            <ProfileImageUpload
-              profilePicture={imagePath}
-              personId={personId}
-              onImageUpload={onImageUpload}
-            />
-          </Box>
+          <FormControl
+            fullWidth
+            margin="normal"
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <InputLabel
+              htmlFor="roles"
+              sx={{
+                minWidth: 150,
+                position: 'relative',
+                transform: 'none',
+                mb: { xs: 1, sm: 0 },
+              }}
+            >
+              {t('person.form.roles')}
+            </InputLabel>
+            <UserRolesSelect control={control} name="roles" />
+          </FormControl>
+          <FormControl
+            fullWidth
+            margin="normal"
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <InputLabel
+              htmlFor="jobPositions"
+              sx={{
+                minWidth: 150,
+                position: 'relative',
+                transform: 'none',
+                mb: { xs: 1, sm: 0 },
+              }}
+            >
+              {t('person.form.jobPositions')}
+            </InputLabel>
+            <EmployeeJobPositionSelect control={control} name="jobPositions" />
+          </FormControl>
+
+          <FormControl
+            fullWidth
+            margin="normal"
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <InputLabel
+              htmlFor="documents"
+              sx={{
+                minWidth: 150,
+                position: 'relative',
+                transform: 'none',
+                mb: { xs: 1, sm: 0 },
+              }}
+            >
+              {t('person.form.documents')}
+            </InputLabel>
+            <DocumentList personId={personId} isEdit={isEdit} fullWidth />
+          </FormControl>
         </Box>
-
-        <Box display="flex" flexWrap="wrap" gap={2} mt={2}>
-          <FormField
-            control={control}
-            name="mail"
-            label="Mail"
-            type="email"
-            error={errors.mail as FieldError}
-          />
-          <Controller
-            name="startDate"
-            control={control}
-            render={({ field }) => (
-              <DateField
-                id="startDate"
-                label="Start Date"
-                value={field.value ?? ''}
-                onChange={field.onChange}
-                error={errors.startDate as FieldError}
-              />
-            )}
-          />
-          <Controller
-            name="endDate"
-            control={control}
-            render={({ field }) => (
-              <DateField
-                id="endDate"
-                label="End Date"
-                value={field.value ?? ''}
-                onChange={field.onChange}
-                error={errors.endDate as FieldError}
-              />
-            )}
-          />
-          <FormField
-            control={control}
-            name="additionalInfo"
-            label="Additional Info"
-            error={errors.additionalInfo as FieldError}
-            multiline
-            rows={4}
-          />
-        </Box>
-
-        <FormControl
-          fullWidth
-          margin="normal"
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <InputLabel
-            htmlFor="roles"
-            sx={{
-              minWidth: 150,
-              position: 'relative',
-              transform: 'none',
-              mb: { xs: 1, sm: 0 },
-            }}
-          >
-            Roles:
-          </InputLabel>
-          <UserRolesSelect control={control} name="roles" />
-        </FormControl>
-        <FormControl
-          fullWidth
-          margin="normal"
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <InputLabel
-            htmlFor="workplaces"
-            sx={{
-              minWidth: 150,
-              position: 'relative',
-              transform: 'none',
-              mb: { xs: 1, sm: 0 },
-            }}
-          >
-            Workplaces:
-          </InputLabel>
-          <EmployeeWorkplaceSelect control={control} name="workplaces" />
-        </FormControl>
-
-        <FormControl
-          fullWidth
-          margin="normal"
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: 'center',
-            gap: 2,
-          }}
-        >
-          <InputLabel
-            htmlFor="documents"
-            sx={{
-              minWidth: 150,
-              position: 'relative',
-              transform: 'none',
-              mb: { xs: 1, sm: 0 },
-            }}
-          >
-            Documents:
-          </InputLabel>
-          <DocumentList personId={personId} isEdit={isEdit} fullWidth />
-        </FormControl>
 
         <Box
-          mt={3}
-          px={2}
-          py={2}
-          position="sticky"
-          bottom={0}
-          left={0}
-          width="100%"
-          zIndex={100}
-          bgcolor={theme.palette.background.default}
+          sx={{
+            flexShrink: 0,
+            pt: 2,
+            pb: 2,
+            px: 2,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            backgroundColor: theme.palette.background.default,
+          }}
         >
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -337,7 +349,7 @@ const PersonForm = ({
                 },
               }}
             >
-              Back
+              {t('person.form.back')}
             </Button>
           </Box>
         </Box>

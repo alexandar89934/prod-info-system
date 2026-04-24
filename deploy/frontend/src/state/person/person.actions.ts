@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AxiosError } from 'axios';
 
 import { PersonFormDataBase } from './person.types';
 import { mimeTypes } from './person.types';
@@ -137,8 +138,9 @@ export const updatePassword = createAsyncThunk(
         );
       }
       return response.data.message;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || err.message);
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message?: string }>;
+      return rejectWithValue(axiosErr.response?.data?.message || axiosErr.message);
     }
   }
 );
@@ -221,12 +223,20 @@ export const uploadFile = createAsyncThunk(
 
       if (response.status >= 400 && response.status < 500) {
         return rejectWithValue(
-          `Client error: ${response.data.error.code} - ${response.data.error.message}`
+          response.data?.error?.message ||
+            response.data?.message ||
+            'Failed to upload document.'
         );
       }
       return response.data.content.documents;
-    } catch (error) {
-      return rejectWithValue(error || 'Failed to upload persons document.');
+    } catch (error: unknown) {
+      const axiosErr = error as AxiosError<{ error?: { message?: string }; message?: string }>;
+      return rejectWithValue(
+        axiosErr?.response?.data?.error?.message ||
+          axiosErr?.response?.data?.message ||
+          axiosErr?.message ||
+          'Failed to upload persons document.'
+      );
     }
   }
 );
@@ -245,13 +255,21 @@ export const uploadFileForNewPerson = createAsyncThunk(
 
       if (response.status >= 400 && response.status < 500) {
         return rejectWithValue(
-          `Client error: ${response.data.error.code} - ${response.data.error.message}`
+          response.data?.error?.message ||
+            response.data?.message ||
+            'Failed to upload document.'
         );
       }
 
       return response.data.content;
-    } catch (error) {
-      return rejectWithValue(error || 'Failed to upload document.');
+    } catch (error: unknown) {
+      const axiosErr = error as AxiosError<{ error?: { message?: string }; message?: string }>;
+      return rejectWithValue(
+        axiosErr?.response?.data?.error?.message ||
+          axiosErr?.response?.data?.message ||
+          axiosErr?.message ||
+          'Failed to upload document.'
+      );
     }
   }
 );

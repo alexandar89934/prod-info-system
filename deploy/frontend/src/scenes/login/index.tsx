@@ -12,6 +12,7 @@ import {
 import Alert from '@mui/material/Alert';
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 
@@ -23,6 +24,7 @@ import { loginSchema } from '@/zodValidationSchemas/login.schema.ts';
 export type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useAppDispatch();
   const router = useNavigate();
@@ -74,7 +76,7 @@ const Login: React.FC = () => {
         boxShadow={1}
       >
         <Typography variant="h4" component="h1" align="center" mb={2}>
-          Login
+          {t('login.title')}
         </Typography>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -89,19 +91,21 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit(handleLogin)}>
           <TextField
             fullWidth
-            label="Employee Number"
+            label={t('login.employeeNumber')}
             variant="outlined"
             margin="normal"
+            autoComplete="username"
             {...register('employeeNumber')}
             error={!!errors.employeeNumber}
             helperText={errors.employeeNumber?.message}
           />
           <TextField
             fullWidth
-            label="Password"
+            label={t('login.password')}
             type={showPassword ? 'text' : 'password'}
             variant="outlined"
             margin="normal"
+            autoComplete="current-password"
             {...register('password')}
             error={!!errors.password}
             helperText={errors.password?.message}
@@ -130,7 +134,7 @@ const Login: React.FC = () => {
               loading ? <CircularProgress size={20} color="inherit" /> : null
             }
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? t('login.loggingIn') : t('login.loginButton')}
           </Button>
         </form>
       </Box>

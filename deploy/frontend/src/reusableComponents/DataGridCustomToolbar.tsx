@@ -7,6 +7,7 @@ import {
   GridToolbarColumnsButton,
 } from '@mui/x-data-grid';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import FlexBetween from './FlexBetween';
 
@@ -17,8 +18,8 @@ interface DataGridCustomToolbarProps {
 // @ts-ignore
 interface CustomGridProps
   extends React.ComponentProps<typeof GridToolbarColumnsButton> {
-  onPointerEnterCapture?: React.PointerEventHandler<any>;
-  onPointerLeaveCapture?: React.PointerEventHandler<any>;
+  onPointerEnterCapture?: React.PointerEventHandler<HTMLButtonElement>;
+  onPointerLeaveCapture?: React.PointerEventHandler<HTMLButtonElement>;
 }
 
 const CustomGridToolbarColumnsButton: React.FC<CustomGridProps> = (props) => {
@@ -34,6 +35,7 @@ const CustomGridToolbarDensitySelector: React.FC<CustomGridProps> = (props) => {
 const DataGridCustomToolbar: React.FC<DataGridCustomToolbarProps> = ({
   setSearch,
 }) => {
+  const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState<string>('');
 
   useEffect(() => {
@@ -53,7 +55,7 @@ const DataGridCustomToolbar: React.FC<DataGridCustomToolbarProps> = ({
           <GridToolbarExport />
         </FlexBetween>
         <TextField
-          label="Search..."
+          label={t('common.search')}
           sx={{ mb: '0.5rem', width: '15rem' }}
           onChange={(e) => setSearchInput(e.target.value)}
           value={searchInput}

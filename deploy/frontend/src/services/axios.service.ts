@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 import { config } from '../config/config.ts';
 
@@ -9,6 +9,8 @@ const removeUser = async () => {
   localStorage.removeItem('name');
   localStorage.removeItem('employeeNumber');
   localStorage.removeItem('profilePicture');
+  localStorage.removeItem('id');
+  window.dispatchEvent(new CustomEvent('force-logout'));
 };
 const axiosServer = axios.create({
   baseURL: config.backend.apiUrl,
@@ -29,12 +31,18 @@ export const renewTokens = async () => {
   return false;
 };
 
-const handleTokenExpiredResponse = async (error: any) => {
-  const originalRequest = error.config;
-  // eslint-disable-next-line no-underscore-dangle
-  if (!originalRequest._retry) {
-    // eslint-disable-next-line no-underscore-dangle
-    originalRequest._retry = true;
+interface ServerErrorData {
+  message?: string;
+  tokenExpired?: boolean;
+  tokenNotValid?: boolean;
+}
+
+type RetryableConfig = NonNullable<AxiosError['config']> & { retried?: boolean };
+
+const handleTokenExpiredResponse = async (error: AxiosError<ServerErrorData>) => {
+  const originalRequest = error.config as RetryableConfig;
+  if (!originalRequest.retried) {
+    originalRequest.retried = true;
 
     if (!isTokenRenewing) {
       isTokenRenewing = true;
@@ -47,13 +55,13 @@ const handleTokenExpiredResponse = async (error: any) => {
     try {
       if (tokenRenewed) {
         originalRequest.headers.token = getFromLocalStorage('token');
-        return await axios(originalRequest);
+        return await axiosServer(originalRequest);
       }
       await removeUser();
       return {
         data: {
           success: false,
-          message: error.response.data.message,
+          message: error.response?.data?.message,
         },
       };
     } catch (refreshError) {
@@ -61,7 +69,7 @@ const handleTokenExpiredResponse = async (error: any) => {
       return {
         data: {
           success: false,
-          message: error.response.data.message,
+          message: error.response?.data?.message,
         },
       };
     }
@@ -75,11 +83,11 @@ const handleTokenExpiredResponse = async (error: any) => {
   };
 };
 
-const handleUnauthorizedResponse = async (error: any) => {
-  if (error.response.data.tokenExpired) {
+const handleUnauthorizedResponse = async (error: AxiosError<ServerErrorData>) => {
+  if (error.response?.data?.tokenExpired) {
     return handleTokenExpiredResponse(error);
   }
-  if (error.response.data.tokenNotValid) {
+  if (error.response?.data?.tokenNotValid) {
     await removeUser();
     return {
       data: {
@@ -98,8 +106,7 @@ const handleUnauthorizedResponse = async (error: any) => {
 
 axiosServer.interceptors.request.use(
   (reqConfig) => {
-    // eslint-disable-next-line no-param-reassign
-    reqConfig.headers.token = getFromLocalStorage('token');
+    reqConfig.headers.set('token', getFromLocalStorage('token') ?? '');
     return reqConfig;
   },
   (error) => {

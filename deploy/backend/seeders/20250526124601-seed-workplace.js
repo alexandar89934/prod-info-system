@@ -4,7 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     const categories = await queryInterface.sequelize.query(
-      `SELECT id, name FROM "WorkplaceCategory";`,
+      `SELECT id, name FROM "JobPositionCategory";`,
       { type: Sequelize.QueryTypes.SELECT },
     );
 
@@ -14,7 +14,7 @@ module.exports = {
     });
 
     await queryInterface.bulkInsert(
-      "Workplace",
+      "JobPosition",
       [
         {
           name: "Direktor",
@@ -106,6 +106,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete("Workplace", null, {});
+    await queryInterface.bulkDelete("JobPosition", null, {});
   },
 };

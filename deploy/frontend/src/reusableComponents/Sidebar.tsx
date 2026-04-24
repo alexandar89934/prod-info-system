@@ -5,14 +5,10 @@ import {
   HomeOutlined,
   Groups2Outlined,
   ReceiptLongOutlined,
-  PublicOutlined,
-  PointOfSaleOutlined,
-  TodayOutlined,
-  CalendarMonthOutlined,
-  AdminPanelSettingsOutlined,
-  TrendingUpOutlined,
-  PieChartOutlined,
+  CategoryOutlined,
   CheckCircleOutline,
+  PieChartOutlined,
+  AdminPanelSettingsOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -28,6 +24,7 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -36,8 +33,10 @@ import FlexBetween from './FlexBetween';
 import { getIsLoggedIn } from '@/state/auth/auth.selectors.ts';
 
 type NavItem = {
-  text: string;
+  textKey: string;
+  path: string | null;
   icon: React.ReactNode | null;
+  requiresAuth?: boolean;
 };
 
 type SidebarProps = {
@@ -51,21 +50,30 @@ type SidebarProps = {
 };
 
 const navItems: NavItem[] = [
-  { text: 'Dashboard', icon: <HomeOutlined /> },
-  { text: 'Person Manage', icon: null },
-  { text: 'Person', icon: <Groups2Outlined /> },
-  { text: 'Workplace', icon: <ReceiptLongOutlined /> },
-  { text: 'machineAvailabilityStatus', icon: <CheckCircleOutline /> },
-  { text: 'machineEquipmentTypes', icon: <CheckCircleOutline /> },
-  { text: 'Geography', icon: <PublicOutlined /> },
-  { text: 'Sales', icon: null },
-  { text: 'Overview', icon: <PointOfSaleOutlined /> },
-  { text: 'Daily', icon: <TodayOutlined /> },
-  { text: 'Monthly', icon: <CalendarMonthOutlined /> },
-  { text: 'Breakdown', icon: <PieChartOutlined /> },
-  { text: 'Management', icon: null },
-  { text: 'Admin', icon: <AdminPanelSettingsOutlined /> },
-  { text: 'Performance', icon: <TrendingUpOutlined /> },
+  { textKey: 'sidebar.dashboard', path: 'dashboard', icon: <HomeOutlined />, requiresAuth: false },
+  { textKey: 'sidebar.personManagement', path: null, icon: null, requiresAuth: true },
+  { textKey: 'sidebar.persons', path: 'person', icon: <Groups2Outlined />, requiresAuth: true },
+  { textKey: 'sidebar.jobPositions', path: 'jobPosition', icon: <ReceiptLongOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.jobPositionCategories', path: 'jobPositionCategories', icon: <CategoryOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.machineManagement', path: null, icon: null, requiresAuth: true },
+  {
+    textKey: 'sidebar.availabilityStatuses',
+    path: 'machineAvailabilityStatus',
+    icon: <CheckCircleOutline />,
+    requiresAuth: true,
+  },
+  {
+    textKey: 'sidebar.equipmentTypes',
+    path: 'machineEquipmentTypes',
+    icon: <PieChartOutlined />,
+    requiresAuth: true,
+  },
+  {
+    textKey: 'sidebar.equipment',
+    path: 'machineEquipment',
+    icon: <AdminPanelSettingsOutlined />,
+    requiresAuth: true,
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -79,7 +87,20 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [active, setActive] = useState<string>('');
   const navigate = useNavigate();
   const theme = useTheme();
+  const { t } = useTranslation();
   const isLoggedIn: boolean = useSelector(getIsLoggedIn);
+
+  const visibleItems = navItems.reduce<NavItem[]>((acc, item, index) => {
+    if (item.requiresAuth && !isLoggedIn) return acc;
+    if (!item.icon) {
+      const nextItems = navItems.slice(index + 1);
+      const nextHeader = nextItems.findIndex((i) => !i.icon);
+      const sectionItems = nextHeader === -1 ? nextItems : nextItems.slice(0, nextHeader);
+      const hasSectionVisible = sectionItems.some((i) => !i.requiresAuth || isLoggedIn);
+      if (!hasSectionVisible) return acc;
+    }
+    return [...acc, item];
+  }, []);
 
   const handleProfileClick = () => {
     navigate('/profilePage');
@@ -113,9 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             zIndex: isNonMobile ? theme.zIndex.drawer : theme.zIndex.drawer + 1,
             overflowY: 'auto',
             scrollBehavior: 'smooth',
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
+            '&::-webkit-scrollbar': { width: '8px' },
             '&::-webkit-scrollbar-thumb': {
               backgroundColor: theme.palette.primary[900],
               borderRadius: '4px',
@@ -127,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <Box display="flex" flexDirection="column" height="100%">
-          <Box m="1.5rem 2rem 2rem 3rem">
+          <Box m="1.5rem 1rem 1.5rem 1.5rem">
             <FlexBetween color={theme.palette.secondary.main}>
               <Box display="flex" alignItems="center" gap="0.5rem">
                 <Typography variant="h4" fontWeight="bold">
@@ -144,49 +163,48 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <Box flexGrow={1}>
             <List>
-              {navItems.map(({ text, icon }) => {
+              {visibleItems.map(({ textKey, path, icon }) => {
                 if (!icon) {
                   return (
-                    <Typography key={text} sx={{ m: '2.25rem 0 1rem 3rem' }}>
-                      {text}
+                    <Typography key={textKey} sx={{ m: '1.5rem 0 0.5rem 1.5rem', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.6 }}>
+                      {t(textKey)}
                     </Typography>
                   );
                 }
-                const lcText = text.toLowerCase();
                 return (
-                  <ListItem key={text} disablePadding>
+                  <ListItem key={textKey} disablePadding>
                     <ListItemButton
                       onClick={() => {
-                        navigate(`/${lcText}`);
-                        setActive(lcText);
+                        navigate(`/${path}`);
+                        setActive(path!);
                         if (!isNonMobile) {
                           setIsSidebarOpen(false);
                         }
                       }}
                       sx={{
                         backgroundColor:
-                          active === lcText
+                          active === path
                             ? theme.palette.secondary[300]
                             : 'transparent',
                         color:
-                          active === lcText
+                          active === path
                             ? theme.palette.primary[600]
                             : theme.palette.secondary[100],
                       }}
                     >
                       <ListItemIcon
                         sx={{
-                          ml: '2rem',
+                          minWidth: 36,
                           color:
-                            active === lcText
+                            active === path
                               ? theme.palette.primary[600]
                               : theme.palette.secondary[200],
                         }}
                       >
                         {icon}
                       </ListItemIcon>
-                      <ListItemText primary={text} />
-                      {active === lcText ? (
+                      <ListItemText primary={t(textKey)} />
+                      {active === path ? (
                         <ChevronRightOutlined sx={{ ml: 'auto' }} />
                       ) : null}
                     </ListItemButton>

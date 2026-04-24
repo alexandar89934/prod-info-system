@@ -39,7 +39,7 @@ export const getAllMachineEquipmentTypesQuery = async (
     OFFSET $2
   `;
 
-  const params: any[] = [limit, offset];
+  const params: (string | number)[] = [limit, offset];
   if (search) params.push(`%${search}%`);
 
   return callQuery<MachineEquipmentType[]>(sql, params, true);
@@ -116,7 +116,7 @@ export const checkMachineEquipmentTypeNameExistsQuery = async (
   id?: number,
 ): Promise<{ count: number }> => {
   let sql = `SELECT COUNT(*)::int AS count FROM "MachineEquipmentTypes" WHERE name = $1`;
-  const params: any[] = [name];
+  const params: (string | number)[] = [name];
 
   if (id) {
     sql += ` AND id != $2`;

@@ -3,10 +3,17 @@ import {
   Visibility as ViewIcon,
   Download as DownloadIcon,
   AttachFile as AttachFileIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +22,6 @@ import {
   useTheme,
   useMediaQuery,
   Typography,
-  IconButton,
   Stack,
 } from '@mui/material';
 import React, { useState } from 'react';
@@ -24,16 +30,23 @@ import { useDispatch, useSelector } from 'react-redux';
 import DocumentTableHead from './DocumentTableHead';
 
 import ConfirmDialog from '@/reusableComponents/ConfirmDialog.tsx';
+import axiosServer from '@/services/axios.service.ts';
 import {
   deleteFile,
   deleteFileNewPerson,
   downloadFile,
   uploadFile,
   uploadFileForNewPerson,
-  viewFile,
 } from '@/state/person/person.actions.ts';
+import { mimeTypes } from '@/state/person/person.types.ts';
 import { selectPerson } from '@/state/person/person.selectors.ts';
 import { AppDispatch } from '@/state/store.ts';
+
+interface ViewModal {
+  url: string;
+  fileName: string;
+  mimeType: string;
+}
 
 interface DocumentListProps {
   personId?: string;
@@ -52,12 +65,35 @@ const DocumentList: React.FC<DocumentListProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const [open, setOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [viewModal, setViewModal] = useState<ViewModal | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
 
   const person = useSelector(selectPerson);
   const { documents } = person;
 
-  const handleView = (docName) => {
-    dispatch(viewFile(docName));
+  const handleView = async (docName: string) => {
+    setViewLoading(true);
+    try {
+      const response = await axiosServer.get(`/person/view-file/${docName}`, {
+        responseType: 'blob',
+      });
+      const ext = docName.split('.').pop()?.toLowerCase() ?? '';
+      const mimeType = mimeTypes[ext] || 'application/octet-stream';
+      const blob = new Blob([response.data], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      setViewModal({ url, fileName: docName, mimeType });
+    } catch {
+      setUploadError('Failed to load document.');
+      setTimeout(() => setUploadError(null), 4000);
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  const handleCloseView = () => {
+    if (viewModal) URL.revokeObjectURL(viewModal.url);
+    setViewModal(null);
   };
 
   const handleDownload = (docName) => {
@@ -88,22 +124,35 @@ const DocumentList: React.FC<DocumentListProps> = ({
     handleClose();
   };
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
   const handleAddNewDocument = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
+    event.target.value = '';
 
-    if (file) {
-      const fileUploadFormData = new FormData();
-      fileUploadFormData.append('uploadFile', file);
-      if (isUpdateMode) fileUploadFormData.append('personId', personId);
+    if (!file) return;
 
-      if (isUpdateMode) {
-        await dispatch(uploadFile(fileUploadFormData));
-      }
-      if (!isUpdateMode) {
-        await dispatch(uploadFileForNewPerson(fileUploadFormData));
-      }
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadError('File size exceeds the 10 MB limit.');
+      setTimeout(() => setUploadError(null), 5000);
+      return;
+    }
+
+    setUploadError(null);
+    const fileUploadFormData = new FormData();
+    fileUploadFormData.append('uploadFile', file);
+    if (isUpdateMode) fileUploadFormData.append('personId', personId);
+
+    const action = isUpdateMode
+      ? uploadFile(fileUploadFormData)
+      : uploadFileForNewPerson(fileUploadFormData);
+
+    const result = await dispatch(action);
+    if (result.meta.requestStatus === 'rejected') {
+      setUploadError((result.payload as string) || 'Upload failed.');
+      setTimeout(() => setUploadError(null), 5000);
     }
   };
 
@@ -161,6 +210,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
                       size="small"
                       onClick={() => handleView(doc.name)}
                       color="success"
+                      disabled={viewLoading}
                     >
                       <ViewIcon fontSize="small" />
                     </IconButton>
@@ -224,7 +274,17 @@ const DocumentList: React.FC<DocumentListProps> = ({
                 ) : (
                   documents.map((doc) => (
                     <TableRow key={doc.name}>
-                      <TableCell>{doc.name}</TableCell>
+                      <TableCell
+                        sx={{
+                          maxWidth: 200,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                        title={doc.name}
+                      >
+                        {doc.name}
+                      </TableCell>
                       <TableCell align="left">
                         <Button
                           size="small"
@@ -232,6 +292,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
                           sx={{ mr: 1 }}
                           color="success"
                           startIcon={<ViewIcon />}
+                          disabled={viewLoading}
                         >
                           View
                         </Button>
@@ -261,6 +322,12 @@ const DocumentList: React.FC<DocumentListProps> = ({
             </Table>
           </Box>
         </TableContainer>
+      )}
+
+      {uploadError && (
+        <Alert severity="error" sx={{ mt: 1 }}>
+          {uploadError}
+        </Alert>
       )}
 
       <Box
@@ -293,6 +360,112 @@ const DocumentList: React.FC<DocumentListProps> = ({
         onClose={handleClose}
         onConfirm={handleConfirmDelete}
       />
+
+      <Dialog
+        open={!!viewModal}
+        onClose={handleCloseView}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{ sx: { height: '90vh', display: 'flex', flexDirection: 'column' } }}
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            pr: 1,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            noWrap
+            sx={{ maxWidth: 'calc(100% - 100px)' }}
+            title={viewModal?.fileName}
+          >
+            {viewModal?.fileName}
+          </Typography>
+          <Box display="flex" gap={1}>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={() => dispatch(downloadFile(viewModal!.fileName))}
+            >
+              Download
+            </Button>
+            <IconButton onClick={handleCloseView} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0, flex: 1, overflow: 'hidden' }}>
+          {viewModal && viewModal.mimeType.startsWith('image/') ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#111',
+              }}
+            >
+              <img
+                src={viewModal.url}
+                alt={viewModal.fileName}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+              />
+            </Box>
+          ) : viewModal &&
+            (viewModal.mimeType === 'application/pdf' ||
+              viewModal.mimeType.startsWith('text/')) ? (
+            <iframe
+              src={viewModal.url}
+              title={viewModal.fileName}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                gap: 2,
+              }}
+            >
+              <Typography color="text.secondary">
+                Preview is not available for this file type.
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                onClick={() => dispatch(downloadFile(viewModal!.fileName))}
+              >
+                Download to open
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {viewLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            zIndex: 1400,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
     </Box>
   );
 };

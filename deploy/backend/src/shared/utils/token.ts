@@ -31,10 +31,11 @@ export const encodeJWTRefresh = <T extends object>(
 export const decodeJWT = <T extends object>(encodedToken: string): T => {
   try {
     return jwt.verify(encodedToken, config.jwt.secret) as T;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     throw new ApiError(
-      error.message || "Invalid token",
-      error.name === "TokenExpiredError"
+      err.message || "Invalid token",
+      err.name === "TokenExpiredError"
         ? httpStatus.UNAUTHORIZED
         : httpStatus.BAD_REQUEST,
     );

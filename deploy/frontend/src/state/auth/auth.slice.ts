@@ -25,6 +25,16 @@ const authSlice = createSlice({
       state.error = null;
       state.success = null;
     },
+    forceLogout: (state) => {
+      state.isLoggedIn = false;
+      state.name = '';
+      state.employeeNumber = '';
+      state.id = null;
+      state.profilePicture = profileImage;
+      state.loading = false;
+      state.error = null;
+      state.success = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -34,12 +44,13 @@ const authSlice = createSlice({
         state.success = null;
       })
       .addCase(userLogin.fulfilled, (state, action) => {
-        const { name, employeeNumber, picture } = action.payload.content;
+        const { name, employeeNumber, picture, id } = action.payload.content;
         state.loading = false;
         state.isLoggedIn = true;
         state.name = name;
         state.employeeNumber = employeeNumber;
         state.profilePicture = picture;
+        state.id = String(id);
         state.success = 'Logged in successfully';
       })
       .addCase(userLogin.rejected, (state, action) => {
@@ -79,5 +90,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearNotifications } = authSlice.actions;
+export const { clearNotifications, forceLogout } = authSlice.actions;
 export default authSlice.reducer;

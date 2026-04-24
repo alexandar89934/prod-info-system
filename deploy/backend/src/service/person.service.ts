@@ -4,6 +4,7 @@ import { logger } from "#logger";
 
 import {
   checkEmployeeNumberExists,
+  checkMailExists,
   createPersonQuery,
   deletePersonQuery,
   getAllPersonsQuery,
@@ -37,10 +38,17 @@ export const createPerson = async (
         httpStatus.CONFLICT,
       );
     }
+    const { count: mailCount } = await checkMailExists(data.mail);
+    if (mailCount > 0) {
+      throw new ApiError(
+        `Email ${data.mail} is already in use!`,
+        httpStatus.CONFLICT,
+      );
+    }
     return await createPersonQuery(
       data,
       data.roles ?? [],
-      data.workplaces ?? [],
+      data.jobPositions ?? [],
     );
   } catch (error) {
     if (error instanceof ApiError) {
@@ -61,6 +69,13 @@ export const updatePerson = async (
     if (count > 0) {
       throw new ApiError(
         `Employee number ${data.employeeNumber} already exists!`,
+        httpStatus.CONFLICT,
+      );
+    }
+    const { count: mailCount } = await checkMailExists(data.mail, data.id);
+    if (mailCount > 0) {
+      throw new ApiError(
+        `Email ${data.mail} is already in use!`,
         httpStatus.CONFLICT,
       );
     }

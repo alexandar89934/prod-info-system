@@ -12,12 +12,14 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import ConfirmDialog from '@/reusableComponents/ConfirmDialog';
 import DataGridCustomToolbar from '@/reusableComponents/DataGridCustomToolbar';
 import Header from '@/reusableComponents/Header';
+import { useDataGridLocaleText } from '@/reusableComponents/useDataGridLocaleText';
 import {
   fetchMachineEquipmentTypes,
   deleteMachineEquipmentType,
@@ -42,6 +44,8 @@ const MachineEquipmentTypeList = () => {
     name: string;
   };
 
+  const { t } = useTranslation();
+  const localeText = useDataGridLocaleText();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -114,12 +118,12 @@ const MachineEquipmentTypeList = () => {
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', flex: 0.3 },
-    { field: 'name', headerName: 'Name', flex: 1 },
-    { field: 'description', headerName: 'Description', flex: 1.5 },
+    { field: 'id', headerName: t('machineEquipmentType.columns.id'), flex: 0.3 },
+    { field: 'name', headerName: t('machineEquipmentType.columns.name'), flex: 1 },
+    { field: 'description', headerName: t('machineEquipmentType.columns.description'), flex: 1.5 },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('machineEquipmentType.columns.actions'),
       flex: 0.8,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -135,7 +139,7 @@ const MachineEquipmentTypeList = () => {
   ];
 
   return (
-    <Box m={isMobile ? '1rem' : '5rem'}>
+    <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 1, display: 'flex', flexDirection: 'column', height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } }}>
       <Box
         display="flex"
         flexDirection={isMobile ? 'column' : 'row'}
@@ -145,8 +149,8 @@ const MachineEquipmentTypeList = () => {
         gap={isMobile ? 2 : 0}
       >
         <Header
-          title="MACHINE EQUIPMENT TYPES"
-          subtitle="List of all equipment types"
+          title={t('machineEquipmentType.title')}
+          subtitle={t('machineEquipmentType.subtitle')}
         />
         <Button
           variant="contained"
@@ -155,14 +159,15 @@ const MachineEquipmentTypeList = () => {
           fullWidth={isMobile}
           size={isMobile ? 'medium' : 'large'}
         >
-          Add new type
+          {t('machineEquipmentType.addButton')}
         </Button>
       </Box>
 
       <Box
-        height={isMobile ? '70vh' : '78vh'}
         width="100%"
         sx={{
+          flexGrow: 1,
+          minHeight: 0,
           '& .MuiDataGrid-root': { border: 'none' },
           '& .MuiDataGrid-cell': { borderBottom: 'none' },
           '& .MuiDataGrid-columnHeaders': {
@@ -184,7 +189,6 @@ const MachineEquipmentTypeList = () => {
         }}
       >
         <DataGrid
-          density="comfortable"
           loading={loading}
           rows={types || []}
           getRowId={(row) => row.id}
@@ -203,13 +207,15 @@ const MachineEquipmentTypeList = () => {
           componentsProps={{
             toolbar: { searchInput, setSearchInput, setSearch },
           }}
+          density="comfortable"
+          localeText={localeText}
         />
       </Box>
 
       <ConfirmDialog
         open={open}
-        title="Confirm Delete"
-        message={`Are you sure you want to delete "${selected?.name}"?`}
+        title={t('machineEquipmentType.confirmDelete.title')}
+        message={t('machineEquipmentType.confirmDelete.message', { name: selected?.name })}
         onClose={handleClose}
         onConfirm={handleConfirmDelete}
       />

@@ -22,8 +22,7 @@ export const authorizeAdmin = async (
   next: NextFunction,
 ) => {
   try {
-    // eslint-disable-next-line no-param-reassign
-    res.locals.user = tryExtractTokenFromHeaders(req);
+    Object.assign(res.locals, { user: tryExtractTokenFromHeaders(req) });
     const isAdmin = await checkIfAdmin(res.locals.user.userId);
     if (!isAdmin) {
       res.status(httpStatus.UNAUTHORIZED).send({
@@ -44,8 +43,7 @@ export const authorizeSelf = async (
   next: NextFunction,
 ) => {
   try {
-    // eslint-disable-next-line no-param-reassign
-    res.locals.user = tryExtractTokenFromHeaders(req);
+    Object.assign(res.locals, { user: tryExtractTokenFromHeaders(req) });
     const { userId } = res.locals.user;
     const user = await getUserById(userId);
     const person = await getPersonByEmployeeNumber(user.employeeNumber);
@@ -70,8 +68,7 @@ export const authorizeAdminOrSelf = async (
   next: NextFunction,
 ) => {
   try {
-    // eslint-disable-next-line no-param-reassign
-    res.locals.user = tryExtractTokenFromHeaders(req);
+    Object.assign(res.locals, { user: tryExtractTokenFromHeaders(req) });
     const { userId } = res.locals.user;
     const user = await getUserById(userId);
     const { employeeNumber: targetEmployeeNumber } = req.body;
@@ -116,8 +113,7 @@ export const authorizeModerator = async (
   next: NextFunction,
 ) => {
   try {
-    // eslint-disable-next-line no-param-reassign
-    res.locals.user = tryExtractTokenFromHeaders(req);
+    Object.assign(res.locals, { user: tryExtractTokenFromHeaders(req) });
     const isModerator = await checkIfModerator(res.locals.user.userId);
     if (!isModerator) {
       res.status(httpStatus.UNAUTHORIZED).send({
@@ -156,8 +152,8 @@ export const verifyTokenMiddleware = async (
       return;
     }
     next();
-  } catch (ex: any) {
-    if (ex.name === "TokenExpiredError") {
+  } catch (ex: unknown) {
+    if ((ex as Error).name === "TokenExpiredError") {
       res.status(httpStatus.UNAUTHORIZED).send({
         success: false,
         message: "Token expired, Please Login.",

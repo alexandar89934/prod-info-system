@@ -24,7 +24,7 @@ export interface PersonFormDataBase {
   picture: string;
   additionalInfo: string;
   roles: number[];
-  workplaces: number[];
+  jobPositions: number[];
   startDate: string | Date | null;
   endDate: string | Date | null;
   createdAt: Date;

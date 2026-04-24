@@ -31,7 +31,7 @@ const initialPerson: PersonState['person'] = {
   startDate: '',
   endDate: '',
   roles: [],
-  workplaces: [],
+  jobPositions: [],
   createdAt: null,
   updatedAt: null,
   createdBy: getName(),

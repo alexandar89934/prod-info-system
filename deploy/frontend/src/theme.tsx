@@ -9,6 +9,7 @@ type Tokens = {
   primary: ColorToken;
   secondary: ColorToken;
 };
+
 export const tokensDark: Tokens = {
   grey: {
     0: '#ffffff',
@@ -25,28 +26,30 @@ export const tokensDark: Tokens = {
     900: '#141414',
     1000: '#000000',
   },
+  // Slate / navy — used as backgrounds in dark mode
   primary: {
-    100: '#d3d4d4',
-    200: '#a6a8a8',
-    300: '#7a7c7c',
-    400: '#4d4f4f',
-    500: '#212121',
-    600: '#191919',
-    700: '#141414',
-    800: '#0d0d0d',
-    900: '#070707',
+    100: '#cbd5e1',
+    200: '#94a3b8',
+    300: '#64748b',
+    400: '#475569',
+    500: '#1e293b',
+    600: '#0f172a',
+    700: '#0c1322',
+    800: '#08101c',
+    900: '#040810',
   },
+  // Indigo — accent colour in both modes
   secondary: {
-    50: '#f0f0f0',
-    100: '#fff6e0',
-    200: '#ffedc2',
-    300: '#ffe3a3',
-    400: '#ffda85',
-    500: '#ffd166',
-    600: '#cca752',
-    700: '#997d3d',
-    800: '#665429',
-    900: '#332a14',
+    50:  '#eef2ff',
+    100: '#e0e7ff',
+    200: '#c7d2fe',
+    300: '#a5b4fc',
+    400: '#818cf8',
+    500: '#6366f1',
+    600: '#4f46e5',
+    700: '#4338ca',
+    800: '#3730a3',
+    900: '#312e81',
   },
 };
 
@@ -111,8 +114,8 @@ export const themeSettings = (mode: ThemeMode): ThemeSettings => {
               main: tokensDark.grey[500],
             },
             background: {
-              default: tokensDark.primary[600],
-              paper: tokensDark.primary[500],
+              default: tokensDark.primary[600],  // #0f172a — deep slate
+              paper:   tokensDark.primary[500],  // #1e293b — lighter slate
             },
           }
         : {
@@ -123,46 +126,34 @@ export const themeSettings = (mode: ThemeMode): ThemeSettings => {
             },
             secondary: {
               ...tokensLight.secondary,
-              main: tokensDark.secondary[600],
-              light: tokensDark.secondary[700],
+              // Only [300] needs overriding: the reversal would give dark-indigo here
+              // which is used as a background (column headers, active sidebar items).
+              // Light indigo tint works correctly against dark text on a white bg.
+              // [100] and [200] are used as text/icon colours so they stay as the
+              // reversed dark-indigo values — readable on the white background.
+              300: tokensDark.secondary[300],   // #a5b4fc — column headers, active bg
+              main: tokensDark.secondary[600],  // #4f46e5 — buttons, icons
+              light: tokensDark.secondary[400], // #818cf8 — hover states
             },
             neutral: {
               ...tokensLight.grey,
               main: tokensDark.grey[500],
             },
             background: {
-              default: tokensDark.grey[0],
-              paper: tokensDark.grey[50],
+              default: tokensDark.grey[0],   // #ffffff
+              paper:   tokensDark.grey[10],  // #f6f6f6
             },
           }),
     },
     typography: {
       fontFamily: ['Inter', 'sans-serif'].join(','),
       fontSize: 12,
-      h1: {
-        fontFamily: ['Inter', 'sans-serif'].join(','),
-        fontSize: 40,
-      },
-      h2: {
-        fontFamily: ['Inter', 'sans-serif'].join(','),
-        fontSize: 32,
-      },
-      h3: {
-        fontFamily: ['Inter', 'sans-serif'].join(','),
-        fontSize: 24,
-      },
-      h4: {
-        fontFamily: ['Inter', 'sans-serif'].join(','),
-        fontSize: 20,
-      },
-      h5: {
-        fontFamily: ['Inter', 'sans-serif'].join(','),
-        fontSize: 16,
-      },
-      h6: {
-        fontFamily: ['Inter', 'sans-serif'].join(','),
-        fontSize: 14,
-      },
+      h1: { fontFamily: ['Inter', 'sans-serif'].join(','), fontSize: 40 },
+      h2: { fontFamily: ['Inter', 'sans-serif'].join(','), fontSize: 32 },
+      h3: { fontFamily: ['Inter', 'sans-serif'].join(','), fontSize: 24 },
+      h4: { fontFamily: ['Inter', 'sans-serif'].join(','), fontSize: 20 },
+      h5: { fontFamily: ['Inter', 'sans-serif'].join(','), fontSize: 16 },
+      h6: { fontFamily: ['Inter', 'sans-serif'].join(','), fontSize: 14 },
     },
     breakpoints: {
       values: {

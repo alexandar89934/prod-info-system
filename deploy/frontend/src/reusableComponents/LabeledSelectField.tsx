@@ -2,6 +2,7 @@ import {
   FormControl,
   MenuItem,
   Select,
+  SelectChangeEvent,
   useTheme,
   Box,
   Typography,
@@ -18,7 +19,7 @@ interface LabeledXtSelectProps {
   label: string;
   options: Option[];
   value: string | number;
-  onChange: (value: any) => void;
+  onChange: (event: SelectChangeEvent<string | number>) => void;
   error?: FieldError;
   minWidth?: string;
   fullWidth?: boolean;

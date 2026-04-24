@@ -15,35 +15,29 @@ Worker authentication: **NFC card** (primary) + employee number/password (fallba
 
 ## Current State (what exists)
 
-| Area | Status |
-|------|--------|
-| Auth (JWT + refresh token, RBAC) | Done |
-| Person management | Done |
-| Workplace → **needs rename to JobPosition** | Done (wrong name) |
-| WorkplaceCategory → **needs rename** | Done (wrong name) |
-| Machine Availability Statuses | Done |
-| Machine Equipment Types | Done |
-| Machine Equipment (auxiliary, e.g. robot, boiler, conveyor) | In progress (US02-03) |
-| Machine (main injection/production machine) | Not started |
-| Tool (Alat / mold) | Not started |
-| Product / Part (Šifra komada) | Not started |
-| Work Order system | Not started |
-| Production Plan | Not started (deferred — complex MRP) |
+| Area | Branch | Status |
+|------|--------|--------|
+| Auth (JWT + refresh token, RBAC) | — | ✅ Done |
+| Person management | — | ✅ Done |
+| JobPosition / JobPositionCategory | — | ✅ Done (renamed from Workplace) |
+| Machine Availability Statuses | US02-01-machine-availability-statuses | ✅ Done |
+| Machine Equipment Types | US02-02-machine-equipment-types | ✅ Done |
+| Machine Equipment (auxiliary — robot, boiler, conveyor) | US02-03-machine-equipment-crud | ✅ Done |
+| Machine (main injection/production machine) | US02-04-machine-crud | Not started |
+| Tool / Mold (Alat) | US03-01-tool-crud | Not started |
+| Product / Part (Šifra komada) | US03-02-product-crud | Not started |
+| Material | US03-03-material-crud | Not started |
+| Customer | US03-04-customer-crud | Not started |
+| Work Order system | US04-01-work-order-core | Not started |
+| Production Plan | US05-01-production-plan | Not started (deferred — complex MRP) |
 
 ---
 
-## Refactoring Required (before new features)
+## Notes
 
-### 1. Rename Workplace → JobPosition
-`Workplace` was built as a physical location but the actual requirement is **job position** (Regler, Transporter, Production Worker, etc.).
-
-Scope of change:
-- DB: migration to rename `Workplaces` → `JobPositions`, `WorkplaceCategories` → `JobPositionCategories`, `EmployeeWorkplaces` → `PersonJobPositions`
-- Backend: rename models, services, controllers, routes, Joi schemas
-- Frontend: rename Redux slices, scenes, Zod schemas, sidebar links
-
-### 2. MachineEquipment naming note
-`MachineEquipment` is correctly used for **auxiliary equipment** (robot arm, conveyor belt, boiler, vacuum, dryer) that supports a main machine. The upcoming `Machine` entity is the main production machine. No rename needed, but always be explicit in code comments to avoid confusion.
+- `MachineEquipment` = auxiliary equipment (robot arm, conveyor, boiler, dryer) attached to a main `Machine`. Keep naming explicit in code.
+- `Tool` = Alat / mold — the die that produces a `Product`. One tool can run on multiple machines.
+- `Material` = raw material input tracked in warehouse and linked to BOM.
 
 ---
 
@@ -176,43 +170,45 @@ Sub-order tables: `TransporterOrder`, `ToolMountingOrder`, `MachineStartupOrder`
 
 ## Build Order
 
-### Phase 0 — Refactoring (do first)
-- [ ] Rename Workplace → JobPosition across DB, backend, frontend
+### Phase 0 — Refactoring ✅ Done
+- [x] Rename Workplace → JobPosition across DB, backend, frontend
 
-### Phase 1 — Finish current work (US02-03)
-- [ ] Complete Machine Equipment CRUD + file upload (branch US02-03)
+### Phase 1 — Machine Equipment ✅ Done
+- [x] `US02-03-machine-equipment-crud` — MachineEquipment CRUD + file upload
 
 ### Phase 2 — Core entities
-- [ ] US02-04: Machine entity (main machine with full fields)
-- [ ] US03-01: Tool entity (Alat)
-- [ ] US03-02: Product/Part entity (Šifra komada) + BOM
-- [ ] Extended Person fields (RFID number, status, eligible positions)
+- [ ] `US02-04-machine-crud` — Machine (main machine: fields, status, modes, service interval)
+- [ ] `US02-05-person-fields` — Extended Person (RFID card, status, eligible positions junction)
+- [ ] `US03-01-tool-crud` — Tool / Mold (Alat): dimensions, temps, piece counter, docs
+- [ ] `US03-02-product-crud` — Product / Part (Šifra komada) + BOM
+- [ ] `US03-03-material-crud` — Material (raw material: code, name, docs)
+- [ ] `US03-04-customer-crud` — Customer + basic order/shipment entities
 
 ### Phase 3 — Work Order system
-- [ ] US04-01: Work order creation (Planner)
-- [ ] US04-02: Transporter sub-order
-- [ ] US04-03: Tool mounting sub-order (with machine lock dependency)
-- [ ] US04-04: Machine startup sub-order
-- [ ] US04-05: Production worker sub-order (multi-shift, scrap logging)
-- [ ] US04-06: QC sub-order (parallel, hourly confirmation, deviations)
-- [ ] US04-07: Warehouse receipt sub-order
-- [ ] US04-08: Other sub-orders (printing, assembly, recycling)
+- [ ] `US04-01-work-order-core` — Work order creation (Planner: machine + tool + part + qty)
+- [ ] `US04-02-transporter-order` — Transporter sub-order (deliver material to machine)
+- [ ] `US04-03-tool-mounting-order` — Tool mounting sub-order (with machine lock dependency)
+- [ ] `US04-04-machine-startup-order` — Machine startup sub-order + startup scrap log
+- [ ] `US04-05-production-order` — Production worker sub-order (multi-shift, scrap logging)
+- [ ] `US04-06-qc-order` — QC sub-order (parallel, hourly confirmation, deviations)
+- [ ] `US04-07-warehouse-order` — Warehouse receipt sub-order
+- [ ] `US04-08-other-sub-orders` — Printing, assembly, recycling sub-orders
 
 ### Phase 4 — PWA & NFC
-- [ ] US05-01: PWA shell (installable, mobile-first layout)
-- [ ] US05-02: NFC card login (Web NFC API, Android Chrome)
-- [ ] US05-03: Role-specific dashboards (worker sees only their active sub-order)
+- [ ] `US05-01-pwa-shell` — PWA shell (installable, mobile-first layout)
+- [ ] `US05-02-nfc-login` — NFC card login (Web NFC API, Android Chrome)
+- [ ] `US05-03-role-dashboards` — Role-specific dashboards (worker sees only active sub-order)
 
 ### Phase 5 — Reporting & Dashboard
-- [ ] US06-01: Real-time production overview (polling, Director/Planner)
-- [ ] US06-02: Machine counters dashboard
-- [ ] US06-03: Scrap analysis by reason/machine/worker
+- [ ] `US06-01-production-overview` — Real-time production overview (Director/Planner)
+- [ ] `US06-02-machine-counters` — Machine counters dashboard
+- [ ] `US06-03-scrap-analysis` — Scrap analysis by reason / machine / worker
 
-### Phase 6 — Plan (deferred — complex MRP)
-- [ ] US07-01: Master plan with sector sub-plans
-- [ ] US07-02: Material requirements calculation from BOM + stock
-- [ ] US07-03: Plan → Work Order generation
-- [ ] US07-04: Plan time levels (monthly/weekly/daily/shift)
+### Phase 6 — Production Plan (deferred — complex MRP)
+- [ ] `US07-01-plan-structure` — Master plan with sector sub-plans
+- [ ] `US07-02-material-requirements` — Material requirements calculation from BOM + stock
+- [ ] `US07-03-plan-to-work-order` — Plan → Work Order generation
+- [ ] `US07-04-plan-time-levels` — Plan time levels (monthly / weekly / daily / shift)
 
 ---
 

@@ -1,6 +1,6 @@
 import { deleteRefreshToken } from "../infrastructure/refreshToken.redis";
 import {
-  getUserByEmployeeNumber,
+  getUserByIdentifier,
   updateUserPasswordQuery,
 } from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
@@ -10,8 +10,8 @@ import { encodeJWT } from "../shared/utils/token";
 
 import { getUserById } from "./user.service";
 
-export const userSignIn = async (employeeNumber: string, password: string) => {
-  const user = await getUserByEmployeeNumber(employeeNumber);
+export const userSignIn = async (identifier: string, password: string) => {
+  const user = await getUserByIdentifier(identifier);
 
   if (!user) {
     throw new AuthError("Wrong username or password");
@@ -37,7 +37,7 @@ export const resetPassword = async (
   newPassword: string,
   confirmPassword: string,
 ) => {
-  const user = await getUserByEmployeeNumber(employeeNumber);
+  const user = await getUserByIdentifier(employeeNumber);
   if (!user) {
     throw new AuthError("User not found");
   }

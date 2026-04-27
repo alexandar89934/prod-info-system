@@ -264,7 +264,7 @@ export const uploadProfileImage = (req: Request, res: Response) => {
     return res.status(400).json({ error: "No file uploaded" });
   }
 
-  const imagePath = `/uploads/${req.file.filename}`;
+  const imagePath = `/uploads/temp/${req.file.filename}`;
   return res.status(200).json({ path: imagePath });
 };
 
@@ -280,7 +280,7 @@ export const uploadFile = catchAsync(async (req: Request, res: Response) => {
     return res.status(400).json({ error: "No file uploaded" });
   }
 
-  const filePath = `/uploads/${req.file.filename}`;
+  const filePath = `/uploads/temp/${req.file.filename}`;
   const fileName = req.file.filename;
   const documents = await personService.updatePersonsDocuments(
     personId,
@@ -300,7 +300,7 @@ export const uploadFileNewPerson = catchAsync(
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const filePath = `/uploads/${req.file.filename}`;
+    const filePath = `/uploads/temp/${req.file.filename}`;
     const fileName = req.file.filename;
     const document = {
       name: fileName,
@@ -326,7 +326,10 @@ export const downloadDocument = async (
     return res.status(400).json({ message: "File name is required" });
   }
 
-  const filePath = path.join("/backend/src/uploads/", fileName); // Adjust path as needed
+  const uploadsDir = path.join(__dirname, "../uploads");
+  const tempPath = path.join(uploadsDir, "temp", fileName);
+  const permPath = path.join(uploadsDir, fileName);
+  const filePath = fs.existsSync(permPath) ? permPath : tempPath;
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ message: "File not found" });
@@ -351,7 +354,10 @@ export const viewDocument = async (
     return res.status(400).json({ message: "File name is required" });
   }
 
-  const filePath = path.join(__dirname, "../uploads", fileName); // Adjust path
+  const uploadsDir = path.join(__dirname, "../uploads");
+  const tempPath = path.join(uploadsDir, "temp", fileName);
+  const permPath = path.join(uploadsDir, fileName);
+  const filePath = fs.existsSync(permPath) ? permPath : tempPath;
 
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ message: "File not found" });

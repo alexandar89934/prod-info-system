@@ -2,15 +2,16 @@ import { User } from "../service/user.service.types";
 
 import { callQuery } from "./utils/query";
 
-export const getUserByEmployeeNumber = async (employeeNumber: string) => {
+export const getUserByIdentifier = async (identifier: string) => {
   const selectSQL = `
     SELECT u.*, p.name, p.picture
     FROM "User" u
            JOIN "Person" p ON u."personId" = p."id"
-    WHERE u."employeeNumber" = CAST($1 AS INTEGER);
+    WHERE u."employeeNumber" = CASE WHEN $1 ~ '^[0-9]+$' THEN CAST($1 AS INTEGER) ELSE NULL END
+       OR p.mail = $1;
   `;
 
-  const values = [employeeNumber];
+  const values = [identifier];
 
   return callQuery<User>(selectSQL, values);
 };

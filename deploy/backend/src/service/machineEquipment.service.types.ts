@@ -10,6 +10,10 @@ export type MachineEquipment = {
   model: string | null;
   serialNumber: string | null;
   type: number;
+  machineId: string | null;
+  equipmentTypeName?: string | null;
+  machineName?: string | null;
+  machineNumber?: number | null;
   description: string | null;
   documents: FileReference[] | null;
   pictures: FileReference[] | null;

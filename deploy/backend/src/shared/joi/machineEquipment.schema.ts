@@ -30,6 +30,10 @@ export const CreateMachineEquipmentSchema = Joi.object({
   updatedAt: Joi.date().iso().optional(),
 });
 
+export const AssignMachineEquipmentSchema = Joi.object({
+  machineId: Joi.string().uuid().required(),
+});
+
 export const UpdateMachineEquipmentSchema = Joi.object({
   id: Joi.number().integer().required(),
   name: Joi.string().optional().allow(""),

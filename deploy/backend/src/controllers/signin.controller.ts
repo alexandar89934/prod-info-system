@@ -9,9 +9,9 @@ import { readPayloadOfToken } from "../shared/utils/token";
 import { config } from "./../config/config";
 
 export const userSignIn = catchAsync(async (req: Request, res: Response) => {
-  const { employeeNumber, password } = req.body;
+  const { identifier, password } = req.body;
 
-  const signInData = await signInService.userSignIn(employeeNumber, password);
+  const signInData = await signInService.userSignIn(identifier, password);
   const { refreshValidity = 10 * 60 * 1000 } = config.jwt;
 
   const refreshTokenData = await refreshTokenService.createRefreshToken(

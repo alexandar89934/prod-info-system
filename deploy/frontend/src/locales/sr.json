@@ -93,10 +93,113 @@
       "description": "Opis"
     }
   },
+  "machine": {
+    "title": "MAŠINE",
+    "subtitle": "Lista svih mašina",
+    "addButton": "Dodaj novu mašinu",
+    "columns": {
+      "name": "Naziv",
+      "machineNumber": "Broj mašine",
+      "serialNumber": "Serijski broj",
+      "availabilityStatus": "Status",
+      "automaticMode": "Auto",
+      "workPermit": "Radna dozvola",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj mašinu",
+      "editTitle": "Izmeni mašinu",
+      "addSubmit": "Dodaj mašinu",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "sectionBasic": "Osnovne informacije",
+      "sectionTechnical": "Tehničke specifikacije",
+      "sectionStatus": "Status",
+      "sectionModes": "Načini rada",
+      "sectionMoldLimits": "Dimenzije alata",
+      "sectionService": "Servis",
+      "sectionCounters": "Brojači",
+      "sectionMedia": "Fotografije",
+      "sectionDocuments": "Dokumenta",
+      "name": "Naziv",
+      "machineNumber": "Broj mašine",
+      "serialNumber": "Serijski broj",
+      "yearOfManufacture": "Godina proizvodnje",
+      "controlSystem": "Upravljanje mašine",
+      "description": "Opis",
+      "availabilityStatus": "Status dostupnosti",
+      "selectStatus": "Izaberite status",
+      "workPermit": "Radna dozvola",
+      "automaticMode": "Automatski mod",
+      "semiAutomaticMode": "Polu-automatski mod",
+      "manualMode": "Manuelni mod",
+      "clampingForce": "Sila zatvaranja kalupa (kN)",
+      "injectionWeight": "Masa ubrizgavanja (gr)",
+      "maxMoldWeight": "Maks. težina alata (kg)",
+      "maxMoldWidth": "Razmak između vođica — širina (mm)",
+      "maxMoldHeight": "Razmak između vođica — visina (mm)",
+      "minMoldThickness": "Min debljina alata (mm)",
+      "maxMoldThickness": "Maks. debljina alata (mm)",
+      "centeringRingFixedSide": "Prečnik centraža — nepokretna strana (mm)",
+      "centeringRingMovingSide": "Prečnik centraža — pokretna strana (mm)",
+      "serviceInterval": "Interval servisiranja (dani)",
+      "lastServiceDone": "Datum poslednjeg servisa",
+      "workHoursCounter": "Broj radnih sati",
+      "pieceCounter": "Broj komada",
+      "scrapCounter": "Broj škarta"
+    },
+    "validation": {
+      "nameRequired": "Naziv je obavezan",
+      "machineNumberPositive": "Broj mašine mora biti pozitivan ceo broj",
+      "intMax": "Vrednost ne sme preći 2.147.483.647"
+    },
+    "detail": {
+      "back": "Nazad na listu",
+      "edit": "Izmeni",
+      "notSpecified": "Nije navedeno",
+      "view": "Pregled",
+      "download": "Preuzmi",
+      "attachedEquipment": "Priključena oprema",
+      "noAttachedEquipment": "Nema priključene opreme na ovoj mašini.",
+      "addEquipment": "Dodaj opremu",
+      "unassign": "Ukloni",
+      "assignDialogTitle": "Dodaj opremu na mašinu",
+      "searchEquipment": "Pretraži opremu...",
+      "noUnassignedEquipment": "Nema dostupne nepriključene opreme.",
+      "assign": "Dodaj",
+      "equipmentType": "Tip",
+      "serialNumber": "Ser. br."
+    }
+  },
   "machineEquipment": {
     "title": "OPREMA MAŠINA",
     "subtitle": "Lista sve opreme mašina",
     "addButton": "Dodaj novu opremu",
+    "detail": {
+      "back": "Nazad na listu",
+      "edit": "Izmeni",
+      "notSpecified": "Nije navedeno",
+      "view": "Pregled",
+      "download": "Preuzmi",
+      "sectionBasic": "Osnovne informacije",
+      "sectionMachineAssignment": "Priključena mašina",
+      "sectionMedia": "Fotografije",
+      "sectionDocuments": "Dokumenta",
+      "name": "Naziv",
+      "model": "Model",
+      "serialNumber": "Serijski broj",
+      "equipmentType": "Tip opreme",
+      "description": "Opis",
+      "assignedMachine": "Priključena mašina",
+      "noMachineAssigned": "Nije priključena ni na jednu mašinu",
+      "goToMachine": "Idi na mašinu"
+    },
     "columns": {
       "id": "ID",
       "name": "Naziv",
@@ -104,6 +207,7 @@
       "description": "Opis",
       "serialNumber": "Serijski broj",
       "equipmentType": "Tip opreme",
+      "machine": "Mašina",
       "actions": "Akcije"
     },
     "confirmDelete": {
@@ -123,7 +227,15 @@
       "serialNumber": "Serijski broj",
       "equipmentType": "Tip opreme",
       "selectType": "Izaberite tip",
-      "description": "Opis"
+      "description": "Opis",
+      "sectionMedia": "Fotografije",
+      "sectionDocuments": "Dokumenta",
+      "sectionMachineAssignment": "Priključivanje na mašinu",
+      "notAssigned": "Nije priključena ni na jednu mašinu",
+      "selectMachine": "Izaberite mašinu",
+      "assignToMachine": "Priključi",
+      "unassignFromMachine": "Odveži",
+      "reassign": "Premesti"
     }
   },
   "machineEquipmentType": {
@@ -180,7 +292,7 @@
   },
   "login": {
     "title": "Prijava",
-    "employeeNumber": "Broj zaposlenog",
+    "identifier": "Broj zaposlenog ili email",
     "password": "Lozinka",
     "loginButton": "Prijavi se",
     "loggingIn": "Prijavljivanje..."
@@ -203,7 +315,8 @@
     "machineManagement": "Upravljanje mašinama",
     "availabilityStatuses": "Statusi dostupnosti",
     "equipmentTypes": "Tipovi opreme",
-    "equipment": "Oprema"
+    "equipment": "Oprema",
+    "machines": "Mašine"
   },
   "common": {
     "cancel": "Otkaži",

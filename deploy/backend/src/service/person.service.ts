@@ -19,6 +19,7 @@ import { ApiError } from "../shared/error/ApiError";
 import {
   deleteFileIfExists,
   deleteFilesIfExist,
+  promoteFile,
 } from "../shared/utils/fileUtils";
 
 import {
@@ -45,10 +46,22 @@ export const createPerson = async (
         httpStatus.CONFLICT,
       );
     }
+    const rawDocs = Array.isArray(data.documents) ? data.documents : [];
+    const promotedDocs = rawDocs.map((doc) => {
+      const d = doc as { path: string };
+      return { ...d, path: promoteFile(d.path) };
+    });
+
+    const promotedData: CreatePersonData = {
+      ...data,
+      picture: data.picture ? promoteFile(data.picture) : data.picture,
+      documents: promotedDocs.length > 0 ? (promotedDocs as unknown as Record<string, unknown>) : data.documents,
+    };
+
     return await createPersonQuery(
-      data,
-      data.roles ?? [],
-      data.jobPositions ?? [],
+      promotedData,
+      promotedData.roles ?? [],
+      promotedData.jobPositions ?? [],
     );
   } catch (error) {
     if (error instanceof ApiError) {
@@ -188,7 +201,7 @@ export const updateImagePath: (
       deleteFileIfExists(person.picture);
     }
 
-    const updatedPerson = await updatePersonImagePathQuery(id, newImagePath);
+    const updatedPerson = await updatePersonImagePathQuery(id, promoteFile(newImagePath));
     if (!updatedPerson) {
       throw new ApiError(
         "Error updating image path in database!",
@@ -307,7 +320,7 @@ export const updatePersonsDocuments = async (
 
     updatedDocuments.push({
       name: fileName,
-      path: filePath,
+      path: promoteFile(filePath),
       dateAdded: new Date(),
     });
 

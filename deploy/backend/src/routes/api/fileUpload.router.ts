@@ -13,5 +13,9 @@ fileUploadRouter
   );
 
 fileUploadRouter
+  .route("/view-file/:filename")
+  .get(fileUploadController.viewFile);
+
+fileUploadRouter
   .route("/delete-file")
   .delete(fileUploadController.deleteFile);

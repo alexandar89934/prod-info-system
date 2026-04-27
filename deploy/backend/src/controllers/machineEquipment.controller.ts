@@ -106,6 +106,67 @@ export const getMachineEquipmentById = catchAsync(
   },
 );
 
+export const getUnassignedEquipment = catchAsync(
+  async (req: Request, res: Response) => {
+    const { search = "" } = req.query;
+    const equipments = await machineEquipmentService.getUnassignedEquipment(
+      String(search),
+    );
+    return res.status(httpStatus.OK).send({
+      success: true,
+      message: "Successfully fetched unassigned equipment.",
+      content: { equipments },
+    });
+  },
+);
+
+export const assignEquipmentToMachine = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { machineId } = req.body;
+
+    if (!id) {
+      return res.status(httpStatus.BAD_REQUEST).send({
+        success: false,
+        message: "Missing equipment ID.",
+      });
+    }
+
+    const equipment = await machineEquipmentService.assignEquipmentToMachine(
+      Number(id),
+      machineId,
+    );
+
+    return res.status(httpStatus.OK).send({
+      success: true,
+      message: "Equipment assigned to machine successfully!",
+      content: { equipment },
+    });
+  },
+);
+
+export const unassignEquipmentFromMachine = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(httpStatus.BAD_REQUEST).send({
+        success: false,
+        message: "Missing equipment ID.",
+      });
+    }
+
+    const equipment =
+      await machineEquipmentService.unassignEquipmentFromMachine(Number(id));
+
+    return res.status(httpStatus.OK).send({
+      success: true,
+      message: "Equipment unassigned from machine successfully!",
+      content: { equipment },
+    });
+  },
+);
+
 export const deleteMachineEquipment = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;

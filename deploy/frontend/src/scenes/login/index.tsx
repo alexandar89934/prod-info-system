@@ -91,13 +91,13 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit(handleLogin)}>
           <TextField
             fullWidth
-            label={t('login.employeeNumber')}
+            label={t('login.identifier')}
             variant="outlined"
             margin="normal"
             autoComplete="username"
-            {...register('employeeNumber')}
-            error={!!errors.employeeNumber}
-            helperText={errors.employeeNumber?.message}
+            {...register('identifier')}
+            error={!!errors.identifier}
+            helperText={errors.identifier?.message}
           />
           <TextField
             fullWidth

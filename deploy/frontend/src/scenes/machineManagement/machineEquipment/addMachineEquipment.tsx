@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, CircularProgress, Alert, useTheme } from '@mui/material';
+import { Box, Button, CircularProgress, Alert, Typography, useTheme } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import Header from '@/reusableComponents/Header';
 import ImageGallery from '@/reusableComponents/ImageGallery.tsx';
 import { LabeledXtSelect } from '@/reusableComponents/LabeledSelectField.tsx';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
+import MachineDocumentUpload from '@/reusableComponents/MachineDocumentUpload.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import { useAppDispatch } from '@/state/hooks';
 import { addMachineEquipment } from '@/state/machineEquipment/machineEquipment.actions.ts';
@@ -26,6 +27,9 @@ const AddMachineEquipment = () => {
     types,
     pictures,
     picturesToSubmit,
+    documents,
+    setDocuments,
+    documentsToSubmit,
     fileLoading,
     fileError,
     loading,
@@ -54,7 +58,7 @@ const AddMachineEquipment = () => {
 
   const onSubmit = async (data: AddMachineEquipmentFormData) => {
     const result = await dispatch(
-      addMachineEquipment({ ...data, pictures: picturesToSubmit })
+      addMachineEquipment({ ...data, pictures: picturesToSubmit, documents: documentsToSubmit })
     );
     if (addMachineEquipment.fulfilled.match(result)) {
       reset();
@@ -79,7 +83,7 @@ const AddMachineEquipment = () => {
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         width="100%"
-        maxWidth="600px"
+        maxWidth="750px"
         p={3}
         border="1px solid"
         borderColor="grey.300"
@@ -108,6 +112,9 @@ const AddMachineEquipment = () => {
             )}
           />
 
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+            {t('machineEquipment.form.sectionMedia')}
+          </Typography>
           <ImageGallery
             galleryImages={pictures}
             onImagesSelected={handleImagesSelected}
@@ -115,6 +122,15 @@ const AddMachineEquipment = () => {
             isLoading={fileLoading}
           />
           {fileError && <Alert severity="error">{fileError}</Alert>}
+
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+            {t('machineEquipment.form.sectionDocuments')}
+          </Typography>
+          <MachineDocumentUpload
+            documents={documents}
+            onChange={setDocuments}
+            isLoading={fileLoading}
+          />
 
           <Controller
             name="model"

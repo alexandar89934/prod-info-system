@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { GalleryImage } from '@/reusableComponents/ImageGallery.tsx';
+import { DocumentRef } from '@/reusableComponents/MachineDocumentUpload.tsx';
 import {
   uploadSingleFile,
   deleteFileMachineEquipment,
@@ -34,6 +35,7 @@ export const useMachineEquipmentForm = () => {
   const fileError = useSelector(selectFileError);
 
   const [pictures, setPictures] = useState<GalleryImage[]>([]);
+  const [documents, setDocuments] = useState<DocumentRef[]>([]);
 
   useEffect(() => {
     dispatch(
@@ -61,6 +63,12 @@ export const useMachineEquipmentForm = () => {
     path: p.path,
     dateAdded:
       p.dateAdded instanceof Date ? p.dateAdded : new Date(p.dateAdded),
+  }));
+
+  const documentsToSubmit = documents.map((d) => ({
+    name: d.name,
+    path: d.path,
+    dateAdded: d.dateAdded instanceof Date ? d.dateAdded : new Date(d.dateAdded),
   }));
 
   const handleImagesSelected = async (files: FileList) => {
@@ -99,6 +107,9 @@ export const useMachineEquipmentForm = () => {
     pictures,
     setPictures,
     picturesToSubmit,
+    documents,
+    setDocuments,
+    documentsToSubmit,
     fileLoading,
     fileError,
     loading,

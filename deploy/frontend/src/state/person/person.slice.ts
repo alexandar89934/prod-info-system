@@ -177,8 +177,14 @@ const personSlice = createSlice({
       })
       .addCase(updatePersonsImagePath.fulfilled, (state, action) => {
         state.loading = false;
-        state.success = action.payload.message;
-        state.person.picture = action.payload;
+        state.success = 'Image updated successfully.';
+        const newPicture = action.payload as string;
+        state.person.picture = newPicture;
+        const { personId } = action.meta.arg as { personId: string };
+        const idx = state.persons.findIndex((p) => p.id === personId);
+        if (idx !== -1) {
+          state.persons[idx].picture = newPicture;
+        }
       })
       .addCase(updatePersonsImagePath.rejected, (state, action) => {
         state.loading = false;

@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 
 import { fileUploadRouter } from "./fileUpload.router";
+import { machineRouter } from "./machine.router";
 import { jobPositionRouter } from "./jobPosition.route";
 import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
@@ -53,6 +54,10 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/file-upload",
     route: fileUploadRouter,
+  },
+  {
+    path: "/machine",
+    route: machineRouter,
   },
 ];
 

@@ -124,7 +124,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
     handleClose();
   };
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
   const handleAddNewDocument = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -135,7 +135,7 @@ const DocumentList: React.FC<DocumentListProps> = ({
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError('File size exceeds the 10 MB limit.');
+      setUploadError('File size exceeds the 100 MB limit.');
       setTimeout(() => setUploadError(null), 5000);
       return;
     }

@@ -7,6 +7,7 @@ import helmet from "helmet";
 
 import { config } from "./config/config";
 import { successHandler, errorHandler } from "./config/morgan";
+import { startUploadCleanup } from "./config/uploadCleanup";
 import {
   errorConverter,
   errorHandler as apiErrorHandler,
@@ -38,5 +39,7 @@ app.use(
 app.use("/", healthcheckRouter);
 app.use("/api", apiRouter);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+startUploadCleanup();
 app.use(errorConverter);
 app.use(apiErrorHandler);

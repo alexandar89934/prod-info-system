@@ -1,6 +1,7 @@
 import { combineReducers } from '@reduxjs/toolkit';
 
 import machineEquipmentSlice from './machineEquipment/machineEquipment.slice';
+import machineSlice from './machine/machine.slice';
 
 import authSlice from '@/state/auth/auth.slice.ts';
 import filesSlice from '@/state/fileUploads/files.slice.ts';
@@ -22,6 +23,7 @@ const reducer = combineReducers({
   machineAvailabilityStatus: machineAvailabilityStatusSlice,
   machineEquipmentType: machineEquipmentTypesSlice,
   machineEquipment: machineEquipmentSlice,
+  machine: machineSlice,
   filesUpload: filesSlice,
 });
 

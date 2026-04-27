@@ -11,3 +11,9 @@ deploy/tools/env/.env.*
 deploy/tools/env/*.*.env
 deploy/tools/env/*.*.env.*
 deploy/tools/env.tests/backend.test.env
+
+# Local reference files (not part of the project)
+additionalFiles/
+
+# Accidental npm lockfile (project uses yarn)
+deploy/backend/package-lock.json

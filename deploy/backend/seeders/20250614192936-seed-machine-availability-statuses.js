@@ -5,24 +5,24 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert("MachineAvailabilityStatuses", [
       {
-        name: "Available",
-        description: "Machine is ready for use",
+        name: "Radi",
+        description: "Mašina je u pogonu i spremna za rad",
         createdBy: "system",
         updatedBy: "system",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        name: "Under Maintenance",
-        description: "Machine is currently being serviced",
+        name: "Stoji",
+        description: "Mašina je zaustavljena i trenutno nije u upotrebi",
         createdBy: "system",
         updatedBy: "system",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        name: "Unavailable",
-        description: "Machine is not operational",
+        name: "Kvar",
+        description: "Mašina je u kvaru i nije operativna",
         createdBy: "system",
         updatedBy: "system",
         createdAt: new Date(),

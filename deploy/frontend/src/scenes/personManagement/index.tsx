@@ -1,10 +1,16 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import TableRowsIcon from '@mui/icons-material/TableRows';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
   Box,
   Button,
+  Grid,
   IconButton,
+  Pagination,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
   Snackbar,
   Alert,
@@ -39,6 +45,8 @@ import {
 import { PersonFormDataBase } from '@/state/person/person.types.ts';
 import { AppDispatch } from '@/state/store.ts';
 
+import PersonCard from './PersonCard';
+
 const Person = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -57,6 +65,10 @@ const Person = () => {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [sortModel, setSortModel] = useState([]);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(
+    () => (localStorage.getItem('personViewMode') as 'table' | 'grid') ?? 'table'
+  );
+
   const persons = useSelector(selectPersons);
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
@@ -133,6 +145,17 @@ const Person = () => {
       }, 3000);
     }
   }, [success, error, dispatch]);
+
+  const handleViewMode = (_: React.MouseEvent<HTMLElement>, next: 'table' | 'grid' | null) => {
+    if (!next) return;
+    setViewMode(next);
+    localStorage.setItem('personViewMode', next);
+  };
+
+  const handleDeleteCard = (id: string, name: string) => {
+    setSelectedPerson({ id, name });
+    setOpen(true);
+  };
 
   const mobileColumns = [
     {
@@ -234,6 +257,25 @@ const Person = () => {
 
   const columns = isMobile ? mobileColumns : desktopColumns;
 
+  const dataGridSx = {
+    '& .MuiDataGrid-root': { border: 'none' },
+    '& .MuiDataGrid-cell': { borderBottom: 'none' },
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: theme.palette.secondary[300],
+      color: theme.palette.primary[600],
+      borderBottom: 'none',
+    },
+    '& .MuiDataGrid-virtualScroller': { backgroundColor: theme.palette.background.paper },
+    '& .MuiDataGrid-footerContainer': {
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.secondary[100],
+      borderTop: 'none',
+    },
+    '& .MuiDataGrid-toolbarContainer .MuiButton-text': {
+      color: `${theme.palette.secondary[200]} !important`,
+    },
+  };
+
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 1, display: 'flex', flexDirection: 'column', height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } }}>
       <Box
@@ -245,88 +287,83 @@ const Person = () => {
         gap={isMobile ? 2 : 0}
       >
         <Header title={t('person.title')} subtitle={t('person.subtitle')} />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddPerson}
-          fullWidth={isMobile}
-          size={isMobile ? 'medium' : 'large'}
-        >
-          {t('person.addButton')}
-        </Button>
+        <Box display="flex" alignItems="center" gap={1}>
+          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewMode} size="small">
+            <ToggleButton value="table"><TableRowsIcon fontSize="small" /></ToggleButton>
+            <ToggleButton value="grid"><ViewModuleIcon fontSize="small" /></ToggleButton>
+          </ToggleButtonGroup>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddPerson}
+            fullWidth={isMobile}
+            size={isMobile ? 'medium' : 'large'}
+          >
+            {t('person.addButton')}
+          </Button>
+        </Box>
       </Box>
-      <Box
-        width="100%"
-        sx={{
-          flexGrow: 1,
-          minHeight: 0,
-          overflow: 'auto',
-          '& .MuiDataGrid-root': {
-            border: 'none',
-          },
-          '& .MuiDataGrid-cell': {
-            borderBottom: 'none',
-          },
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: theme.palette.secondary[300],
-            color: theme.palette.primary[600],
-            borderBottom: 'none',
-          },
-          '& .MuiDataGrid-virtualScroller': {
-            backgroundColor: theme.palette.background.paper,
-          },
-          '& .MuiDataGrid-footerContainer': {
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.secondary[100],
-            borderTop: 'none',
-          },
-          '& .MuiDataGrid-toolbarContainer .MuiButton-text': {
-            color: `${theme.palette.secondary[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-          loading={loading}
-          getRowId={(row) => row.id}
-          rows={persons ?? []}
-          columns={columns}
-          rowCount={total ?? 0}
-          rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
-          pagination
-          page={page}
-          pageSize={pageSize}
-          paginationMode="server"
-          sortingMode="server"
-          onPageChange={(newPage) => setPage(newPage)}
-          onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-          onSortModelChange={handleSortModelChange}
-          components={{ Toolbar: DataGridCustomToolbar }}
-          componentsProps={{
-            toolbar: { searchInput, setSearchInput, setSearch },
-          }}
-          density="comfortable"
-          localeText={localeText}
-          sx={{
-            '& .MuiDataGrid-virtualScroller': {
-              overflow: 'auto',
-              scrollbarWidth: 'thin',
-            },
-            '& .MuiDataGrid-row.Mui-selected': {
-              backgroundColor: `${theme.palette.action.selected} !important`,
-              color: theme.palette.primary.contrastText,
-            },
-            '& .MuiDataGrid-row.Mui-selected:hover': {
-              backgroundColor: `${theme.palette.action.hover} !important`,
-            },
-            '& .MuiDataGrid-columnHeaderTitle': {
-              fontSize: isMobile ? '0.75rem' : '0.875rem',
-            },
-            '& .MuiDataGrid-cellContent': {
-              fontSize: isMobile ? '0.75rem' : '0.875rem',
-            },
-          }}
-        />
-      </Box>
+
+      {viewMode === 'table' ? (
+        <Box width="100%" sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto', ...dataGridSx }}>
+          <DataGrid
+            loading={loading}
+            getRowId={(row) => row.id}
+            rows={persons ?? []}
+            columns={columns}
+            rowCount={total ?? 0}
+            rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
+            pagination
+            page={page}
+            pageSize={pageSize}
+            paginationMode="server"
+            sortingMode="server"
+            onPageChange={(newPage) => setPage(newPage)}
+            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+            onSortModelChange={handleSortModelChange}
+            components={{ Toolbar: DataGridCustomToolbar }}
+            componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
+            density="comfortable"
+            localeText={localeText}
+            sx={{
+              '& .MuiDataGrid-virtualScroller': { overflow: 'auto', scrollbarWidth: 'thin' },
+              '& .MuiDataGrid-row.Mui-selected': {
+                backgroundColor: `${theme.palette.action.selected} !important`,
+                color: theme.palette.primary.contrastText,
+              },
+              '& .MuiDataGrid-row.Mui-selected:hover': {
+                backgroundColor: `${theme.palette.action.hover} !important`,
+              },
+              '& .MuiDataGrid-columnHeaderTitle': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
+              '& .MuiDataGrid-cellContent': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
+            }}
+          />
+        </Box>
+      ) : (
+        <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Grid container spacing={2}>
+            {(persons ?? []).map((person) => (
+              <Grid item key={person.id} xs={12} sm={6} md={4} lg={3}>
+                <PersonCard
+                  person={person as PersonFormDataBase & { id: string }}
+                  onDelete={handleDeleteCard}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          {total > pageSize && (
+            <Box display="flex" justifyContent="center" pb={2}>
+              <Pagination
+                count={Math.ceil(total / pageSize)}
+                page={page + 1}
+                onChange={(_, value) => setPage(value - 1)}
+                color="primary"
+              />
+            </Box>
+          )}
+        </Box>
+      )}
+
       <ConfirmDialog
         open={open}
         title={t('person.confirmDelete.title')}

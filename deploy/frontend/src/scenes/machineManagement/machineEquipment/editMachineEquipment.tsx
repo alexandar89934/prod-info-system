@@ -1,6 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, CircularProgress, Alert, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Alert,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
+
+import axiosServer from '@/services/axios.service';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -12,6 +27,7 @@ import ImageGallery, {
 } from '@/reusableComponents/ImageGallery.tsx';
 import { LabeledXtSelect } from '@/reusableComponents/LabeledSelectField.tsx';
 import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
+import MachineDocumentUpload, { DocumentRef } from '@/reusableComponents/MachineDocumentUpload.tsx';
 import { getName } from '@/state/auth/auth.selectors.ts';
 import {
   uploadSingleFile,
@@ -58,6 +74,12 @@ const EditMachineEquipment = () => {
   const types: MachineEquipmentType[] = useSelector(selectMachineEquipmentTypes);
 
   const [pictures, setPictures] = useState<GalleryImage[]>([]);
+  const [documents, setDocuments] = useState<DocumentRef[]>([]);
+
+  const [machines, setMachines] = useState<{ id: string; name: string; machineNumber: number }[]>([]);
+  const [currentMachineId, setCurrentMachineId] = useState<string | null>(null);
+  const [selectedMachineId, setSelectedMachineId] = useState<string>('');
+  const [machineAssignLoading, setMachineAssignLoading] = useState(false);
 
   const {
     control,
@@ -92,6 +114,9 @@ const EditMachineEquipment = () => {
         sortOrder: '',
       })
     );
+    axiosServer.get('/machine', { params: { page: 1, limit: 1000, search: '' } }).then((res) => {
+      if (res.data.success) setMachines(res.data.content.machines);
+    });
   }, [dispatch]);
 
   useEffect(() => {
@@ -106,6 +131,9 @@ const EditMachineEquipment = () => {
         updatedBy: getName(),
       });
 
+      setCurrentMachineId(equipment.machineId ?? null);
+      setSelectedMachineId(equipment.machineId ?? '');
+
       const existingPictures: GalleryImage[] = (equipment.pictures ?? []).map(
         (p) => ({
           name: p.name,
@@ -114,6 +142,15 @@ const EditMachineEquipment = () => {
         })
       );
       setPictures(existingPictures);
+
+      const existingDocuments: DocumentRef[] = (equipment.documents ?? []).map(
+        (d) => ({
+          name: d.name,
+          path: d.path,
+          dateAdded: d.dateAdded,
+        })
+      );
+      setDocuments(existingDocuments);
     }
   }, [equipment, reset]);
 
@@ -125,6 +162,31 @@ const EditMachineEquipment = () => {
     return () => clearTimeout(timer);
   }, [error, success, dispatch]);
 
+  const handleMachineAssign = async () => {
+    if (!selectedMachineId || !id) return;
+    setMachineAssignLoading(true);
+    try {
+      const res = await axiosServer.post(`/machine-equipment/assign/${id}`, { machineId: selectedMachineId });
+      if (res.data.success) setCurrentMachineId(selectedMachineId);
+    } finally {
+      setMachineAssignLoading(false);
+    }
+  };
+
+  const handleMachineUnassign = async () => {
+    if (!id) return;
+    setMachineAssignLoading(true);
+    try {
+      const res = await axiosServer.delete(`/machine-equipment/unassign/${id}`);
+      if (res.data.success) {
+        setCurrentMachineId(null);
+        setSelectedMachineId('');
+      }
+    } finally {
+      setMachineAssignLoading(false);
+    }
+  };
+
   const onSubmit = async (data: EditMachineEquipmentFormData) => {
     const result = await dispatch(
       updateMachineEquipment({
@@ -133,6 +195,11 @@ const EditMachineEquipment = () => {
           name: p.name,
           path: p.path,
           dateAdded: new Date(p.dateAdded as string),
+        })),
+        documents: documents.map((d) => ({
+          name: d.name,
+          path: d.path,
+          dateAdded: new Date(d.dateAdded as string),
         })),
       })
     );
@@ -188,7 +255,7 @@ const EditMachineEquipment = () => {
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         width="100%"
-        maxWidth="600px"
+        maxWidth="750px"
         p={3}
         border="1px solid"
         borderColor="grey.300"
@@ -222,6 +289,13 @@ const EditMachineEquipment = () => {
             )}
           />
 
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ mt: 1, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}
+          >
+            {t('machineEquipment.form.sectionMedia')}
+          </Typography>
           <ImageGallery
             galleryImages={pictures}
             onImagesSelected={handleImagesSelected}
@@ -229,6 +303,19 @@ const EditMachineEquipment = () => {
             isLoading={fileLoading}
           />
           {fileError && <Alert severity="error">{fileError}</Alert>}
+
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ mt: 1, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}
+          >
+            {t('machineEquipment.form.sectionDocuments')}
+          </Typography>
+          <MachineDocumentUpload
+            documents={documents}
+            onChange={setDocuments}
+            isLoading={fileLoading}
+          />
 
           <Controller
             name="model"
@@ -295,6 +382,67 @@ const EditMachineEquipment = () => {
               />
             )}
           />
+
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ mt: 1, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}
+          >
+            {t('machineEquipment.form.sectionMachineAssignment')}
+          </Typography>
+
+          {currentMachineId ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              <Chip
+                label={(() => {
+                  const m = machines.find((mac) => mac.id === currentMachineId);
+                  return m ? `#${m.machineNumber} – ${m.name}` : currentMachineId;
+                })()}
+                color="secondary"
+                size="small"
+              />
+              <Button
+                size="small"
+                color="error"
+                variant="outlined"
+                onClick={handleMachineUnassign}
+                disabled={machineAssignLoading}
+              >
+                {t('machineEquipment.form.unassignFromMachine')}
+              </Button>
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {t('machineEquipment.form.notAssigned')}
+            </Typography>
+          )}
+
+          <Box sx={{ display: 'flex', gap: 1, mt: 1, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ flex: 1 }}>
+              <InputLabel>{t('machineEquipment.form.selectMachine')}</InputLabel>
+              <Select
+                value={selectedMachineId}
+                label={t('machineEquipment.form.selectMachine')}
+                onChange={(e: SelectChangeEvent<string>) => setSelectedMachineId(e.target.value)}
+              >
+                <MenuItem value=""><em>—</em></MenuItem>
+                {machines.map((m) => (
+                  <MenuItem key={m.id} value={m.id}>
+                    #{m.machineNumber} – {m.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              onClick={handleMachineAssign}
+              disabled={!selectedMachineId || selectedMachineId === currentMachineId || machineAssignLoading}
+            >
+              {currentMachineId ? t('machineEquipment.form.reassign') : t('machineEquipment.form.assignToMachine')}
+            </Button>
+          </Box>
         </Box>
 
         <Box

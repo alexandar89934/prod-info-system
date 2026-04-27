@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FieldError } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 interface Option {
   value: number | string;
@@ -33,10 +34,11 @@ export const LabeledXtSelect = ({
   value,
   onChange,
   error,
-  minWidth = '150px',
+  minWidth = '220px',
   fullWidth = true,
   disabledDefaultText = 'Select an option',
 }: LabeledXtSelectProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
 
   return (
@@ -83,7 +85,7 @@ export const LabeledXtSelect = ({
               mt: 0.5,
             }}
           >
-            {error.message}
+            {t(error.message ?? '')}
           </Box>
         )}
       </Box>

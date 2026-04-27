@@ -16,6 +16,10 @@ export type EditMachineEquipmentFormData = {
   model?: string | null;
   serialNumber: string;
   type: number;
+  machineId?: string | null;
+  equipmentTypeName?: string | null;
+  machineName?: string | null;
+  machineNumber?: number | null;
   description?: string | null;
   documents?: MachineEquipment['documents'];
   pictures?: MachineEquipment['pictures'];

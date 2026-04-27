@@ -118,7 +118,7 @@ const PersonForm = ({
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         width="100%"
-        maxWidth="800px"
+        maxWidth="950px"
         px={3}
         py={2}
         border="1px solid"
@@ -241,7 +241,7 @@ const PersonForm = ({
             <InputLabel
               htmlFor="roles"
               sx={{
-                minWidth: 150,
+                minWidth: 220,
                 position: 'relative',
                 transform: 'none',
                 mb: { xs: 1, sm: 0 },
@@ -264,7 +264,7 @@ const PersonForm = ({
             <InputLabel
               htmlFor="jobPositions"
               sx={{
-                minWidth: 150,
+                minWidth: 220,
                 position: 'relative',
                 transform: 'none',
                 mb: { xs: 1, sm: 0 },
@@ -275,29 +275,14 @@ const PersonForm = ({
             <EmployeeJobPositionSelect control={control} name="jobPositions" />
           </FormControl>
 
-          <FormControl
-            fullWidth
-            margin="normal"
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: 'center',
-              gap: 2,
-            }}
+          <Typography
+            variant="subtitle2"
+            color="text.secondary"
+            sx={{ mt: 2, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}
           >
-            <InputLabel
-              htmlFor="documents"
-              sx={{
-                minWidth: 150,
-                position: 'relative',
-                transform: 'none',
-                mb: { xs: 1, sm: 0 },
-              }}
-            >
-              {t('person.form.documents')}
-            </InputLabel>
-            <DocumentList personId={personId} isEdit={isEdit} fullWidth />
-          </FormControl>
+            {t('person.form.documents')}
+          </Typography>
+          <DocumentList personId={personId} isEdit={isEdit} fullWidth />
         </Box>
 
         <Box

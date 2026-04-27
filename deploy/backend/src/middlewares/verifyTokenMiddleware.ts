@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 import { config } from "../config/config";
 import {
-  getUserByEmployeeNumber,
+  getUserByIdentifier,
   getUserRolesById,
 } from "../models/user.model";
 import { getPersonByEmployeeNumber } from "../service/person.service";
@@ -72,7 +72,7 @@ export const authorizeAdminOrSelf = async (
     const { userId } = res.locals.user;
     const user = await getUserById(userId);
     const { employeeNumber: targetEmployeeNumber } = req.body;
-    const targetUser = await getUserByEmployeeNumber(user.employeeNumber);
+    const targetUser = await getUserByIdentifier(user.employeeNumber);
     const { roles: newRoles } = req.body;
 
     const userRoles = await getUserRolesById(targetUser.id);

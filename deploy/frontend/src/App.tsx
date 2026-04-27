@@ -7,6 +7,10 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import Layout from './scenes/layout/index.tsx';
 import MachineEquipmentList from './scenes/machineManagement/machineEquipment/index.tsx';
+import MachineList from './scenes/machineManagement/machine/index.tsx';
+import AddMachine from './scenes/machineManagement/machine/addMachine.tsx';
+import EditMachine from './scenes/machineManagement/machine/editMachine.tsx';
+import MachinePage from './scenes/machineManagement/machine/machinePage.tsx';
 import { themeSettings } from './theme.tsx';
 
 import Dashboard from '@/scenes/dashboard';
@@ -22,6 +26,7 @@ import AddMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvai
 import EditMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvailabilityStatus/editMachineAvailabilityStatus.tsx';
 import AddMachineEquipment from '@/scenes/machineManagement/machineEquipment/addMachineEquipment.tsx';
 import EditMachineEquipment from '@/scenes/machineManagement/machineEquipment/editMachineEquipment.tsx';
+import MachineEquipmentPage from '@/scenes/machineManagement/machineEquipment/machineEquipmentPage.tsx';
 import MachineEquipmentTypeList from '@/scenes/machineManagement/machineEquipmentTypes';
 import AddMachineEquipmentType from '@/scenes/machineManagement/machineEquipmentTypes/addMachineEquipmentTypes.tsx';
 import EditMachineEquipmentType from '@/scenes/machineManagement/machineEquipmentTypes/editMachineEquipmentTypes.tsx';
@@ -79,8 +84,13 @@ function App() {
               <Route path="/addMachineEquipmentType" element={<ProtectedRoute><AddMachineEquipmentType /></ProtectedRoute>} />
               <Route path="/editMachineEquipmentType/:id" element={<ProtectedRoute><EditMachineEquipmentType /></ProtectedRoute>} />
               <Route path="/machineEquipment" element={<ProtectedRoute><MachineEquipmentList /></ProtectedRoute>} />
+              <Route path="/machineEquipment/:id" element={<ProtectedRoute><MachineEquipmentPage /></ProtectedRoute>} />
               <Route path="/addMachineEquipment" element={<ProtectedRoute><AddMachineEquipment /></ProtectedRoute>} />
               <Route path="/editMachineEquipment/:id" element={<ProtectedRoute><EditMachineEquipment /></ProtectedRoute>} />
+              <Route path="/machine" element={<ProtectedRoute><MachineList /></ProtectedRoute>} />
+              <Route path="/machine/:id" element={<ProtectedRoute><MachinePage /></ProtectedRoute>} />
+              <Route path="/addMachine" element={<ProtectedRoute><AddMachine /></ProtectedRoute>} />
+              <Route path="/editMachine/:id" element={<ProtectedRoute><EditMachine /></ProtectedRoute>} />
             </Route>
           </Routes>
         </ThemeProvider>

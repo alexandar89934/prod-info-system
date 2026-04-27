@@ -93,10 +93,113 @@
       "description": "Description"
     }
   },
+  "machine": {
+    "title": "MACHINES",
+    "subtitle": "List of all machines",
+    "addButton": "Add new machine",
+    "columns": {
+      "name": "Name",
+      "machineNumber": "Machine #",
+      "serialNumber": "Serial Number",
+      "availabilityStatus": "Status",
+      "automaticMode": "Auto",
+      "workPermit": "Work Permit",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Machine",
+      "editTitle": "Edit Machine",
+      "addSubmit": "Add Machine",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "sectionBasic": "Basic Info",
+      "sectionTechnical": "Technical Specifications",
+      "sectionStatus": "Status",
+      "sectionModes": "Operation Modes",
+      "sectionMoldLimits": "Mold Limits",
+      "sectionService": "Service",
+      "sectionCounters": "Counters",
+      "sectionMedia": "Photos",
+      "sectionDocuments": "Documents",
+      "name": "Name",
+      "machineNumber": "Machine Number",
+      "serialNumber": "Serial Number",
+      "yearOfManufacture": "Year of Manufacture",
+      "controlSystem": "Control System",
+      "description": "Description",
+      "availabilityStatus": "Availability Status",
+      "selectStatus": "Select status",
+      "workPermit": "Work Permit",
+      "automaticMode": "Automatic Mode",
+      "semiAutomaticMode": "Semi-Automatic Mode",
+      "manualMode": "Manual Mode",
+      "clampingForce": "Clamping Force (kN)",
+      "injectionWeight": "Injection Weight (gr)",
+      "maxMoldWeight": "Max Mold Weight (kg)",
+      "maxMoldWidth": "Tie Bar Distance — Width (mm)",
+      "maxMoldHeight": "Tie Bar Distance — Height (mm)",
+      "minMoldThickness": "Min Mold Thickness (mm)",
+      "maxMoldThickness": "Max Mold Thickness (mm)",
+      "centeringRingFixedSide": "Centering Ring — Fixed Side (mm)",
+      "centeringRingMovingSide": "Centering Ring — Moving Side (mm)",
+      "serviceInterval": "Service Interval (days)",
+      "lastServiceDone": "Last Service Date",
+      "workHoursCounter": "Work Hours Counter",
+      "pieceCounter": "Piece Counter",
+      "scrapCounter": "Scrap Counter"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "machineNumberPositive": "Machine number must be a positive whole number",
+      "intMax": "Value must not exceed 2,147,483,647"
+    },
+    "detail": {
+      "back": "Back to list",
+      "edit": "Edit",
+      "notSpecified": "Not specified",
+      "view": "View",
+      "download": "Download",
+      "attachedEquipment": "Attached Equipment",
+      "noAttachedEquipment": "No equipment attached to this machine.",
+      "addEquipment": "Add Equipment",
+      "unassign": "Unassign",
+      "assignDialogTitle": "Assign Equipment to Machine",
+      "searchEquipment": "Search equipment...",
+      "noUnassignedEquipment": "No unassigned equipment available.",
+      "assign": "Assign",
+      "equipmentType": "Type",
+      "serialNumber": "Serial #"
+    }
+  },
   "machineEquipment": {
     "title": "MACHINE EQUIPMENT",
     "subtitle": "List of all machine equipment",
     "addButton": "Add new equipment",
+    "detail": {
+      "back": "Back to list",
+      "edit": "Edit",
+      "notSpecified": "Not specified",
+      "view": "View",
+      "download": "Download",
+      "sectionBasic": "Basic Info",
+      "sectionMachineAssignment": "Machine Assignment",
+      "sectionMedia": "Photos",
+      "sectionDocuments": "Documents",
+      "name": "Name",
+      "model": "Model",
+      "serialNumber": "Serial Number",
+      "equipmentType": "Equipment Type",
+      "description": "Description",
+      "assignedMachine": "Assigned Machine",
+      "noMachineAssigned": "Not assigned to any machine",
+      "goToMachine": "Go to machine"
+    },
     "columns": {
       "id": "ID",
       "name": "Name",
@@ -104,6 +207,7 @@
       "description": "Description",
       "serialNumber": "Serial Number",
       "equipmentType": "Equipment Type",
+      "machine": "Machine",
       "actions": "Actions"
     },
     "confirmDelete": {
@@ -123,7 +227,15 @@
       "serialNumber": "Serial Number",
       "equipmentType": "Equipment Type",
       "selectType": "Select type",
-      "description": "Description"
+      "description": "Description",
+      "sectionMedia": "Photos",
+      "sectionDocuments": "Documents",
+      "sectionMachineAssignment": "Machine Assignment",
+      "notAssigned": "Not assigned to any machine",
+      "selectMachine": "Select machine",
+      "assignToMachine": "Assign",
+      "unassignFromMachine": "Unassign",
+      "reassign": "Reassign"
     }
   },
   "machineEquipmentType": {
@@ -180,7 +292,7 @@
   },
   "login": {
     "title": "Login",
-    "employeeNumber": "Employee Number",
+    "identifier": "Employee Number or Email",
     "password": "Password",
     "loginButton": "Login",
     "loggingIn": "Logging in..."
@@ -203,7 +315,8 @@
     "machineManagement": "Machine Management",
     "availabilityStatuses": "Availability Statuses",
     "equipmentTypes": "Equipment Types",
-    "equipment": "Equipment"
+    "equipment": "Equipment",
+    "machines": "Machines"
   },
   "common": {
     "cancel": "Cancel",

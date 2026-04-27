@@ -9,6 +9,7 @@ import {
   CheckCircleOutline,
   PieChartOutlined,
   AdminPanelSettingsOutlined,
+  PrecisionManufacturingOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -72,6 +73,12 @@ const navItems: NavItem[] = [
     textKey: 'sidebar.equipment',
     path: 'machineEquipment',
     icon: <AdminPanelSettingsOutlined />,
+    requiresAuth: true,
+  },
+  {
+    textKey: 'sidebar.machines',
+    path: 'machine',
+    icon: <PrecisionManufacturingOutlined />,
     requiresAuth: true,
   },
 ];

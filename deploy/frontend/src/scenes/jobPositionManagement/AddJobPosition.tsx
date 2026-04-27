@@ -95,7 +95,7 @@ const AddJobPosition = () => {
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         width="100%"
-        maxWidth="600px"
+        maxWidth="750px"
         p={3}
         border="1px solid"
         borderColor="grey.300"

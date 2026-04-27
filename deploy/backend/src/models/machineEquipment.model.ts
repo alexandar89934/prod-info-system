@@ -1,7 +1,7 @@
 import {
-  MachineEquipment,
   CreateMachineEquipmentData,
   EditMachineEquipmentData,
+  MachineEquipment,
 } from "../service/machineEquipment.service.types";
 
 import { callQuery } from "./utils/query";
@@ -36,7 +36,10 @@ export const getAllMachineEquipmentQuery = async (
       me."model",
       me."serialNumber",
       me."type",
+      me."machineId",
       mt."name" AS "equipmentTypeName",
+      m."name"          AS "machineName",
+      m."machineNumber" AS "machineNumber",
       me."description",
       me."documents",
       me."pictures",
@@ -46,6 +49,7 @@ export const getAllMachineEquipmentQuery = async (
       me."updatedAt"
     FROM "MachineEquipment" me
     LEFT JOIN "MachineEquipmentTypes" mt ON mt."id" = me."type"
+    LEFT JOIN "Machines" m             ON m."id"  = me."machineId"
     WHERE
       me."name" ILIKE $3 OR
       me."model" ILIKE $3 OR
@@ -83,7 +87,17 @@ export const getTotalMachineEquipmentCountQuery = async (
 export const getMachineEquipmentByIdQuery = async (
   id: number,
 ): Promise<MachineEquipment[]> => {
-  const sql = `SELECT * FROM "MachineEquipment" WHERE id = $1`;
+  const sql = `
+    SELECT
+      me.*,
+      mt."name" AS "equipmentTypeName",
+      m."name"          AS "machineName",
+      m."machineNumber" AS "machineNumber"
+    FROM "MachineEquipment" me
+    LEFT JOIN "MachineEquipmentTypes" mt ON mt."id" = me."type"
+    LEFT JOIN "Machines" m              ON m."id"  = me."machineId"
+    WHERE me.id = $1
+  `;
   return callQuery<MachineEquipment[]>(sql, [id], true);
 };
 
@@ -153,6 +167,37 @@ export const deleteMachineEquipmentQuery = async (
 ): Promise<MachineEquipment> => {
   const sql = `DELETE FROM "MachineEquipment" WHERE id = $1 RETURNING *`;
   return callQuery<MachineEquipment>(sql, [id], true);
+};
+
+export const assignEquipmentToMachineQuery = async (
+  equipmentId: number,
+  machineId: string,
+): Promise<MachineEquipment> => {
+  const sql = `UPDATE "MachineEquipment" SET "machineId" = $1 WHERE id = $2 RETURNING *`;
+  return callQuery<MachineEquipment>(sql, [machineId, equipmentId], true);
+};
+
+export const unassignEquipmentFromMachineQuery = async (
+  equipmentId: number,
+): Promise<MachineEquipment> => {
+  const sql = `UPDATE "MachineEquipment" SET "machineId" = NULL WHERE id = $1 RETURNING *`;
+  return callQuery<MachineEquipment>(sql, [equipmentId], true);
+};
+
+export const getUnassignedEquipmentQuery = async (
+  search: string,
+): Promise<MachineEquipment[]> => {
+  const sql = `
+    SELECT
+      me.*,
+      mt."name" AS "equipmentTypeName"
+    FROM "MachineEquipment" me
+    LEFT JOIN "MachineEquipmentTypes" mt ON mt."id" = me."type"
+    WHERE me."machineId" IS NULL
+      AND (me."name" ILIKE $1 OR me."model" ILIKE $1 OR me."serialNumber" ILIKE $1)
+    ORDER BY me."name" ASC
+  `;
+  return callQuery<MachineEquipment[]>(sql, [`%${search}%`], true) || [];
 };
 
 export const checkMachineEquipmentExistsBySerialNumberQuery = async (

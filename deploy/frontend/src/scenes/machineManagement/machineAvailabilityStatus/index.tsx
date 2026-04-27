@@ -1,10 +1,16 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import TableRowsIcon from '@mui/icons-material/TableRows';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
   Box,
   Button,
+  Grid,
   IconButton,
+  Pagination,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
   Snackbar,
   Alert,
@@ -36,7 +42,10 @@ import {
   clearSuccess,
   resetState,
 } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.slice';
+import { MachineAvailabilityStatus } from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.types';
 import { AppDispatch } from '@/state/store';
+
+import MachineAvailabilityStatusCard from './MachineAvailabilityStatusCard';
 
 const MachineAvailabilityStatusList = () => {
   type SelectedItem = {
@@ -62,6 +71,9 @@ const MachineAvailabilityStatusList = () => {
   const [searchInput, setSearchInput] = useState('');
   const [sortModel, setSortModel] = useState([]);
   const [reload, setReload] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(
+    () => (localStorage.getItem('machineAvailabilityStatusViewMode') as 'table' | 'grid') ?? 'table'
+  );
 
   const statuses = useSelector(selectMachineAvailabilityStatuses);
   const loading = useSelector(selectMachineAvailabilityStatusLoading);
@@ -98,8 +110,7 @@ const MachineAvailabilityStatusList = () => {
   }, [success, error, dispatch]);
 
   const handleAdd = () => navigate('/addMachineAvailabilityStatus');
-  const handleEdit = (row) =>
-    navigate(`/editMachineAvailabilityStatus/${row.id}`);
+  const handleEdit = (row) => navigate(`/editMachineAvailabilityStatus/${row.id}`);
   const handleDelete = (row) => {
     setSelected(row);
     setOpen(true);
@@ -114,6 +125,17 @@ const MachineAvailabilityStatusList = () => {
       handleClose();
       setReload((prev) => !prev);
     }
+  };
+
+  const handleViewMode = (_: React.MouseEvent<HTMLElement>, next: 'table' | 'grid' | null) => {
+    if (!next) return;
+    setViewMode(next);
+    localStorage.setItem('machineAvailabilityStatusViewMode', next);
+  };
+
+  const handleDeleteCard = (id: string, name: string) => {
+    setSelected({ id, name });
+    setOpen(true);
   };
 
   const columns = [
@@ -137,6 +159,25 @@ const MachineAvailabilityStatusList = () => {
     },
   ];
 
+  const dataGridSx = {
+    '& .MuiDataGrid-root': { border: 'none' },
+    '& .MuiDataGrid-cell': { borderBottom: 'none' },
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: theme.palette.secondary[300],
+      color: theme.palette.primary[600],
+      borderBottom: 'none',
+    },
+    '& .MuiDataGrid-virtualScroller': { backgroundColor: theme.palette.background.paper },
+    '& .MuiDataGrid-footerContainer': {
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.secondary[100],
+      borderTop: 'none',
+    },
+    '& .MuiDataGrid-toolbarContainer .MuiButton-text': {
+      color: `${theme.palette.secondary[200]} !important`,
+    },
+  };
+
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 1, display: 'flex', flexDirection: 'column', height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } }}>
       <Box
@@ -151,65 +192,67 @@ const MachineAvailabilityStatusList = () => {
           title={t('machineAvailabilityStatus.title')}
           subtitle={t('machineAvailabilityStatus.subtitle')}
         />
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAdd}
-          fullWidth={isMobile}
-          size={isMobile ? 'medium' : 'large'}
-        >
-          {t('machineAvailabilityStatus.addButton')}
-        </Button>
+        <Box display="flex" alignItems="center" gap={1}>
+          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewMode} size="small">
+            <ToggleButton value="table"><TableRowsIcon fontSize="small" /></ToggleButton>
+            <ToggleButton value="grid"><ViewModuleIcon fontSize="small" /></ToggleButton>
+          </ToggleButtonGroup>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAdd}
+            fullWidth={isMobile}
+            size={isMobile ? 'medium' : 'large'}
+          >
+            {t('machineAvailabilityStatus.addButton')}
+          </Button>
+        </Box>
       </Box>
 
-      <Box
-        width="100%"
-        sx={{
-          flexGrow: 1,
-          minHeight: 0,
-          '& .MuiDataGrid-root': { border: 'none' },
-          '& .MuiDataGrid-cell': { borderBottom: 'none' },
-          '& .MuiDataGrid-columnHeaders': {
-            backgroundColor: theme.palette.secondary[300],
-            color: theme.palette.primary[600],
-            borderBottom: 'none',
-          },
-          '& .MuiDataGrid-virtualScroller': {
-            backgroundColor: theme.palette.background.paper,
-          },
-          '& .MuiDataGrid-footerContainer': {
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.secondary[100],
-            borderTop: 'none',
-          },
-          '& .MuiDataGrid-toolbarContainer .MuiButton-text': {
-            color: `${theme.palette.secondary[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid
-          loading={loading}
-          rows={statuses || []}
-          getRowId={(row) => row.id}
-          columns={columns}
-          rowCount={total || 0}
-          rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
-          pagination
-          page={page}
-          pageSize={pageSize}
-          paginationMode="server"
-          sortingMode="server"
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSortModelChange={setSortModel}
-          components={{ Toolbar: DataGridCustomToolbar }}
-          componentsProps={{
-            toolbar: { searchInput, setSearchInput, setSearch },
-          }}
-          density="comfortable"
-          localeText={localeText}
-        />
-      </Box>
+      {viewMode === 'table' ? (
+        <Box width="100%" sx={{ flexGrow: 1, minHeight: 0, ...dataGridSx }}>
+          <DataGrid
+            loading={loading}
+            rows={statuses || []}
+            getRowId={(row) => row.id}
+            columns={columns}
+            rowCount={total || 0}
+            rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
+            pagination
+            page={page}
+            pageSize={pageSize}
+            paginationMode="server"
+            sortingMode="server"
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            onSortModelChange={setSortModel}
+            components={{ Toolbar: DataGridCustomToolbar }}
+            componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
+            density="comfortable"
+            localeText={localeText}
+          />
+        </Box>
+      ) : (
+        <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <Grid container spacing={2}>
+            {(statuses as MachineAvailabilityStatus[]).map((status) => (
+              <Grid item key={status.id} xs={12} sm={6} md={4} lg={3}>
+                <MachineAvailabilityStatusCard status={status} onDelete={handleDeleteCard} />
+              </Grid>
+            ))}
+          </Grid>
+          {total > pageSize && (
+            <Box display="flex" justifyContent="center" pb={2}>
+              <Pagination
+                count={Math.ceil(total / pageSize)}
+                page={page + 1}
+                onChange={(_, value) => setPage(value - 1)}
+                color="primary"
+              />
+            </Box>
+          )}
+        </Box>
+      )}
 
       <ConfirmDialog
         open={open}

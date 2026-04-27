@@ -27,24 +27,27 @@ const ProfileImageUpload: FC<ProfileImageUploadProps> = ({
 
   const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      dispatch(deleteFileNewPerson({ documentPath: currentImagePath }));
-      const imageUploadFormData = new FormData();
-      imageUploadFormData.append('profileImage', file);
-      const payload = await dispatch(uploadImage(imageUploadFormData)).unwrap();
+    if (!file) return;
 
-      if (personId) {
-        await dispatch(
-          updatePersonsImagePath({
-            newImagePath: payload.path,
-            personId,
-          })
-        );
-      }
-      if (onImageUpload) {
-        setCurrentImagePath(payload.path);
-        onImageUpload(payload.path);
-      }
+    dispatch(deleteFileNewPerson({ documentPath: currentImagePath }));
+    const imageUploadFormData = new FormData();
+    imageUploadFormData.append('profileImage', file);
+    const payload = await dispatch(uploadImage(imageUploadFormData)).unwrap();
+
+    let finalPath = payload.path as string;
+
+    if (personId) {
+      finalPath = (await dispatch(
+        updatePersonsImagePath({
+          newImagePath: payload.path,
+          personId,
+        })
+      ).unwrap()) as string;
+    }
+
+    setCurrentImagePath(finalPath);
+    if (onImageUpload) {
+      onImageUpload(finalPath);
     }
   };
 

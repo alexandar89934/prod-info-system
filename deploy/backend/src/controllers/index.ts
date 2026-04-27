@@ -7,3 +7,4 @@ export * as machineAvailabilityStatusController from "./machineAvailabilityStatu
 export * as machineEquipmentTypesController from "./machineEquipmentTypes.controller";
 export * as machineEquipmentController from "./machineEquipment.controller";
 export * as fileUploadController from "./fileUpload.controller";
+export * as machineController from "./machine.controller";

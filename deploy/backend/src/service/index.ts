@@ -7,3 +7,4 @@ export * as jobPositionCategoryService from "./jobPositionCategory.service";
 export * as machineAvailabilityStatusService from "./machineAvailabilityStatus.service";
 export * as machineEquipmentTypeService from "./machineEquipmentTypes.service";
 export * as machineEquipmentService from "./machineEquipment.service";
+export * as machineService from "./machine.service";

@@ -1,21 +1,31 @@
 import httpStatus from "http-status";
 
 import {
+  assignEquipmentToMachineQuery,
+  checkMachineEquipmentExistsBySerialNumberQuery,
   createMachineEquipmentQuery,
   deleteMachineEquipmentQuery,
-  getMachineEquipmentByIdQuery,
-  updateMachineEquipmentQuery,
   getAllMachineEquipmentQuery,
+  getMachineEquipmentByIdQuery,
   getTotalMachineEquipmentCountQuery,
-  checkMachineEquipmentExistsBySerialNumberQuery,
+  getUnassignedEquipmentQuery,
+  unassignEquipmentFromMachineQuery,
+  updateMachineEquipmentQuery,
 } from "../models/machineEquipment.model";
 import { ApiError } from "../shared/error/ApiError";
+import { deleteFilesIfExist, promoteFile } from "../shared/utils/fileUtils";
 
 import {
   CreateMachineEquipmentData,
   EditMachineEquipmentData,
+  FileReference,
   MachineEquipment,
 } from "./machineEquipment.service.types";
+
+const promoteFileRefs = (files: FileReference[] | null): FileReference[] | null => {
+  if (!files) return null;
+  return files.map((f) => ({ ...f, path: promoteFile(f.path) }));
+};
 
 export const getAllMachineEquipment = async (
   limit: number,
@@ -80,7 +90,13 @@ export const createMachineEquipment = async (
       }
     }
 
-    return await createMachineEquipmentQuery(data);
+    const promotedData: CreateMachineEquipmentData = {
+      ...data,
+      documents: promoteFileRefs(data.documents),
+      pictures: promoteFileRefs(data.pictures),
+    };
+
+    return await createMachineEquipmentQuery(promotedData);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError(
@@ -108,11 +124,73 @@ export const updateMachineEquipment = async (
       }
     }
 
-    return await updateMachineEquipmentQuery(data);
+    const promotedData: EditMachineEquipmentData = {
+      ...data,
+      documents: promoteFileRefs(data.documents),
+      pictures: promoteFileRefs(data.pictures),
+    };
+
+    return await updateMachineEquipmentQuery(promotedData);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError(
       "Error while updating machine equipment!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+};
+
+export const getUnassignedEquipment = async (
+  search = "",
+): Promise<MachineEquipment[]> => {
+  try {
+    return await getUnassignedEquipmentQuery(search);
+  } catch (error) {
+    throw new ApiError(
+      "Error while fetching unassigned equipment!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+};
+
+export const assignEquipmentToMachine = async (
+  equipmentId: number,
+  machineId: string,
+): Promise<MachineEquipment> => {
+  try {
+    const result = await getMachineEquipmentByIdQuery(equipmentId);
+    if (!result || result.length === 0) {
+      throw new ApiError("Machine equipment not found.", httpStatus.NOT_FOUND);
+    }
+    if (result[0].machineId === machineId) {
+      throw new ApiError(
+        "Equipment is already assigned to this machine.",
+        httpStatus.CONFLICT,
+      );
+    }
+    return await assignEquipmentToMachineQuery(equipmentId, machineId);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(
+      "Error while assigning equipment to machine!",
+      httpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+};
+
+export const unassignEquipmentFromMachine = async (
+  equipmentId: number,
+): Promise<MachineEquipment> => {
+  try {
+    const result = await getMachineEquipmentByIdQuery(equipmentId);
+    if (!result || result.length === 0) {
+      throw new ApiError("Machine equipment not found.", httpStatus.NOT_FOUND);
+    }
+    return await unassignEquipmentFromMachineQuery(equipmentId);
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(
+      "Error while unassigning equipment from machine!",
       httpStatus.INTERNAL_SERVER_ERROR,
     );
   }
@@ -126,6 +204,14 @@ export const deleteMachineEquipment = async (
 
     if (!result || result.length === 0) {
       throw new ApiError("Machine equipment not found!", 404);
+    }
+
+    const equipment = result[0];
+    if (equipment.documents) {
+      deleteFilesIfExist(equipment.documents.map((f) => f.path));
+    }
+    if (equipment.pictures) {
+      deleteFilesIfExist(equipment.pictures.map((f) => f.path));
     }
 
     return await deleteMachineEquipmentQuery(id);

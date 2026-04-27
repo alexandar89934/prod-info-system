@@ -8,6 +8,7 @@ import {
   verifyTokenMiddleware,
 } from "../../middlewares/verifyTokenMiddleware";
 import {
+  AssignMachineEquipmentSchema,
   CreateMachineEquipmentSchema,
   UpdateMachineEquipmentSchema,
 } from "../../shared/joi/machineEquipment.schema";
@@ -34,6 +35,25 @@ machineEquipmentRouter
 machineEquipmentRouter
   .route("/")
   .get(machineEquipmentController.getAllMachineEquipment);
+
+machineEquipmentRouter
+  .route("/unassigned")
+  .get(machineEquipmentController.getUnassignedEquipment);
+
+machineEquipmentRouter
+  .route("/assign/:id")
+  .post(
+    validateRequestBody(AssignMachineEquipmentSchema),
+    authorizeAdmin,
+    machineEquipmentController.assignEquipmentToMachine,
+  );
+
+machineEquipmentRouter
+  .route("/unassign/:id")
+  .delete(
+    authorizeAdmin,
+    machineEquipmentController.unassignEquipmentFromMachine,
+  );
 
 machineEquipmentRouter
   .route("/:id")

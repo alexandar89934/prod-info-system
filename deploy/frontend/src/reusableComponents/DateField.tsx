@@ -1,5 +1,5 @@
 import { TextField, InputLabel, FormControl } from '@mui/material';
-import { ChangeEvent, FC } from 'react';
+import { ChangeEvent, FC, useRef } from 'react';
 import { FieldError } from 'react-hook-form';
 
 type DateFieldProps = {
@@ -18,9 +18,15 @@ const DateField: FC<DateFieldProps> = ({
   value,
   onChange,
   error,
-  minWidth = '150px',
+  minWidth = '220px',
   fullWidth = true,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    inputRef.current?.showPicker();
+  };
+
   return (
     <FormControl
       fullWidth={fullWidth}
@@ -48,10 +54,12 @@ const DateField: FC<DateFieldProps> = ({
         type="date"
         value={value}
         onChange={onChange}
+        onClick={handleClick}
         variant="outlined"
         error={!!error}
         helperText={error?.message}
         fullWidth={fullWidth}
+        inputRef={inputRef}
         InputLabelProps={{
           shrink: true,
         }}

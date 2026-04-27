@@ -1,10 +1,12 @@
 import { TextField, InputLabel, FormControl, useTheme } from '@mui/material';
+import { useRef } from 'react';
 import { FieldError } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 interface FormFieldProps {
   id: string;
   label: string;
-  type?: 'number' | 'text' | 'email' | 'password' | 'string';
+  type?: 'number' | 'text' | 'email' | 'password' | 'string' | 'date';
   value: string | number;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error?: FieldError;
@@ -12,6 +14,7 @@ interface FormFieldProps {
   rows?: number;
   minWidth?: string;
   fullWidth?: boolean;
+  InputLabelProps?: { shrink?: boolean };
 }
 
 export const LabeledXtField = ({
@@ -23,10 +26,17 @@ export const LabeledXtField = ({
   error,
   multiline = false,
   rows = 1,
-  minWidth = '150px',
+  minWidth = '220px',
   fullWidth = true,
+  InputLabelProps,
 }: FormFieldProps) => {
+  const { t } = useTranslation();
   const theme = useTheme();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    if (type === 'date') inputRef.current?.showPicker();
+  };
 
   return (
     <FormControl
@@ -35,7 +45,7 @@ export const LabeledXtField = ({
       sx={{
         display: 'flex',
         flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: { xs: 'flex-start', sm: 'center' },
+        alignItems: 'flex-start',
         gap: { xs: 1, sm: 2 },
       }}
     >
@@ -46,6 +56,10 @@ export const LabeledXtField = ({
           position: 'relative',
           transform: 'none',
           marginBottom: { xs: 1, sm: 0 },
+          whiteSpace: 'normal',
+          overflow: 'visible',
+          lineHeight: 1.4,
+          paddingTop: { sm: '14px' },
         }}
       >
         {label}:
@@ -55,12 +69,15 @@ export const LabeledXtField = ({
         type={type}
         value={value}
         onChange={onChange}
+        onClick={handleClick}
         variant="outlined"
+        inputRef={inputRef}
         error={!!error}
-        helperText={error?.message}
+        helperText={error?.message ? t(error.message) : undefined}
         multiline={multiline}
         rows={rows}
         fullWidth={fullWidth}
+        InputLabelProps={type === 'date' ? { shrink: true, ...InputLabelProps } : InputLabelProps}
         sx={{
           '& textarea': {
             maxHeight: '25vh',

@@ -7,6 +7,29 @@ import {
 
 import { callQuery } from "./utils/query";
 
+export const setJobPositionResponsibilitiesQuery = async (
+  jobPositionId: number,
+  responsibilityCodes: string[],
+): Promise<void> => {
+  await callQuery(
+    `DELETE FROM "JobPositionResponsibilities" WHERE "jobPositionId" = $1`,
+    [jobPositionId],
+  );
+
+  if (responsibilityCodes.length === 0) return;
+
+  const placeholders = responsibilityCodes
+    .map((_, i) => `($1, $${i + 2}, NOW(), NOW())`)
+    .join(", ");
+
+  await callQuery(
+    `INSERT INTO "JobPositionResponsibilities" ("jobPositionId", "responsibilityCode", "createdAt", "updatedAt")
+     VALUES ${placeholders}
+     ON CONFLICT DO NOTHING`,
+    [jobPositionId, ...responsibilityCodes],
+  );
+};
+
 export const getAllJobPositionsQuery = async (
   limit: number,
   offset: number,
@@ -45,10 +68,13 @@ export const getAllJobPositionsQuery = async (
       w."categoryId",
       c.name AS "categoryName",
       w."createdAt",
-      w."updatedAt"
+      w."updatedAt",
+      COALESCE(array_agg(DISTINCT jr."responsibilityCode") FILTER (WHERE jr."responsibilityCode" IS NOT NULL), '{}') AS responsibilities
     FROM "JobPosition" w
            LEFT JOIN "JobPositionCategory" c ON w."categoryId" = c.id
+           LEFT JOIN "JobPositionResponsibilities" jr ON jr."jobPositionId" = w.id
       ${where}
+      GROUP BY w.id, c.name
         ${order}
     LIMIT $1
       OFFSET $2
@@ -79,35 +105,65 @@ export const getTotalJobPositionsCountQuery = async (
 };
 
 export const getJobPositionByIdQuery = async (id: number) => {
-  const sql = `SELECT * FROM "JobPosition" WHERE id = $1`;
-  return callQuery<JobPosition[]>(sql, [id], true);
+  const sql = `
+    SELECT
+      w.*,
+      c.name AS "categoryName",
+      COALESCE(array_agg(DISTINCT jr."responsibilityCode") FILTER (WHERE jr."responsibilityCode" IS NOT NULL), '{}') AS responsibilities
+    FROM "JobPosition" w
+           LEFT JOIN "JobPositionCategory" c ON w."categoryId" = c.id
+           LEFT JOIN "JobPositionResponsibilities" jr ON jr."jobPositionId" = w.id
+    WHERE w.id = $1
+    GROUP BY w.id, c.name
+  `;
+  return callQuery<JobPositionWithCategory[]>(sql, [id], true);
 };
 
-export const createJobPositionQuery = async (data: CreateJobPositionData) => {
+export const createJobPositionQuery = async (
+  data: CreateJobPositionData,
+): Promise<JobPositionWithCategory> => {
   const sql = `
     INSERT INTO "JobPosition" (name, description, "categoryId", "createdAt", "updatedAt")
     VALUES ($1, $2, $3, NOW(), NOW())
     RETURNING *`;
 
-  return callQuery<JobPosition>(
+  const rows = await callQuery<JobPosition[]>(
     sql,
     [data.name, data.description, data.categoryId],
     true,
   );
+  const created = rows[0];
+
+  if (data.responsibilities && data.responsibilities.length > 0) {
+    await setJobPositionResponsibilitiesQuery(created.id, data.responsibilities);
+  }
+
+  const result = await getJobPositionByIdQuery(created.id);
+  return result[0];
 };
 
-export const updateJobPositionQuery = async (data: EditJobPositionData) => {
+export const updateJobPositionQuery = async (
+  data: EditJobPositionData,
+): Promise<JobPositionWithCategory> => {
   const sql = `
     UPDATE "JobPosition"
     SET name = $1, description = $2, "categoryId" = $3, "updatedAt" = NOW()
     WHERE id = $4
     RETURNING *`;
 
-  return callQuery<JobPosition>(
+  await callQuery<JobPosition[]>(
     sql,
     [data.name, data.description, data.categoryId, data.id],
     true,
   );
+
+  await setJobPositionResponsibilitiesQuery(
+    data.id,
+    data.responsibilities ?? [],
+  );
+
+  const result = await getJobPositionByIdQuery(data.id);
+  return result[0];
 };
 
 export const deleteJobPositionQuery = async (id: number) => {

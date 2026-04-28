@@ -15,6 +15,8 @@ export interface RoleState {
   success: string | null;
 }
 
+export type PersonStatus = 'working' | 'off' | 'vacation' | 'sick' | 'break';
+
 export interface PersonFormDataBase {
   profileImage: string;
   employeeNumber: number;
@@ -33,11 +35,20 @@ export interface PersonFormDataBase {
   updatedBy: string;
   id?: string;
   documents: DocumentData[] | number[];
+  rfidCardNumber?: string | null;
+  status?: PersonStatus;
+  currentPositionId?: number | null;
+}
+
+export interface PersonDetailData extends PersonFormDataBase {
+  roleNames: string[];
+  jobPositionNames: string[];
+  currentPositionName?: string | null;
 }
 
 export interface PersonState {
   persons: PersonFormDataBase[];
-  person: PersonFormDataBase;
+  person: PersonDetailData;
   total: number;
   loading: boolean;
   error: string | null;

@@ -10,6 +10,7 @@ import jobPositionCategorySlice from '@/state/jobPositionCategory/jobPositionCat
 import machineAvailabilityStatusSlice from '@/state/machineAvailabilityStatus/machineAvailabilityStatus.slice.ts';
 import machineEquipmentTypesSlice from '@/state/machineEquipmentTypes/machineEquipmentTypes.slice.ts';
 import personSlice from '@/state/person/person.slice.ts';
+import responsibilitySlice from '@/state/responsibility/responsibility.slice.ts';
 import roleSlice from '@/state/role/role.slice.ts';
 import themeSlice from '@/state/theme/theme.slice.ts';
 
@@ -24,6 +25,7 @@ const reducer = combineReducers({
   machineEquipmentType: machineEquipmentTypesSlice,
   machineEquipment: machineEquipmentSlice,
   machine: machineSlice,
+  responsibility: responsibilitySlice,
   filesUpload: filesSlice,
 });
 

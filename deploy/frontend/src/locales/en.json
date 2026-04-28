@@ -32,8 +32,32 @@
       "additionalInfo": "Additional Info",
       "roles": "Roles:",
       "jobPositions": "Job Positions:",
+      "rfidCardNumber": "RFID Card Number",
+      "status": "Status",
+      "currentPosition": "Current Position",
+      "currentPositionHint": "Select from eligible positions",
       "documents": "Documents:",
       "back": "Back"
+    },
+    "status": {
+      "working": "Working",
+      "off": "Off",
+      "vacation": "Vacation",
+      "sick": "Sick",
+      "break": "Break"
+    },
+    "detail": {
+      "back": "Back",
+      "edit": "Edit",
+      "notSpecified": "Not specified",
+      "sectionBasic": "Basic Information",
+      "sectionEmployment": "Employment",
+      "sectionRoles": "Roles",
+      "sectionJobPositions": "Job Positions",
+      "sectionDocuments": "Documents",
+      "noDocuments": "No documents attached",
+      "noRoles": "No roles assigned",
+      "noJobPositions": "No job positions assigned"
     }
   },
   "jobPosition": {
@@ -64,7 +88,39 @@
       "name": "Name",
       "description": "Description",
       "category": "Category",
-      "addCategory": "Add Job Position Category"
+      "addCategory": "Add Job Position Category",
+      "responsibilities": "Responsibilities"
+    }
+  },
+  "responsibility": {
+    "title": "RESPONSIBILITIES",
+    "subtitle": "Manage system and custom responsibilities",
+    "addButton": "Add responsibility",
+    "systemBadge": "System",
+    "columns": {
+      "id": "ID",
+      "code": "Code",
+      "label": "Label",
+      "description": "Description",
+      "type": "Type",
+      "actions": "Actions"
+    },
+    "confirmDelete": {
+      "title": "Confirm Delete",
+      "message": "Are you sure you want to delete \"{{label}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Responsibility",
+      "editTitle": "Edit Responsibility",
+      "addSubmit": "Add Responsibility",
+      "addSubmitLoading": "Adding...",
+      "saveChanges": "Save Changes",
+      "saveChangesLoading": "Saving...",
+      "cancel": "Cancel",
+      "code": "Code",
+      "codeHint": "Lowercase letters, digits and underscores only (e.g. batch_release_qc)",
+      "label": "Label",
+      "description": "Description"
     }
   },
   "jobPositionCategory": {
@@ -312,6 +368,7 @@
     "persons": "Persons",
     "jobPositions": "Job Positions",
     "jobPositionCategories": "Job Position Categories",
+    "responsibilities": "Responsibilities",
     "machineManagement": "Machine Management",
     "availabilityStatuses": "Availability Statuses",
     "equipmentTypes": "Equipment Types",
@@ -321,7 +378,8 @@
   "common": {
     "cancel": "Cancel",
     "delete": "Delete",
-    "search": "Search..."
+    "search": "Search...",
+    "perPage": "Per page"
   },
   "dataGrid": {
     "toolbarColumns": "Columns",

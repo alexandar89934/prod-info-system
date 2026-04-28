@@ -19,9 +19,10 @@ export const createPersonQuery = async (
     WITH inserted_person AS (
       INSERT INTO "Person" (
                             "name", "address", "mail", "picture", "additionalInfo", "documents",
-                            "startDate", "endDate", "createdAt", "updatedAt", "createdBy", "updatedBy"
+                            "startDate", "endDate", "createdAt", "updatedAt", "createdBy", "updatedBy",
+                            "rfidCardNumber", "status", "currentPositionId"
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $17, $18, $19)
         RETURNING id AS "personId"
     ),
          inserted_user AS (
@@ -67,6 +68,9 @@ export const createPersonQuery = async (
     hashedPassword,
     roles,
     jobPositions,
+    personData.rfidCardNumber ?? null,
+    personData.status ?? "off",
+    personData.currentPositionId ?? null,
   ];
 
   return callQuery<CreatePersonData>(insertSQL, values);
@@ -87,7 +91,10 @@ export const updatePersonQuery = async (
           "startDate" = $7,
           "endDate" = $8,
           "updatedAt" = $9,
-          "updatedBy" = $10
+          "updatedBy" = $10,
+          "rfidCardNumber" = $14,
+          "status" = $15,
+          "currentPositionId" = $16
         WHERE "id" = $1
         RETURNING "id"
     ),
@@ -129,6 +136,9 @@ export const updatePersonQuery = async (
     personData.employeeNumber,
     personData.roles || [],
     personData.jobPositions || [],
+    personData.rfidCardNumber ?? null,
+    personData.status ?? "off",
+    personData.currentPositionId ?? null,
   ];
 
   return callQuery<EditPersonData>(updateSQL, values);
@@ -157,14 +167,19 @@ export const getPersonByIdQuery = async (
       u."employeeNumber",
       u."id" AS "userId",
       array_agg(DISTINCT r."id") AS "roles",
-      array_agg(DISTINCT ej."jobPositionId") AS "jobPositions"
+      array_agg(DISTINCT r."name") AS "roleNames",
+      array_agg(DISTINCT ej."jobPositionId") AS "jobPositions",
+      array_agg(DISTINCT jp."name") AS "jobPositionNames",
+      cp.name AS "currentPositionName"
     FROM "Person" p
            LEFT JOIN "User" u ON u."personId" = p."id"
            LEFT JOIN "UserRoles" ur ON ur."userId" = u."id"
            LEFT JOIN "Role" r ON ur."roleId" = r."id"
            LEFT JOIN "EmployeeJobPositions" ej ON ej."userId" = u."id"
+           LEFT JOIN "JobPosition" jp ON ej."jobPositionId" = jp."id"
+           LEFT JOIN "JobPosition" cp ON cp."id" = p."currentPositionId"
     WHERE p."id" = $1
-    GROUP BY p."id", u."id";
+    GROUP BY p."id", u."id", cp.name;
   `;
 
   return callQuery<CreatePersonData>(selectSQL, [id]);
@@ -179,14 +194,19 @@ export const getPersonByEmployeeNumberQuery = async (
       u."employeeNumber",
       u."id" AS "userId",
       array_agg(DISTINCT r."id") AS "roles",
-      array_agg(DISTINCT ej."jobPositionId") AS "jobPositions"
+      array_agg(DISTINCT r."name") AS "roleNames",
+      array_agg(DISTINCT ej."jobPositionId") AS "jobPositions",
+      array_agg(DISTINCT jp."name") AS "jobPositionNames",
+      cp.name AS "currentPositionName"
     FROM "Person" p
            JOIN "User" u ON u."personId" = p."id"
            LEFT JOIN "UserRoles" ur ON ur."userId" = u."id"
            LEFT JOIN "Role" r ON ur."roleId" = r."id"
            LEFT JOIN "EmployeeJobPositions" ej ON ej."userId" = u."id"
+           LEFT JOIN "JobPosition" jp ON ej."jobPositionId" = jp."id"
+           LEFT JOIN "JobPosition" cp ON cp."id" = p."currentPositionId"
     WHERE u."employeeNumber" = CAST($1 AS INTEGER)
-    GROUP BY p."id", u."id";
+    GROUP BY p."id", u."id", cp.name;
   `;
 
   return callQuery<CreatePersonData>(selectSQL, [employeeNumber]);
@@ -275,9 +295,11 @@ export const getAllPersonsQuery = async (
   const selectSQL = `
     SELECT
       p."id", u."employeeNumber", p."name", p."address", p."mail", p."picture",
-      p."additionalInfo", p."startDate", p."documents", p."createdAt", p."updatedAt", p."createdBy", p."updatedBy"
+      p."additionalInfo", p."startDate", p."documents", p."createdAt", p."updatedAt", p."createdBy", p."updatedBy",
+      p."rfidCardNumber", p."status", p."currentPositionId", cp.name AS "currentPositionName"
     FROM "Person" p
            JOIN "User" u ON u."personId" = p."id"
+           LEFT JOIN "JobPosition" cp ON cp."id" = p."currentPositionId"
     WHERE
       p."name" ILIKE $3 OR
       u."employeeNumber"::TEXT ILIKE $3 OR

@@ -17,6 +17,12 @@ export const personSchema = z
     jobPositions: z.array(z.any()).optional().default([]),
     startDate: z.string().min(1, 'Start date is required'),
     endDate: z.string().optional(),
+    rfidCardNumber: z.string().max(100).optional().nullable(),
+    status: z
+      .enum(['working', 'off', 'vacation', 'sick', 'break'])
+      .optional()
+      .default('off'),
+    currentPositionId: z.number().int().positive().optional().nullable(),
     createdAt: z.date().default(() => new Date()),
     updatedAt: z.date().default(() => new Date()),
     createdBy: z.string().default(() => getName()),

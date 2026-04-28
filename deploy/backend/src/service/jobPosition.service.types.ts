@@ -9,11 +9,16 @@ export type JobPosition = {
 
 export type JobPositionWithCategory = JobPosition & {
   categoryName: string;
+  responsibilities: string[];
 };
 
 export type CreateJobPositionData = Omit<
   JobPosition,
   "id" | "createdAt" | "updatedAt"
->;
+> & {
+  responsibilities?: string[];
+};
 
-export type EditJobPositionData = Omit<JobPosition, "createdAt" | "updatedAt">;
+export type EditJobPositionData = Omit<JobPosition, "createdAt" | "updatedAt"> & {
+  responsibilities?: string[];
+};

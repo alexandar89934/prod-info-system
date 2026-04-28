@@ -10,6 +10,7 @@ import {
   PieChartOutlined,
   AdminPanelSettingsOutlined,
   PrecisionManufacturingOutlined,
+  AssignmentOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -56,6 +57,7 @@ const navItems: NavItem[] = [
   { textKey: 'sidebar.persons', path: 'person', icon: <Groups2Outlined />, requiresAuth: true },
   { textKey: 'sidebar.jobPositions', path: 'jobPosition', icon: <ReceiptLongOutlined />, requiresAuth: true },
   { textKey: 'sidebar.jobPositionCategories', path: 'jobPositionCategories', icon: <CategoryOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.responsibilities', path: 'responsibilities', icon: <AssignmentOutlined />, requiresAuth: true },
   { textKey: 'sidebar.machineManagement', path: null, icon: null, requiresAuth: true },
   {
     textKey: 'sidebar.availabilityStatuses',

@@ -8,3 +8,4 @@ export * as machineAvailabilityStatusService from "./machineAvailabilityStatus.s
 export * as machineEquipmentTypeService from "./machineEquipmentTypes.service";
 export * as machineEquipmentService from "./machineEquipment.service";
 export * as machineService from "./machine.service";
+export * as responsibilityService from "./responsibility.service";

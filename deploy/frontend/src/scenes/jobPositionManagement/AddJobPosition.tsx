@@ -1,6 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, CircularProgress, Alert, useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  Checkbox,
+  CircularProgress,
+  Alert,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  useTheme,
+} from '@mui/material';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +34,8 @@ import {
 import { clearError, clearSuccess } from '@/state/jobPosition/jobPosition.slice';
 import { fetchJobPositionCategories } from '@/state/jobPositionCategory/jobPositionCategory.actions.ts';
 import { selectJobPositionCategories } from '@/state/jobPositionCategory/jobPositionCategory.selectors.ts';
+import { fetchResponsibilities } from '@/state/responsibility/responsibility.actions.ts';
+import { selectResponsibilities } from '@/state/responsibility/responsibility.selectors.ts';
 import { jobPositionSchema } from '@/zodValidationSchemas/jobPosition.schema';
 
 type AddJobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -48,6 +63,7 @@ const AddJobPosition = () => {
       name: '',
       description: '',
       categoryId: 0,
+      responsibilities: [],
     },
   });
   useEffect(() => {
@@ -60,6 +76,7 @@ const AddJobPosition = () => {
         sortOrder: '',
       })
     );
+    dispatch(fetchResponsibilities());
   }, [dispatch]);
 
   useEffect(() => {
@@ -82,6 +99,7 @@ const AddJobPosition = () => {
   };
 
   const categories = useSelector(selectJobPositionCategories) || [];
+  const allResponsibilities = useSelector(selectResponsibilities) || [];
 
   return (
     <Box
@@ -158,6 +176,38 @@ const AddJobPosition = () => {
               />
             )}
           />
+          <FormControl fullWidth>
+            <InputLabel id="responsibilities-label">{t('jobPosition.form.responsibilities')}</InputLabel>
+            <Controller
+              name="responsibilities"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  labelId="responsibilities-label"
+                  id="responsibilities"
+                  multiple
+                  value={field.value ?? []}
+                  label={t('jobPosition.form.responsibilities')}
+                  onChange={(e: SelectChangeEvent<string[]>) =>
+                    field.onChange(e.target.value as string[])
+                  }
+                  renderValue={(selected) =>
+                    (selected as string[])
+                      .map((code) => allResponsibilities.find((r) => r.code === code)?.label ?? code)
+                      .join(', ')
+                  }
+                >
+                  {allResponsibilities.map((r) => (
+                    <MenuItem key={r.code} value={r.code}>
+                      <Checkbox checked={(field.value ?? []).includes(r.code)} />
+                      <ListItemText primary={r.label} secondary={r.code} />
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+          </FormControl>
+
           <Box display="flex" justifyContent="flex-end">
             <Button
               variant="contained"

@@ -1,16 +1,10 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import TableRowsIcon from '@mui/icons-material/TableRows';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
   Box,
   Button,
-  Grid,
   IconButton,
-  Pagination,
-  ToggleButton,
-  ToggleButtonGroup,
   useTheme,
   Snackbar,
   Alert,
@@ -43,9 +37,6 @@ import {
   clearSuccess,
   resetState,
 } from '@/state/jobPositionCategory/jobPositionCategory.slice';
-import { JobPositionCategory } from '@/state/jobPositionCategory/jobPositionCategory.types';
-
-import JobPositionCategoryCard from './JobPositionCategoryCard';
 
 const JobPositionCategoryList = () => {
   type SelectedItem = {
@@ -71,9 +62,6 @@ const JobPositionCategoryList = () => {
   const [searchInput, setSearchInput] = useState('');
   const [sortModel, setSortModel] = useState([]);
   const [reload, setReload] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(
-    () => (localStorage.getItem('jobPositionCategoryViewMode') as 'table' | 'grid') ?? 'table'
-  );
 
   const categories = useSelector(selectJobPositionCategories);
   const loading = useSelector(selectJobPositionCategoryLoading);
@@ -125,17 +113,6 @@ const JobPositionCategoryList = () => {
       handleClose();
       setReload((prev) => !prev);
     }
-  };
-
-  const handleViewMode = (_: React.MouseEvent<HTMLElement>, next: 'table' | 'grid' | null) => {
-    if (!next) return;
-    setViewMode(next);
-    localStorage.setItem('jobPositionCategoryViewMode', next);
-  };
-
-  const handleDeleteCard = (id: string, name: string) => {
-    setSelected({ id, name });
-    setOpen(true);
   };
 
   const columns = [
@@ -192,79 +169,51 @@ const JobPositionCategoryList = () => {
           title={t('jobPositionCategory.title')}
           subtitle={t('jobPositionCategory.subtitle')}
         />
-        <Box display="flex" alignItems="center" gap={1}>
-          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewMode} size="small">
-            <ToggleButton value="table"><TableRowsIcon fontSize="small" /></ToggleButton>
-            <ToggleButton value="grid"><ViewModuleIcon fontSize="small" /></ToggleButton>
-          </ToggleButtonGroup>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAdd}
-            fullWidth={isMobile}
-            size={isMobile ? 'medium' : 'large'}
-          >
-            {t('jobPositionCategory.addButton')}
-          </Button>
-        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleAdd}
+          fullWidth={isMobile}
+          size={isMobile ? 'medium' : 'large'}
+        >
+          {t('jobPositionCategory.addButton')}
+        </Button>
       </Box>
 
-      {viewMode === 'table' ? (
-        <Box width="100%" sx={{ flexGrow: 1, minHeight: 0, ...dataGridSx }}>
-          <DataGrid
-            loading={loading}
-            rows={categories || []}
-            getRowId={(row) => row.id}
-            columns={columns}
-            rowCount={total || 0}
-            rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
-            pagination
-            page={page}
-            pageSize={pageSize}
-            paginationMode="server"
-            sortingMode="server"
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-            onSortModelChange={setSortModel}
-            components={{ Toolbar: DataGridCustomToolbar }}
-            componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
-            density="comfortable"
-            localeText={localeText}
-            sx={{
-              '& .MuiDataGrid-virtualScroller': { overflow: 'auto', scrollbarWidth: 'thin' },
-              '& .MuiDataGrid-row.Mui-selected': {
-                backgroundColor: `${theme.palette.action.selected} !important`,
-                color: theme.palette.primary.contrastText,
-              },
-              '& .MuiDataGrid-row.Mui-selected:hover': {
-                backgroundColor: `${theme.palette.action.hover} !important`,
-              },
-              '& .MuiDataGrid-columnHeaderTitle': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
-              '& .MuiDataGrid-cellContent': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
-            }}
-          />
-        </Box>
-      ) : (
-        <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <Grid container spacing={2}>
-            {(categories as JobPositionCategory[]).map((cat) => (
-              <Grid item key={cat.id} xs={12} sm={6} md={4} lg={3}>
-                <JobPositionCategoryCard category={cat} onDelete={handleDeleteCard} />
-              </Grid>
-            ))}
-          </Grid>
-          {total > pageSize && (
-            <Box display="flex" justifyContent="center" pb={2}>
-              <Pagination
-                count={Math.ceil(total / pageSize)}
-                page={page + 1}
-                onChange={(_, value) => setPage(value - 1)}
-                color="primary"
-              />
-            </Box>
-          )}
-        </Box>
-      )}
+      <Box width="100%" sx={{ flexGrow: 1, minHeight: 0, ...dataGridSx }}>
+        <DataGrid
+          loading={loading}
+          rows={categories || []}
+          getRowId={(row) => row.id}
+          columns={columns}
+          rowCount={total || 0}
+          rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
+          pagination
+          page={page}
+          pageSize={pageSize}
+          paginationMode="server"
+          sortingMode="server"
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          onSortModelChange={setSortModel}
+          components={{ Toolbar: DataGridCustomToolbar }}
+          componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
+          density="comfortable"
+          localeText={localeText}
+          sx={{
+            '& .MuiDataGrid-virtualScroller': { overflow: 'auto', scrollbarWidth: 'thin' },
+            '& .MuiDataGrid-row.Mui-selected': {
+              backgroundColor: `${theme.palette.action.selected} !important`,
+              color: theme.palette.primary.contrastText,
+            },
+            '& .MuiDataGrid-row.Mui-selected:hover': {
+              backgroundColor: `${theme.palette.action.hover} !important`,
+            },
+            '& .MuiDataGrid-columnHeaderTitle': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
+            '& .MuiDataGrid-cellContent': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
+          }}
+        />
+      </Box>
 
       <ConfirmDialog
         open={open}

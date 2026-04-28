@@ -32,8 +32,32 @@
       "additionalInfo": "Dodatne informacije",
       "roles": "Uloge:",
       "jobPositions": "Radna mesta:",
+      "rfidCardNumber": "Broj RFID kartice",
+      "status": "Status",
+      "currentPosition": "Trenutna pozicija",
+      "currentPositionHint": "Izaberite iz dozvoljenih pozicija",
       "documents": "Dokumenta:",
       "back": "Nazad"
+    },
+    "status": {
+      "working": "Na poslu",
+      "off": "Slobodan",
+      "vacation": "Godišnji odmor",
+      "sick": "Bolovanje",
+      "break": "Pauza"
+    },
+    "detail": {
+      "back": "Nazad",
+      "edit": "Izmeni",
+      "notSpecified": "Nije navedeno",
+      "sectionBasic": "Osnovne informacije",
+      "sectionEmployment": "Zaposlenje",
+      "sectionRoles": "Uloge",
+      "sectionJobPositions": "Radna mesta",
+      "sectionDocuments": "Dokumenta",
+      "noDocuments": "Nema priloženih dokumenata",
+      "noRoles": "Nema dodeljenih uloga",
+      "noJobPositions": "Nema dodeljenih radnih mesta"
     }
   },
   "jobPosition": {
@@ -64,7 +88,39 @@
       "name": "Naziv",
       "description": "Opis",
       "category": "Kategorija",
-      "addCategory": "Dodaj kategoriju radnog mesta"
+      "addCategory": "Dodaj kategoriju radnog mesta",
+      "responsibilities": "Odgovornosti"
+    }
+  },
+  "responsibility": {
+    "title": "ODGOVORNOSTI",
+    "subtitle": "Upravljanje sistemskim i prilagođenim odgovornostima",
+    "addButton": "Dodaj odgovornost",
+    "systemBadge": "Sistemska",
+    "columns": {
+      "id": "ID",
+      "code": "Kod",
+      "label": "Naziv",
+      "description": "Opis",
+      "type": "Tip",
+      "actions": "Akcije"
+    },
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "message": "Da li ste sigurni da želite da obrišete \"{{label}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj odgovornost",
+      "editTitle": "Izmeni odgovornost",
+      "addSubmit": "Dodaj odgovornost",
+      "addSubmitLoading": "Dodavanje...",
+      "saveChanges": "Sačuvaj izmene",
+      "saveChangesLoading": "Čuvanje...",
+      "cancel": "Otkaži",
+      "code": "Kod",
+      "codeHint": "Samo mala slova, cifre i donje crte (npr. batch_release_qc)",
+      "label": "Naziv",
+      "description": "Opis"
     }
   },
   "jobPositionCategory": {
@@ -312,6 +368,7 @@
     "persons": "Zaposleni",
     "jobPositions": "Radna mesta",
     "jobPositionCategories": "Kategorije radnih mesta",
+    "responsibilities": "Odgovornosti",
     "machineManagement": "Upravljanje mašinama",
     "availabilityStatuses": "Statusi dostupnosti",
     "equipmentTypes": "Tipovi opreme",
@@ -321,7 +378,8 @@
   "common": {
     "cancel": "Otkaži",
     "delete": "Obriši",
-    "search": "Pretraži..."
+    "search": "Pretraži...",
+    "perPage": "Po stranici"
   },
   "dataGrid": {
     "toolbarColumns": "Kolone",

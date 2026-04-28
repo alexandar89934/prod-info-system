@@ -31,6 +31,12 @@ export const CreatePersonSchema = Joi.object({
   updatedAt: Joi.date().iso().required(),
   createdBy: Joi.string().required(),
   updatedBy: Joi.string().required(),
+  rfidCardNumber: Joi.string().max(100).optional().allow("", null),
+  status: Joi.string()
+    .valid("working", "off", "vacation", "sick", "break")
+    .optional()
+    .default("off"),
+  currentPositionId: Joi.number().integer().positive().optional().allow(null),
 });
 
 export const UpdatePersonSchema = Joi.object({
@@ -64,4 +70,9 @@ export const UpdatePersonSchema = Joi.object({
   updatedAt: Joi.date().empty(""),
   createdBy: Joi.string().required(),
   updatedBy: Joi.string().required(),
+  rfidCardNumber: Joi.string().max(100).optional().allow("", null),
+  status: Joi.string()
+    .valid("working", "off", "vacation", "sick", "break")
+    .optional(),
+  currentPositionId: Joi.number().integer().positive().optional().allow(null),
 });

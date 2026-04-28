@@ -1,3 +1,5 @@
+export type PersonStatus = "working" | "off" | "vacation" | "sick" | "break";
+
 type PersonData = {
   id?: string;
   employeeNumber: number;
@@ -15,6 +17,9 @@ type PersonData = {
   updatedAt: Date;
   createdBy: string;
   updatedBy: string;
+  rfidCardNumber?: string | null;
+  status?: PersonStatus;
+  currentPositionId?: number | null;
 };
 
 export type CreatePersonData = PersonData;

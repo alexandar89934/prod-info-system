@@ -8,15 +8,19 @@ import {
   Button,
   Grid,
   IconButton,
+  MenuItem,
   Pagination,
+  Select,
+  SelectChangeEvent,
   ToggleButton,
   ToggleButtonGroup,
+  Typography,
   useTheme,
   Snackbar,
   Alert,
   useMediaQuery,
 } from '@mui/material';
-import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
@@ -85,6 +89,7 @@ const Person = () => {
   const handleAddPerson = () => {
     navigate('/addPerson');
   };
+  const handleView = (id: string) => navigate(`/person/${id}`);
   const handleEdit = (row: { id: string; employeeNumber: number }) => {
     if (Number(row.employeeNumber) === Number(employeeNumber)) {
       navigate(`/profilePage`);
@@ -176,7 +181,7 @@ const Person = () => {
             }}
           />
           <Box>
-            <div style={{ fontWeight: 'bold' }}>{params.value}</div>
+            <div style={{ fontWeight: 'bold' }}>{params.row.name}</div>
             <div style={{ fontSize: '0.8rem' }}>
               #{params.row.employeeNumber}
             </div>
@@ -209,7 +214,7 @@ const Person = () => {
       renderCell: (params: GridRenderCellParams<PersonFormDataBase>) => {
         return (
           <img
-            src={(params.value as string) || profileImage}
+            src={params.row.picture || profileImage}
             alt="Person"
             style={{
               width: 50,
@@ -255,7 +260,7 @@ const Person = () => {
     },
   ];
 
-  const columns = isMobile ? mobileColumns : desktopColumns;
+  const columns: GridColDef[] = isMobile ? mobileColumns : desktopColumns;
 
   const dataGridSx = {
     '& .MuiDataGrid-root': { border: 'none' },
@@ -321,6 +326,7 @@ const Person = () => {
             onPageChange={(newPage) => setPage(newPage)}
             onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
             onSortModelChange={handleSortModelChange}
+            onRowClick={(params) => handleView(params.row.id)}
             components={{ Toolbar: DataGridCustomToolbar }}
             componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
             density="comfortable"
@@ -336,6 +342,7 @@ const Person = () => {
               },
               '& .MuiDataGrid-columnHeaderTitle': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
               '& .MuiDataGrid-cellContent': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
+              '& .MuiDataGrid-row': { cursor: 'pointer' },
             }}
           />
         </Box>
@@ -352,12 +359,39 @@ const Person = () => {
             ))}
           </Grid>
           {total > pageSize && (
-            <Box display="flex" justifyContent="center" pb={2}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
+              gap={1}
+              px={1}
+              pb={2}
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="body2" color="text.secondary">
+                  {t('common.perPage')}:
+                </Typography>
+                <Select
+                  size="small"
+                  value={pageSize}
+                  onChange={(e: SelectChangeEvent<number>) => {
+                    setPage(0);
+                    setPageSize(Number(e.target.value));
+                  }}
+                  sx={{ minWidth: 70 }}
+                >
+                  {[12, 24, 48].map((s) => (
+                    <MenuItem key={s} value={s}>{s}</MenuItem>
+                  ))}
+                </Select>
+              </Box>
               <Pagination
                 count={Math.ceil(total / pageSize)}
                 page={page + 1}
                 onChange={(_, value) => setPage(value - 1)}
                 color="primary"
+                size="small"
               />
             </Box>
           )}

@@ -1,16 +1,18 @@
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import {
-  Box,
-  Button,
-  IconButton,
-  useTheme,
-  Snackbar,
   Alert,
+  Box,
+  Chip,
+  IconButton,
+  Snackbar,
   useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import Button from '@mui/material/Button';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -20,30 +22,25 @@ import ConfirmDialog from '@/reusableComponents/ConfirmDialog';
 import DataGridCustomToolbar from '@/reusableComponents/DataGridCustomToolbar';
 import Header from '@/reusableComponents/Header';
 import { useDataGridLocaleText } from '@/reusableComponents/useDataGridLocaleText';
-import { useAppDispatch } from '@/state/hooks.ts';
+import { useAppDispatch } from '@/state/hooks';
 import {
-  fetchJobPositions,
-  deleteJobPosition,
-} from '@/state/jobPosition/jobPosition.actions';
+  deleteResponsibility,
+  fetchResponsibilities,
+} from '@/state/responsibility/responsibility.actions';
 import {
-  selectJobPositions,
-  selectJobPositionLoading,
-  selectJobPositionError,
-  selectJobPositionSuccess,
-  selectJobPositionTotal,
-} from '@/state/jobPosition/jobPosition.selectors';
+  selectResponsibilities,
+  selectResponsibilityError,
+  selectResponsibilityLoading,
+  selectResponsibilitySuccess,
+} from '@/state/responsibility/responsibility.selectors';
 import {
   clearError,
   clearSuccess,
   resetState,
-} from '@/state/jobPosition/jobPosition.slice';
+} from '@/state/responsibility/responsibility.slice';
+import { Responsibility } from '@/state/responsibility/responsibility.types';
 
-const JobPositionList = () => {
-  type SelectedItem = {
-    id: string;
-    name: string;
-  };
-
+const ResponsibilityList = () => {
   const { t } = useTranslation();
   const localeText = useDataGridLocaleText();
   const navigate = useNavigate();
@@ -51,41 +48,26 @@ const JobPositionList = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const dispatch = useAppDispatch();
 
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(isMobile ? 10 : 20);
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<SelectedItem | null>(null);
+  const [selected, setSelected] = useState<Responsibility | null>(null);
   const [notification, setNotification] = useState<{
     message: string;
     type: 'success' | 'error';
   } | null>(null);
-  const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [sortModel, setSortModel] = useState([]);
-  const [reload, setReload] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const jobPositions = useSelector(selectJobPositions);
-  const loading = useSelector(selectJobPositionLoading);
-  const error = useSelector(selectJobPositionError);
-  const success = useSelector(selectJobPositionSuccess);
-  const total = useSelector(selectJobPositionTotal);
+  const responsibilities = useSelector(selectResponsibilities);
+  const loading = useSelector(selectResponsibilityLoading);
+  const error = useSelector(selectResponsibilityError);
+  const success = useSelector(selectResponsibilitySuccess);
 
   useEffect(() => {
-    const sortField = sortModel[0]?.field || '';
-    const sortOrder = sortModel[0]?.sort || '';
-    dispatch(
-      fetchJobPositions({
-        limit: pageSize,
-        page: page + 1,
-        search,
-        sortField,
-        sortOrder,
-      })
-    );
+    dispatch(fetchResponsibilities());
     return () => {
       dispatch(resetState());
     };
-  }, [dispatch, page, pageSize, search, reload, sortModel]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (success) {
@@ -98,9 +80,9 @@ const JobPositionList = () => {
     }
   }, [success, error, dispatch]);
 
-  const handleAdd = () => navigate('/addJobPosition');
-  const handleEdit = (row) => navigate(`/editJobPosition/${row.id}`);
-  const handleDelete = (row) => {
+  const handleAdd = () => navigate('/addResponsibility');
+  const handleEdit = (row: Responsibility) => navigate(`/editResponsibility/${row.id}`);
+  const handleDelete = (row: Responsibility) => {
     setSelected(row);
     setOpen(true);
   };
@@ -110,54 +92,68 @@ const JobPositionList = () => {
   };
   const handleConfirmDelete = async () => {
     if (selected) {
-      await dispatch(deleteJobPosition(selected.id));
+      await dispatch(deleteResponsibility(selected.id));
       handleClose();
-      setReload((prev) => !prev);
+      dispatch(fetchResponsibilities());
     }
   };
 
-  const mobileColumns = [
-    { field: 'name', headerName: t('jobPosition.columns.jobPosition'), flex: 1 },
+  const filtered = responsibilities.filter(
+    (r) =>
+      !search ||
+      r.label.toLowerCase().includes(search.toLowerCase()) ||
+      r.code.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const columns = [
+    { field: 'id', headerName: t('responsibility.columns.id'), flex: 0.3 },
+    { field: 'code', headerName: t('responsibility.columns.code'), flex: 1 },
+    { field: 'label', headerName: t('responsibility.columns.label'), flex: 1.2 },
     {
-      field: 'actions',
-      headerName: t('jobPosition.columns.actions'),
+      field: 'description',
+      headerName: t('responsibility.columns.description'),
+      flex: 1.5,
+      hide: isMobile,
+    },
+    {
+      field: 'isSystem',
+      headerName: t('responsibility.columns.type'),
       flex: 0.5,
-      renderCell: (params) => (
-        <Box>
-          <IconButton onClick={() => handleEdit(params.row)} size="small">
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton onClick={() => handleDelete(params.row)} size="small">
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      ),
+      renderCell: (params: GridRenderCellParams<Responsibility>) =>
+        params.row.isSystem ? (
+          <Chip
+            icon={<LockOutlinedIcon fontSize="small" />}
+            label={t('responsibility.systemBadge')}
+            size="small"
+            color="default"
+            variant="outlined"
+          />
+        ) : null,
     },
-  ];
-
-  const desktopColumns = [
-    { field: 'id', headerName: t('jobPosition.columns.id'), flex: 0.3 },
-    { field: 'name', headerName: t('jobPosition.columns.name'), flex: 1 },
-    { field: 'description', headerName: t('jobPosition.columns.description'), flex: 1.5 },
-    { field: 'categoryName', headerName: t('jobPosition.columns.category'), flex: 0.6 },
     {
       field: 'actions',
-      headerName: t('jobPosition.columns.actions'),
-      flex: 0.8,
-      renderCell: (params) => (
+      headerName: t('responsibility.columns.actions'),
+      flex: 0.6,
+      renderCell: (params: GridRenderCellParams<Responsibility>) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton onClick={() => handleEdit(params.row)}>
-            <EditIcon />
+          <IconButton
+            onClick={() => handleEdit(params.row)}
+            disabled={params.row.isSystem}
+            size="small"
+          >
+            <EditIcon fontSize={isMobile ? 'small' : 'medium'} />
           </IconButton>
-          <IconButton onClick={() => handleDelete(params.row)}>
-            <DeleteIcon />
+          <IconButton
+            onClick={() => handleDelete(params.row)}
+            disabled={params.row.isSystem}
+            size="small"
+          >
+            <DeleteIcon fontSize={isMobile ? 'small' : 'medium'} />
           </IconButton>
         </Box>
       ),
     },
   ];
-
-  const columns = isMobile ? mobileColumns : desktopColumns;
 
   const dataGridSx = {
     '& .MuiDataGrid-root': { border: 'none' },
@@ -179,7 +175,16 @@ const JobPositionList = () => {
   };
 
   return (
-    <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 1, display: 'flex', flexDirection: 'column', height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } }}>
+    <Box
+      sx={{
+        px: { xs: 1, sm: 2, md: 3 },
+        pt: { xs: 1, sm: 2 },
+        pb: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
+      }}
+    >
       <Box
         display="flex"
         flexDirection={isMobile ? 'column' : 'row'}
@@ -188,7 +193,10 @@ const JobPositionList = () => {
         mb={2}
         gap={isMobile ? 2 : 0}
       >
-        <Header title={t('jobPosition.title')} subtitle={t('jobPosition.subtitle')} />
+        <Header
+          title={t('responsibility.title')}
+          subtitle={t('responsibility.subtitle')}
+        />
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -196,39 +204,22 @@ const JobPositionList = () => {
           fullWidth={isMobile}
           size={isMobile ? 'medium' : 'large'}
         >
-          {t('jobPosition.addButton')}
+          {t('responsibility.addButton')}
         </Button>
       </Box>
 
       <Box width="100%" sx={{ flexGrow: 1, minHeight: 0, ...dataGridSx }}>
         <DataGrid
           loading={loading}
-          rows={jobPositions || []}
+          rows={filtered}
           getRowId={(row) => row.id}
           columns={columns}
-          rowCount={total || 0}
-          rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
-          pagination
-          page={page}
-          pageSize={pageSize}
-          paginationMode="server"
-          sortingMode="server"
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSortModelChange={setSortModel}
           components={{ Toolbar: DataGridCustomToolbar }}
           componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
           density="comfortable"
           localeText={localeText}
           sx={{
             '& .MuiDataGrid-virtualScroller': { overflow: 'auto', scrollbarWidth: 'thin' },
-            '& .MuiDataGrid-row.Mui-selected': {
-              backgroundColor: `${theme.palette.action.selected} !important`,
-              color: theme.palette.primary.contrastText,
-            },
-            '& .MuiDataGrid-row.Mui-selected:hover': {
-              backgroundColor: `${theme.palette.action.hover} !important`,
-            },
             '& .MuiDataGrid-columnHeaderTitle': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
             '& .MuiDataGrid-cellContent': { fontSize: isMobile ? '0.75rem' : '0.875rem' },
           }}
@@ -237,8 +228,10 @@ const JobPositionList = () => {
 
       <ConfirmDialog
         open={open}
-        title={t('jobPosition.confirmDelete.title')}
-        message={t('jobPosition.confirmDelete.message', { name: selected?.name })}
+        title={t('responsibility.confirmDelete.title')}
+        message={t('responsibility.confirmDelete.message', {
+          label: selected?.label,
+        })}
         onClose={handleClose}
         onConfirm={handleConfirmDelete}
       />
@@ -262,4 +255,4 @@ const JobPositionList = () => {
   );
 };
 
-export default JobPositionList;
+export default ResponsibilityList;

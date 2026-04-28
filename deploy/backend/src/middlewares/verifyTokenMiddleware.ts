@@ -143,15 +143,6 @@ export const verifyTokenMiddleware = async (
   }
   try {
     jwt.verify(token, config.jwt.secret);
-    const isValidUSer = await checkIfUser(token);
-    if (!isValidUSer) {
-      res.status(httpStatus.UNAUTHORIZED).send({
-        success: false,
-        message: "Token not valid for user.",
-      });
-      return;
-    }
-    next();
   } catch (ex: unknown) {
     if ((ex as Error).name === "TokenExpiredError") {
       res.status(httpStatus.UNAUTHORIZED).send({
@@ -164,6 +155,24 @@ export const verifyTokenMiddleware = async (
     res.status(httpStatus.UNAUTHORIZED).clearCookie("refreshToken").send({
       success: false,
       message: "Token not valid.",
+      tokenNotValid: true,
+    });
+    return;
+  }
+  try {
+    const isValidUSer = await checkIfUser(token);
+    if (!isValidUSer) {
+      res.status(httpStatus.UNAUTHORIZED).send({
+        success: false,
+        message: "Token not valid for user.",
+      });
+      return;
+    }
+    next();
+  } catch (ex: unknown) {
+    res.status(httpStatus.UNAUTHORIZED).clearCookie("refreshToken").send({
+      success: false,
+      message: "Session expired, please log in again.",
       tokenNotValid: true,
     });
   }

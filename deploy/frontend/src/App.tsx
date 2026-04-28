@@ -30,9 +30,13 @@ import MachineEquipmentPage from '@/scenes/machineManagement/machineEquipment/ma
 import MachineEquipmentTypeList from '@/scenes/machineManagement/machineEquipmentTypes';
 import AddMachineEquipmentType from '@/scenes/machineManagement/machineEquipmentTypes/addMachineEquipmentTypes.tsx';
 import EditMachineEquipmentType from '@/scenes/machineManagement/machineEquipmentTypes/editMachineEquipmentTypes.tsx';
+import ResponsibilityList from '@/scenes/responsibilityManagement';
+import AddResponsibility from '@/scenes/responsibilityManagement/AddResponsibility.tsx';
+import EditResponsibility from '@/scenes/responsibilityManagement/EditResponsibility.tsx';
 import Person from '@/scenes/personManagement';
 import AddPerson from '@/scenes/personManagement/AddPerson.tsx';
 import EditPerson from '@/scenes/personManagement/EditPerson.tsx';
+import PersonPage from '@/scenes/personManagement/PersonPage.tsx';
 import ProfilePage from '@/scenes/personManagement/ProfilePage.tsx';
 import ResetPasswordPage from '@/scenes/personManagement/ResetPasswordPage.tsx';
 import ProtectedRoute from '@/reusableComponents/ProtectedRoute.tsx';
@@ -67,6 +71,7 @@ function App() {
 
               {/* Protected routes */}
               <Route path="/person" element={<ProtectedRoute><Person /></ProtectedRoute>} />
+              <Route path="/person/:id" element={<ProtectedRoute><PersonPage /></ProtectedRoute>} />
               <Route path="/addPerson" element={<ProtectedRoute><AddPerson /></ProtectedRoute>} />
               <Route path="/editPerson/:id" element={<ProtectedRoute><EditPerson /></ProtectedRoute>} />
               <Route path="/profilePage" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
@@ -87,6 +92,9 @@ function App() {
               <Route path="/machineEquipment/:id" element={<ProtectedRoute><MachineEquipmentPage /></ProtectedRoute>} />
               <Route path="/addMachineEquipment" element={<ProtectedRoute><AddMachineEquipment /></ProtectedRoute>} />
               <Route path="/editMachineEquipment/:id" element={<ProtectedRoute><EditMachineEquipment /></ProtectedRoute>} />
+              <Route path="/responsibilities" element={<ProtectedRoute><ResponsibilityList /></ProtectedRoute>} />
+              <Route path="/addResponsibility" element={<ProtectedRoute><AddResponsibility /></ProtectedRoute>} />
+              <Route path="/editResponsibility/:id" element={<ProtectedRoute><EditResponsibility /></ProtectedRoute>} />
               <Route path="/machine" element={<ProtectedRoute><MachineList /></ProtectedRoute>} />
               <Route path="/machine/:id" element={<ProtectedRoute><MachinePage /></ProtectedRoute>} />
               <Route path="/addMachine" element={<ProtectedRoute><AddMachine /></ProtectedRoute>} />

@@ -1,10 +1,3 @@
-- check first start admin person change and how the flow is
-- upload of images and documents doesnt work same for person and machine
-- profile image was broken when token is expired,
 - there was token expired message after login when accesing employees page
-- pagination on group view not present
-
-- move wacation to later stage
-- packiging units, we need it as entity, because there are few standard ones,qa also checkcs for example if material is packed properly
 
 

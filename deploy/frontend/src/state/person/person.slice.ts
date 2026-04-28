@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { DocumentData, PersonState } from './person.types';
+import { DocumentData, PersonDetailData, PersonState } from './person.types';
 
 import profileImage from '@/assets/profile.jpeg';
 import { getName } from '@/state/auth/auth.selectors.ts';
@@ -20,7 +20,7 @@ import {
   uploadImage,
 } from '@/state/person/person.actions.ts';
 
-const initialPerson: PersonState['person'] = {
+const initialPerson: PersonDetailData = {
   profileImage,
   employeeNumber: 0,
   name: '',
@@ -32,11 +32,17 @@ const initialPerson: PersonState['person'] = {
   endDate: '',
   roles: [],
   jobPositions: [],
+  roleNames: [],
+  jobPositionNames: [],
   createdAt: null,
   updatedAt: null,
   createdBy: getName(),
   updatedBy: getName(),
   documents: [],
+  rfidCardNumber: null,
+  status: 'off',
+  currentPositionId: null,
+  currentPositionName: null,
 };
 
 const initialState: PersonState = {

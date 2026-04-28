@@ -1,8 +1,12 @@
 import {
   Box,
-  Typography,
+  Chip,
   FormControl,
   InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
   Button,
   CircularProgress,
   Alert,
@@ -14,8 +18,13 @@ import {
   Controller,
   FieldError,
   FieldErrors,
+  FieldValues,
+  Path,
   UseFormHandleSubmit,
+  useWatch,
 } from 'react-hook-form';
+
+import { useSelector } from 'react-redux';
 
 import DateField from '@/reusableComponents/DateField.tsx';
 import DocumentList from '@/reusableComponents/DocumentsList.tsx';
@@ -23,7 +32,8 @@ import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField.tsx';
 import EmployeeJobPositionSelect from '@/scenes/personManagement/relatedComponents/EmployeeJobPositionSelect.tsx';
 import ProfileImageUpload from '@/scenes/personManagement/relatedComponents/ProfileImageUpload.tsx';
 import UserRolesSelect from '@/scenes/personManagement/relatedComponents/UserRolesSelect.tsx';
-import { PersonFormDataBase } from '@/state/person/person.types.ts';
+import { selectJobPositions } from '@/state/jobPosition/jobPosition.selectors.ts';
+import { PersonFormDataBase, PersonStatus } from '@/state/person/person.types.ts';
 
 interface PersonFormProps {
   title: string;
@@ -52,7 +62,7 @@ const FormField = ({
   rows = 1,
 }: {
   control: Control<PersonFormDataBase>;
-  name: string;
+  name: Path<PersonFormDataBase>;
   label: string;
   type?: 'number' | 'text' | 'email' | 'password' | 'string';
   error?: FieldError;
@@ -68,7 +78,9 @@ const FormField = ({
         label={label}
         type={type}
         value={
-          field.value === undefined || field.value === null ? '' : field.value
+          field.value === undefined || field.value === null
+            ? ''
+            : String(field.value)
         }
         onChange={(e) => {
           if (type === 'number') {
@@ -86,6 +98,14 @@ const FormField = ({
     )}
   />
 );
+
+const STATUS_COLORS: Record<PersonStatus, 'success' | 'default' | 'primary' | 'warning' | 'info'> = {
+  working: 'success',
+  off: 'default',
+  vacation: 'primary',
+  sick: 'warning',
+  break: 'info',
+};
 
 const PersonForm = ({
   title,
@@ -105,6 +125,12 @@ const PersonForm = ({
 }: PersonFormProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
+
+  const allJobPositions = useSelector(selectJobPositions);
+  const selectedJobPositionIds = useWatch({ control, name: 'jobPositions' }) as number[];
+  const eligiblePositions = allJobPositions.filter((jp) =>
+    (selectedJobPositionIds ?? []).includes(jp.id)
+  );
 
   return (
     <Box
@@ -249,7 +275,7 @@ const PersonForm = ({
             >
               {t('person.form.roles')}
             </InputLabel>
-            <UserRolesSelect control={control} name="roles" />
+            <UserRolesSelect control={control as unknown as Control<FieldValues>} name="roles" />
           </FormControl>
           <FormControl
             fullWidth
@@ -273,6 +299,82 @@ const PersonForm = ({
               {t('person.form.jobPositions')}
             </InputLabel>
             <EmployeeJobPositionSelect control={control} name="jobPositions" />
+          </FormControl>
+
+          <FormField
+            control={control}
+            name="rfidCardNumber"
+            label={t('person.form.rfidCardNumber')}
+            error={errors.rfidCardNumber as FieldError}
+          />
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="status-label">{t('person.form.status')}</InputLabel>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  labelId="status-label"
+                  id="status"
+                  value={field.value ?? 'off'}
+                  label={t('person.form.status')}
+                  onChange={(e: SelectChangeEvent) => field.onChange(e.target.value as PersonStatus)}
+                  renderValue={(selected) => (
+                    <Chip
+                      label={t(`person.status.${selected}`)}
+                      color={STATUS_COLORS[selected as PersonStatus] ?? 'default'}
+                      size="small"
+                    />
+                  )}
+                >
+                  {(['working', 'off', 'vacation', 'sick', 'break'] as PersonStatus[]).map((s) => (
+                    <MenuItem key={s} value={s}>
+                      <Chip
+                        label={t(`person.status.${s}`)}
+                        color={STATUS_COLORS[s]}
+                        size="small"
+                        sx={{ cursor: 'pointer' }}
+                      />
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
+          </FormControl>
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="currentPosition-label">{t('person.form.currentPosition')}</InputLabel>
+            <Controller
+              name="currentPositionId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  labelId="currentPosition-label"
+                  id="currentPositionId"
+                  value={field.value != null ? String(field.value) : ''}
+                  label={t('person.form.currentPosition')}
+                  onChange={(e: SelectChangeEvent) =>
+                    field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                  }
+                  displayEmpty
+                  disabled={eligiblePositions.length === 0}
+                >
+                  <MenuItem value="">
+                    <em>
+                      {eligiblePositions.length === 0
+                        ? t('person.form.currentPositionHint')
+                        : '—'}
+                    </em>
+                  </MenuItem>
+                  {eligiblePositions.map((jp) => (
+                    <MenuItem key={jp.id} value={String(jp.id)}>
+                      {jp.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+            />
           </FormControl>
 
           <Typography

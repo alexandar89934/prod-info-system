@@ -3,6 +3,10 @@ import express, { Router } from "express";
 import { fileUploadRouter } from "./fileUpload.router";
 import { machineRouter } from "./machine.router";
 import { responsibilityRouter } from "./responsibility.route";
+import { systemConfigRouter } from "./systemConfig.route";
+import { attendanceRouter } from "./attendance.route";
+import { attendanceEditRequestRouter } from "./attendanceEditRequest.route";
+import { leaveRecordRouter } from "./leaveRecord.route";
 import { jobPositionRouter } from "./jobPosition.route";
 import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
@@ -63,6 +67,22 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/responsibility",
     route: responsibilityRouter,
+  },
+  {
+    path: "/system-config",
+    route: systemConfigRouter,
+  },
+  {
+    path: "/attendance",
+    route: attendanceRouter,
+  },
+  {
+    path: "/attendance-edit-request",
+    route: attendanceEditRequestRouter,
+  },
+  {
+    path: "/leave-record",
+    route: leaveRecordRouter,
   },
 ];
 

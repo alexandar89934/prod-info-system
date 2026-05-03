@@ -5,6 +5,16 @@ export const UserLoginSchema = Joi.object({
   password: Joi.string().empty("").required(),
 });
 
+export const SetKioskPinSchema = Joi.object({
+  pin: Joi.string().length(4).pattern(/^\d{4}$/).required().messages({
+    "string.length": "PIN must be exactly 4 digits.",
+    "string.pattern.base": "PIN must contain only digits.",
+  }),
+  confirmPin: Joi.string().valid(Joi.ref("pin")).required().messages({
+    "any.only": "PINs do not match.",
+  }),
+});
+
 export const ResetPasswordSchema = Joi.object({
   employeeNumber: Joi.string().empty("").required(),
   oldPassword: Joi.string().required().messages({

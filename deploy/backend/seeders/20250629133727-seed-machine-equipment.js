@@ -14,13 +14,6 @@ module.exports = {
     });
 
     const now = new Date();
-    const sampleMedia = [
-      {
-        name: "1751203162520-Upadates Procedure - Google Docs.pdf",
-        path: "/uploads/1751203162520-Upadates Procedure - Google Docs.pdf",
-        dateAdded: "2025-06-29T13:19:22.535Z",
-      },
-    ];
 
     await queryInterface.bulkInsert("MachineEquipment", [
       {
@@ -29,8 +22,8 @@ module.exports = {
         serialNumber: "ROBOT-001",
         type: typeMap["Robot"] || null,
         description: "Robotska ruka za automatizovano pozicioniranje delova",
-        documents: JSON.stringify(sampleMedia),
-        pictures: JSON.stringify(sampleMedia),
+        documents: JSON.stringify([]),
+        pictures: JSON.stringify([]),
         createdBy: "system",
         updatedBy: "system",
         createdAt: now,
@@ -42,8 +35,8 @@ module.exports = {
         serialNumber: "BOJLER-001",
         type: typeMap["Bojler"] || null,
         description: "Industrijski bojler za prethodno zagrevanje alata",
-        documents: JSON.stringify(sampleMedia),
-        pictures: JSON.stringify(sampleMedia),
+        documents: JSON.stringify([]),
+        pictures: JSON.stringify([]),
         createdBy: "system",
         updatedBy: "system",
         createdAt: now,
@@ -55,14 +48,14 @@ module.exports = {
         serialNumber: "TRAKA-001",
         type: typeMap["Transportna traka"] || null,
         description: "Transportna traka sa senzorima za sortiranje",
-        documents: JSON.stringify(sampleMedia),
-        pictures: JSON.stringify(sampleMedia),
+        documents: JSON.stringify([]),
+        pictures: JSON.stringify([]),
         createdBy: "system",
         updatedBy: "system",
         createdAt: now,
         updatedAt: now,
       },
-    ]);
+    ], { ignoreDuplicates: true });
   },
 
   async down(queryInterface, Sequelize) {

@@ -64,7 +64,8 @@ const UserRolesSelect: React.FC<UserRolesSelectProps> = ({ control, name }) => {
           SelectProps={{
             multiple: true,
             renderValue: (selected) =>
-              (selected as number[])
+              (selected as (number | null | undefined)[])
+                .filter((id): id is number => id != null)
                 .map(
                   (id) =>
                     rolesOptions.find((r) => r.id === id)?.name || id.toString()

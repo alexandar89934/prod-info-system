@@ -296,10 +296,12 @@ export const getAllPersonsQuery = async (
     SELECT
       p."id", u."employeeNumber", p."name", p."address", p."mail", p."picture",
       p."additionalInfo", p."startDate", p."documents", p."createdAt", p."updatedAt", p."createdBy", p."updatedBy",
-      p."rfidCardNumber", p."status", p."currentPositionId", cp.name AS "currentPositionName"
+      p."rfidCardNumber", p."status", p."currentPositionId", cp.name AS "currentPositionName",
+      jpc.name AS "currentPositionCategoryName"
     FROM "Person" p
            JOIN "User" u ON u."personId" = p."id"
            LEFT JOIN "JobPosition" cp ON cp."id" = p."currentPositionId"
+           LEFT JOIN "JobPositionCategory" jpc ON jpc."id" = cp."categoryId"
     WHERE
       p."name" ILIKE $3 OR
       u."employeeNumber"::TEXT ILIKE $3 OR

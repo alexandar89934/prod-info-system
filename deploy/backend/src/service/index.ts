@@ -9,3 +9,7 @@ export * as machineEquipmentTypeService from "./machineEquipmentTypes.service";
 export * as machineEquipmentService from "./machineEquipment.service";
 export * as machineService from "./machine.service";
 export * as responsibilityService from "./responsibility.service";
+export * as systemConfigService from "./systemConfig.service";
+export * as attendanceService from "./attendance.service";
+export * as attendanceEditRequestService from "./attendanceEditRequest.service";
+export * as leaveRecordService from "./leaveRecord.service";

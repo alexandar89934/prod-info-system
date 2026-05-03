@@ -33,7 +33,12 @@ const Layout: React.FC<LayoutProps> = () => {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
-      <Box flexGrow={1} display="flex" flexDirection="column" sx={{ height: '100vh', overflow: 'hidden' }}>
+      <Box
+        flexGrow={1}
+        display="flex"
+        flexDirection="column"
+        sx={{ height: '100vh', overflow: 'hidden' }}
+      >
         <Navbar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
@@ -41,7 +46,7 @@ const Layout: React.FC<LayoutProps> = () => {
           isTablet={isTablet}
         />
         <Toolbar />
-        <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
+        <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
           <Outlet />
         </Box>
       </Box>

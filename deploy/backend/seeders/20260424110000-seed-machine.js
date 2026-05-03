@@ -78,6 +78,7 @@ module.exports = {
          "createdBy", "updatedBy", "createdAt", "updatedAt")
       VALUES
       ${rows}
+      ON CONFLICT DO NOTHING
     `);
   },
 

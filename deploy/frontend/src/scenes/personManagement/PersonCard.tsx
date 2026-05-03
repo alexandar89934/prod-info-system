@@ -75,6 +75,11 @@ const PersonCard = ({ person, onDelete }: PersonCardProps) => {
               {new Date(person.startDate as string).toLocaleDateString('en-GB')}
             </Typography>
           )}
+          {person.currentPositionName && (
+            <Typography variant="caption" color="text.secondary" display="block" noWrap title={person.currentPositionName} sx={{ mt: 0.5 }}>
+              {person.currentPositionName}
+            </Typography>
+          )}
           {person.status && (
             <Box sx={{ mt: 0.5, display: 'flex', justifyContent: 'center' }}>
               <Chip

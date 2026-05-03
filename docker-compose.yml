@@ -49,6 +49,8 @@ services:
     entrypoint: /backend/entrypoint.sh
     env_file:
       - deploy/tools/env/backend.dev.env
+    environment:
+      - TZ=Europe/Belgrade
     depends_on:
       database:
         condition: service_started

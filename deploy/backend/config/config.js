@@ -5,6 +5,8 @@ module.exports = {
     database: process.env.DB_NAME,
     host: process.env.DB_CONNECTION_STRING,
     dialect: "postgres",
+    seederStorage: "sequelize",
+    seederStorageTableName: "SequelizeData",
   },
   test: {
     username: "postgres",

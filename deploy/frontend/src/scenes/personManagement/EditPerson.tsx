@@ -102,6 +102,7 @@ const EditPerson = () => {
           : '',
         roles: person.roles || [],
         jobPositions: person.jobPositions || [],
+        currentPositionId: person.currentPositionId ?? null,
         createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,

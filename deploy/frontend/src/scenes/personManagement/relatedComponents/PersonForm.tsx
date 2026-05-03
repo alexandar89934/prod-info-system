@@ -50,6 +50,7 @@ interface PersonFormProps {
   onImageUpload: (uploadedPath: string) => void;
   personId?: string;
   isEdit?: boolean;
+  children?: React.ReactNode;
 }
 
 const FormField = ({
@@ -122,6 +123,7 @@ const PersonForm = ({
   onImageUpload,
   personId,
   isEdit = false,
+  children,
 }: PersonFormProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -344,7 +346,7 @@ const PersonForm = ({
           </FormControl>
 
           <FormControl fullWidth margin="normal">
-            <InputLabel id="currentPosition-label">{t('person.form.currentPosition')}</InputLabel>
+            <InputLabel id="currentPosition-label" shrink>{t('person.form.currentPosition')}</InputLabel>
             <Controller
               name="currentPositionId"
               control={control}
@@ -354,6 +356,7 @@ const PersonForm = ({
                   id="currentPositionId"
                   value={field.value != null ? String(field.value) : ''}
                   label={t('person.form.currentPosition')}
+                  notched
                   onChange={(e: SelectChangeEvent) =>
                     field.onChange(e.target.value === '' ? null : Number(e.target.value))
                   }
@@ -385,6 +388,7 @@ const PersonForm = ({
             {t('person.form.documents')}
           </Typography>
           <DocumentList personId={personId} isEdit={isEdit} fullWidth />
+          {children}
         </Box>
 
         <Box

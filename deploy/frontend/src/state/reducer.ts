@@ -11,8 +11,11 @@ import machineAvailabilityStatusSlice from '@/state/machineAvailabilityStatus/ma
 import machineEquipmentTypesSlice from '@/state/machineEquipmentTypes/machineEquipmentTypes.slice.ts';
 import personSlice from '@/state/person/person.slice.ts';
 import responsibilitySlice from '@/state/responsibility/responsibility.slice.ts';
+import attendanceSlice from '@/state/attendance/attendance.slice.ts';
+import leaveRecordSlice from '@/state/leaveRecord/leaveRecord.slice.ts';
 import roleSlice from '@/state/role/role.slice.ts';
 import themeSlice from '@/state/theme/theme.slice.ts';
+import systemConfigSlice from '@/state/systemConfig/systemConfig.slice.ts';
 
 const reducer = combineReducers({
   theme: themeSlice,
@@ -27,6 +30,9 @@ const reducer = combineReducers({
   machine: machineSlice,
   responsibility: responsibilitySlice,
   filesUpload: filesSlice,
+  attendance: attendanceSlice,
+  leaveRecord: leaveRecordSlice,
+  systemConfig: systemConfigSlice,
 });
 
 export default { reducer };

@@ -72,6 +72,26 @@ export const checkIfModeratorQuery = async (
   return callQuery<{ isModerator: boolean }[]>(selectSQL, values, true);
 };
 
+export const checkUserHasResponsibilityQuery = async (
+  userId: string,
+  responsibilityCode: string,
+): Promise<{ hasIt: boolean }[]> => {
+  const sql = `
+    SELECT EXISTS (
+      SELECT 1
+      FROM "EmployeeJobPositions" ejp
+      JOIN "JobPositionResponsibilities" jpr ON jpr."jobPositionId" = ejp."jobPositionId"
+      WHERE ejp."userId" = $1 AND jpr."responsibilityCode" = $2
+    ) AS "hasIt";
+  `;
+  return callQuery<{ hasIt: boolean }[]>(sql, [userId, responsibilityCode], true);
+};
+
+export const updateUserPinQuery = async (userId: string, pin: string | null): Promise<void> => {
+  const sql = `UPDATE "User" SET pin = $2, "updatedAt" = CURRENT_TIMESTAMP WHERE id = $1`;
+  await callQuery<void>(sql, [userId, pin]);
+};
+
 export const updateUserPasswordQuery = async (
   id: string,
   newPassword: string,

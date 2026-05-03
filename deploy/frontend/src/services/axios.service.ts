@@ -35,11 +35,19 @@ interface ServerErrorData {
   message?: string;
   tokenExpired?: boolean;
   tokenNotValid?: boolean;
+  error?: { code?: number; message?: string };
 }
 
-type RetryableConfig = NonNullable<AxiosError['config']> & { retried?: boolean };
+const extractMessage = (data: ServerErrorData): string | undefined =>
+  data.message ?? data.error?.message;
 
-const handleTokenExpiredResponse = async (error: AxiosError<ServerErrorData>) => {
+type RetryableConfig = NonNullable<AxiosError['config']> & {
+  retried?: boolean;
+};
+
+const handleTokenExpiredResponse = async (
+  error: AxiosError<ServerErrorData>
+) => {
   const originalRequest = error.config as RetryableConfig;
   if (!originalRequest.retried) {
     originalRequest.retried = true;
@@ -61,7 +69,9 @@ const handleTokenExpiredResponse = async (error: AxiosError<ServerErrorData>) =>
       return {
         data: {
           success: false,
-          message: error.response?.data?.message,
+          message: error.response?.data
+            ? extractMessage(error.response.data)
+            : undefined,
         },
       };
     } catch (refreshError) {
@@ -69,7 +79,9 @@ const handleTokenExpiredResponse = async (error: AxiosError<ServerErrorData>) =>
       return {
         data: {
           success: false,
-          message: error.response?.data?.message,
+          message: error.response?.data
+            ? extractMessage(error.response.data)
+            : undefined,
         },
       };
     }
@@ -78,12 +90,14 @@ const handleTokenExpiredResponse = async (error: AxiosError<ServerErrorData>) =>
   return {
     data: {
       success: false,
-      message: error.response.data.message,
+      message: extractMessage(error.response.data),
     },
   };
 };
 
-const handleUnauthorizedResponse = async (error: AxiosError<ServerErrorData>) => {
+const handleUnauthorizedResponse = async (
+  error: AxiosError<ServerErrorData>
+) => {
   if (error.response?.data?.tokenExpired) {
     return handleTokenExpiredResponse(error);
   }
@@ -92,14 +106,14 @@ const handleUnauthorizedResponse = async (error: AxiosError<ServerErrorData>) =>
     return {
       data: {
         success: false,
-        message: error.response.data.message,
+        message: extractMessage(error.response.data),
       },
     };
   }
   return {
     data: {
       success: false,
-      message: error.response.data.message,
+      message: extractMessage(error.response.data),
     },
   };
 };

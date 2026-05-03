@@ -3,6 +3,7 @@
     "title": "ZAPOSLENI",
     "subtitle": "Lista svih zaposlenih",
     "addButton": "Dodaj novog zaposlenog",
+    "noCategory": "Bez kategorije",
     "columns": {
       "employee": "Zaposleni",
       "actions": "Akcije",
@@ -373,7 +374,131 @@
     "availabilityStatuses": "Statusi dostupnosti",
     "equipmentTypes": "Tipovi opreme",
     "equipment": "Oprema",
-    "machines": "Mašine"
+    "machines": "Mašine",
+    "attendanceManagement": "Evidencija prisustva",
+    "attendance": "Prisustvo",
+    "systemConfig": "Podešavanja sistema"
+  },
+  "systemConfig": {
+    "title": "PODEŠAVANJA SISTEMA",
+    "subtitle": "Upravljanje parametrima za evidenciju prisustva i smene",
+    "keys": {
+      "standardWorkMinutes": "Standardno radno vreme (minuti)",
+      "overtimeMultiplier": "Koeficijent prekovremenog rada",
+      "nightMultiplier": "Koeficijent noćnog rada",
+      "weekendMultiplier": "Koeficijent rada vikendom",
+      "nightStartHour": "Početak noćne smene (sat 0–23)",
+      "nightEndHour": "Kraj noćne smene (sat 0–23)",
+      "maxShiftMinutes": "Maksimalno trajanje smene (minuti)",
+      "shiftGracePeriodMinutes": "Tolerancija ranog dolaska (minuti)",
+      "overtimeMinimumMinutes": "Minimum prekovremenih za odobrenje (minuti)"
+    },
+    "save": "Sačuvaj",
+    "saving": "Čuvanje...",
+    "saveSuccess": "Podešavanje uspešno ažurirano.",
+    "saveError": "Greška pri ažuriranju podešavanja."
+  },
+  "profile": {
+    "kioskPin": {
+      "title": "Kiosk PIN",
+      "description": "Postavite 4-cifreni PIN za korišćenje na kiosku kada RFID kartica nije dostupna.",
+      "newPin": "Novi PIN (4 cifre)",
+      "confirmPin": "Potvrdi PIN",
+      "save": "Sačuvaj PIN",
+      "saving": "Čuvanje...",
+      "success": "Kiosk PIN je uspešno ažuriran.",
+      "errorFormat": "PIN mora imati tačno 4 cifre.",
+      "errorMismatch": "PIN-ovi se ne podudaraju.",
+      "errorGeneric": "Greška pri ažuriranju PIN-a. Pokušajte ponovo."
+    }
+  },
+  "attendance": {
+    "title": "Evidencija prisustva",
+    "subtitle": "Praćenje dolazaka, odlazaka i radnog vremena zaposlenih",
+    "columns": {
+      "person": "Zaposleni",
+      "date": "Datum",
+      "checkIn": "Dolazak",
+      "checkOut": "Odlazak",
+      "totalHours": "Ukupno sati",
+      "overtime": "Prekovremeno",
+      "night": "Noćni rad",
+      "shift": "Smena",
+      "breaks": "Pauze",
+      "clockSpan": "Prisustvo",
+      "status": "Status"
+    },
+    "breaksDialog": {
+      "title": "Pauze",
+      "start": "Početak",
+      "end": "Kraj",
+      "duration": "Trajanje",
+      "noEnd": "U toku"
+    },
+    "flags": {
+      "autoClosed": "Automatski zatvoren",
+      "manual": "Ručni unos",
+      "edited": "Izmenjeno",
+      "overtimePending": "Prekovremeno na čekanju",
+      "overtimeApproved": "Prekovremeno odobreno",
+      "overtimeRejected": "Prekovremeno odbijeno"
+    },
+    "overtime": {
+      "tabLabel": "Odobrenje prekovremenog",
+      "approve": "Odobri",
+      "reject": "Odbij",
+      "noRecords": "Nema zapisa prekovremenog rada na čekanju."
+    },
+    "manualEntry": {
+      "addButton": "Dodaj zapis",
+      "editTitle": "Izmeni prisustvo",
+      "createTitle": "Dodaj prisustvo",
+      "person": "Zaposleni",
+      "checkIn": "Dolazak",
+      "checkOut": "Odlazak",
+      "note": "Napomena",
+      "save": "Sačuvaj",
+      "cancel": "Otkaži"
+    },
+    "shiftTypes": {
+      "first": "Prva smena",
+      "second": "Druga smena",
+      "night": "Noćna smena"
+    },
+    "filters": {
+      "dateFrom": "Od",
+      "dateTo": "Do",
+      "person": "Zaposleni"
+    },
+    "summary": {
+      "workingDays": "Radni dani",
+      "totalHours": "Ukupno sati",
+      "overtime": "Prekovremeno",
+      "vacationUsed": "Odmor iskorišćen",
+      "vacationRemaining": "Odmor preostao"
+    }
+  },
+  "kiosk": {
+    "scanPrompt": "Prinesite karticu ili unesite podatke",
+    "employeeNumber": "Broj zaposlenog",
+    "pin": "PIN (4 cifre)",
+    "confirm": "Potvrdi",
+    "switchToPin": "Nemate karticu? Koristite broj i PIN",
+    "switchToRfid": "Koristite karticu",
+    "checkedIn": "Dolazak evidentiran",
+    "checkedOut": "Odlazak evidentiran",
+    "breakStarted": "Pauza počela",
+    "returnedFromBreak": "Povratak sa pauze",
+    "chooseAction": "Šta želite da uradite?",
+    "checkOut": "Izlaz",
+    "goOnBreak": "Pauza",
+    "breakModeActive": "PAUZA MODE — prinesite karticu za evidentiranje pauze",
+    "autoClosedAndCheckedIn": "Prethodna smena automatski zatvorena. Evidentiran dolazak.",
+    "cancel": "Otkaži",
+    "error": {
+      "title": "Greška",
+      "unknown": "Došlo je do greške. Pokušajte ponovo."
+    }
   },
   "common": {
     "cancel": "Otkaži",

@@ -1,3 +1,8 @@
-- there was token expired message after login when accesing employees page
+- there is an edge case when someone forgets to checkout
+- also,edge case when people checkin before actuall working time,let say,shift is starting 14:00,and people come 15 minutes before to prepare, that doesnt count as working time,
+- for overtime, we must add responsability to approve overtime, so if someone has more than 480 minutes in a shift, that need to be revieved and approved, but lets put also minimum of time required to count as overtime, let say default to be 40 minutes,so if person hase more than 520 minutes, workplace with overtime approval responsabily need to approve it, that setiing need to be in configuration screen
+- manual adding/editing of attandance need to be possible by person with workplace haveing that responsability manual_attendance_entry, manual_attendance_update
+- edited column need to be marked as edited
+- on creating new person, default password need to be applied, and it is NEW_USER_PASSWORD from env variables,that password need to be changed by user on first login
 
 

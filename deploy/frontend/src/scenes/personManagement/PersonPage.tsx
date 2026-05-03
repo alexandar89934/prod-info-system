@@ -201,7 +201,7 @@ const PersonPage = () => {
                 {jobPositionNames.length > 0 ? (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
                     {jobPositionNames.map((name) => (
-                      <Chip key={name} label={name} size="small" color="primary" variant="outlined" />
+                      <Chip key={name} label={name} size="small" variant="outlined" />
                     ))}
                   </Box>
                 ) : (

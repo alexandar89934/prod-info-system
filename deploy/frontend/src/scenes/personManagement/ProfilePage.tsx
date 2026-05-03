@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import profile from '@/assets/profile.jpeg';
+import KioskPinCard from '@/scenes/personManagement/relatedComponents/KioskPinCard.tsx';
 import PersonForm from '@/scenes/personManagement/relatedComponents/PersonForm.tsx';
 import { getEmployeeNumber, getName } from '@/state/auth/auth.selectors.ts';
 import {
@@ -100,6 +101,7 @@ const ProfilePage = () => {
           : '',
         roles: person.roles || [],
         jobPositions: person.jobPositions || [],
+        currentPositionId: person.currentPositionId ?? null,
         createdAt: person.createdAt ? new Date(person.createdAt) : new Date(),
         updatedAt: new Date(),
         createdBy: person.createdBy,
@@ -143,7 +145,9 @@ const ProfilePage = () => {
       }}
       personId={id}
       isEdit
-    />
+    >
+      <KioskPinCard />
+    </PersonForm>
   );
 };
 

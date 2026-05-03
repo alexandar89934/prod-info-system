@@ -58,7 +58,7 @@ const Person = () => {
   const localeText = useDataGridLocaleText();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(isMobile ? 10 : 20);
+  const [pageSize, setPageSize] = useState(isMobile ? 20 : 96);
   const [open, setOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [reload, setReload] = useState(false);
@@ -317,7 +317,7 @@ const Person = () => {
             rows={persons ?? []}
             columns={columns}
             rowCount={total ?? 0}
-            rowsPerPageOptions={isMobile ? [5, 10, 20] : [5, 10, 20, 50, 100]}
+            rowsPerPageOptions={isMobile ? [10, 20] : [10, 20, 50, 96]}
             pagination
             page={page}
             pageSize={pageSize}
@@ -348,44 +348,86 @@ const Person = () => {
         </Box>
       ) : (
         <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <Grid container spacing={2}>
-            {(persons ?? []).map((person) => (
-              <Grid item key={person.id} xs={12} sm={6} md={4} lg={3}>
-                <PersonCard
-                  person={person as PersonFormDataBase & { id: string }}
-                  onDelete={handleDeleteCard}
-                />
-              </Grid>
-            ))}
-          </Grid>
-          {total > pageSize && (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              flexWrap="wrap"
-              gap={1}
-              px={1}
-              pb={2}
-            >
-              <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="body2" color="text.secondary">
-                  {t('common.perPage')}:
-                </Typography>
-                <Select
-                  size="small"
-                  value={pageSize}
-                  onChange={(e: SelectChangeEvent<number>) => {
-                    setPage(0);
-                    setPageSize(Number(e.target.value));
+          {(() => {
+            const grouped = (persons ?? []).reduce<Record<string, (PersonFormDataBase & { id: string })[]>>(
+              (acc, person) => {
+                const cat = person.currentPositionCategoryName ?? t('person.noCategory');
+                if (!acc[cat]) acc[cat] = [];
+                acc[cat].push(person as PersonFormDataBase & { id: string });
+                return acc;
+              },
+              {}
+            );
+            const noCategory = t('person.noCategory');
+            const sortedGroups = Object.keys(grouped).sort((a, b) => {
+              if (a === noCategory) return 1;
+              if (b === noCategory) return -1;
+              return a.localeCompare(b);
+            });
+            return sortedGroups.map((cat) => (
+              <Box key={cat}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    mb: 1.5,
+                    pb: 0.5,
+                    borderBottom: `2px solid ${theme.palette.secondary[300]}`,
                   }}
-                  sx={{ minWidth: 70 }}
                 >
-                  {[12, 24, 48].map((s) => (
-                    <MenuItem key={s} value={s}>{s}</MenuItem>
+                  <Typography variant="subtitle1" fontWeight={700} color="text.primary">
+                    {cat}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    ({grouped[cat].length})
+                  </Typography>
+                </Box>
+                <Grid container spacing={2}>
+                  {grouped[cat].map((person) => (
+                    <Grid item key={person.id} xs={12} sm={6} md={4} lg={3}>
+                      <PersonCard
+                        person={person}
+                        onDelete={handleDeleteCard}
+                      />
+                    </Grid>
                   ))}
-                </Select>
+                </Grid>
               </Box>
+            ));
+          })()}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            flexWrap="wrap"
+            gap={1}
+            px={1}
+            pb={2}
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="body2" color="text.secondary">
+                {t('common.perPage')}:
+              </Typography>
+              <Select
+                size="small"
+                value={pageSize}
+                onChange={(e: SelectChangeEvent<number>) => {
+                  setPage(0);
+                  setPageSize(Number(e.target.value));
+                }}
+                sx={{
+                  minWidth: 70,
+                  color: theme.palette.text.primary,
+                  '& .MuiSelect-icon': { color: theme.palette.text.secondary },
+                }}
+              >
+                {[12, 24, 48, 96].map((s) => (
+                  <MenuItem key={s} value={s}>{s}</MenuItem>
+                ))}
+              </Select>
+            </Box>
+            {Math.ceil(total / pageSize) > 1 && (
               <Pagination
                 count={Math.ceil(total / pageSize)}
                 page={page + 1}
@@ -393,8 +435,8 @@ const Person = () => {
                 color="primary"
                 size="small"
               />
-            </Box>
-          )}
+            )}
+          </Box>
         </Box>
       )}
 

@@ -9,3 +9,7 @@ export * as machineEquipmentController from "./machineEquipment.controller";
 export * as fileUploadController from "./fileUpload.controller";
 export * as machineController from "./machine.controller";
 export * as responsibilityController from "./responsibility.controller";
+export * as systemConfigController from "./systemConfig.controller";
+export * as attendanceController from "./attendance.controller";
+export * as attendanceEditRequestController from "./attendanceEditRequest.controller";
+export * as leaveRecordController from "./leaveRecord.controller";

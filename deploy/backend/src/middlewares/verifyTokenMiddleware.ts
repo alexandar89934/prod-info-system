@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 
 import { config } from "../config/config";
 import {
+  checkUserHasResponsibilityQuery,
   getUserByIdentifier,
   getUserRolesById,
 } from "../models/user.model";
@@ -125,6 +126,76 @@ export const authorizeModerator = async (
     next();
   } catch (error) {
     res.status(401).json({ message: error.message });
+  }
+};
+
+const makeResponsibilityMiddleware = (code: string, errorMessage: string) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      Object.assign(res.locals, { user: tryExtractTokenFromHeaders(req) });
+      const result = await checkUserHasResponsibilityQuery(res.locals.user.userId, code);
+      if (!result?.[0]?.hasIt) {
+        res.status(httpStatus.FORBIDDEN).send({ success: false, message: errorMessage });
+        return;
+      }
+      next();
+    } catch (error) {
+      res.status(httpStatus.UNAUTHORIZED).json({ message: (error as Error).message });
+    }
+  };
+
+export const authorizeVacationApprover = makeResponsibilityMiddleware(
+  "odobrenje_odmora",
+  "Nemate nadležnost za odobrenje odmora.",
+);
+
+export const authorizeAttendanceEditor = makeResponsibilityMiddleware(
+  "izmena_prisustva",
+  "Nemate nadležnost za izmenu evidencije prisustva.",
+);
+
+export const authorizeAttendanceEditApprover = makeResponsibilityMiddleware(
+  "odobrenje_izmene_prisustva",
+  "Nemate nadležnost za odobrenje izmene prisustva.",
+);
+
+export const authorizeOvertimeApproval = makeResponsibilityMiddleware(
+  "odobrenje_prekovremenog",
+  "Nemate nadležnost za odobrenje prekovremenog rada.",
+);
+
+export const authorizeManualAttendanceEntry = makeResponsibilityMiddleware(
+  "rucni_unos_prisustva",
+  "Nemate nadležnost za ručni unos prisustva.",
+);
+
+export const authorizeManualAttendanceUpdate = makeResponsibilityMiddleware(
+  "rucna_izmena_prisustva",
+  "Nemate nadležnost za ručnu izmenu prisustva.",
+);
+
+export const authorizeTeamAttendanceViewer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    Object.assign(res.locals, { user: tryExtractTokenFromHeaders(req) });
+    const userId = res.locals.user.userId;
+    const [hasTeam, hasAll] = await Promise.all([
+      checkUserHasResponsibilityQuery(userId, "pregled_prisustva_tima"),
+      checkUserHasResponsibilityQuery(userId, "pregled_svih_prisustva"),
+    ]);
+    if (!hasTeam?.[0]?.hasIt && !hasAll?.[0]?.hasIt) {
+      res.status(httpStatus.FORBIDDEN).send({
+        success: false,
+        message: "Nemate nadležnost za pregled evidencije prisustva.",
+      });
+      return;
+    }
+    next();
+  } catch (error) {
+    res.status(httpStatus.UNAUTHORIZED).json({ message: (error as Error).message });
   }
 };
 

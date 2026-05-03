@@ -38,6 +38,8 @@ export interface PersonFormDataBase {
   rfidCardNumber?: string | null;
   status?: PersonStatus;
   currentPositionId?: number | null;
+  currentPositionName?: string | null;
+  currentPositionCategoryName?: string | null;
 }
 
 export interface PersonDetailData extends PersonFormDataBase {

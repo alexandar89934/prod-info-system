@@ -33,6 +33,9 @@ import EditMachineEquipmentType from '@/scenes/machineManagement/machineEquipmen
 import ResponsibilityList from '@/scenes/responsibilityManagement';
 import AddResponsibility from '@/scenes/responsibilityManagement/AddResponsibility.tsx';
 import EditResponsibility from '@/scenes/responsibilityManagement/EditResponsibility.tsx';
+import AttendanceManagement from '@/scenes/attendanceManagement';
+import SystemConfigPage from '@/scenes/systemConfig';
+import Kiosk from '@/scenes/kiosk';
 import Person from '@/scenes/personManagement';
 import AddPerson from '@/scenes/personManagement/AddPerson.tsx';
 import EditPerson from '@/scenes/personManagement/EditPerson.tsx';
@@ -99,7 +102,11 @@ function App() {
               <Route path="/machine/:id" element={<ProtectedRoute><MachinePage /></ProtectedRoute>} />
               <Route path="/addMachine" element={<ProtectedRoute><AddMachine /></ProtectedRoute>} />
               <Route path="/editMachine/:id" element={<ProtectedRoute><EditMachine /></ProtectedRoute>} />
+              <Route path="/attendance" element={<ProtectedRoute><AttendanceManagement /></ProtectedRoute>} />
+              <Route path="/system-config" element={<ProtectedRoute><SystemConfigPage /></ProtectedRoute>} />
             </Route>
+            {/* Kiosk — full screen, no layout */}
+            <Route path="/kiosk" element={<Kiosk />} />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

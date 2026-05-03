@@ -3,6 +3,7 @@
     "title": "EMPLOYEES",
     "subtitle": "List of all employees",
     "addButton": "Add new person",
+    "noCategory": "Uncategorized",
     "columns": {
       "employee": "Employee",
       "actions": "Actions",
@@ -373,7 +374,131 @@
     "availabilityStatuses": "Availability Statuses",
     "equipmentTypes": "Equipment Types",
     "equipment": "Equipment",
-    "machines": "Machines"
+    "machines": "Machines",
+    "attendanceManagement": "Attendance Management",
+    "attendance": "Attendance",
+    "systemConfig": "System Settings"
+  },
+  "systemConfig": {
+    "title": "SYSTEM SETTINGS",
+    "subtitle": "Manage attendance and shift parameters",
+    "keys": {
+      "standardWorkMinutes": "Standard Work Duration (minutes)",
+      "overtimeMultiplier": "Overtime Rate Multiplier",
+      "nightMultiplier": "Night Shift Rate Multiplier",
+      "weekendMultiplier": "Weekend Rate Multiplier",
+      "nightStartHour": "Night Shift Start Hour (0–23)",
+      "nightEndHour": "Night Shift End Hour (0–23)",
+      "maxShiftMinutes": "Maximum Shift Duration (minutes)",
+      "shiftGracePeriodMinutes": "Early Arrival Grace Period (minutes)",
+      "overtimeMinimumMinutes": "Minimum Overtime for Approval (minutes)"
+    },
+    "save": "Save",
+    "saving": "Saving...",
+    "saveSuccess": "Setting updated successfully.",
+    "saveError": "Failed to update setting."
+  },
+  "profile": {
+    "kioskPin": {
+      "title": "Kiosk PIN",
+      "description": "Set a 4-digit PIN to use at the kiosk when your RFID card is unavailable.",
+      "newPin": "New PIN (4 digits)",
+      "confirmPin": "Confirm PIN",
+      "save": "Save PIN",
+      "saving": "Saving...",
+      "success": "Kiosk PIN updated successfully.",
+      "errorFormat": "PIN must be exactly 4 digits.",
+      "errorMismatch": "PINs do not match.",
+      "errorGeneric": "Failed to update PIN. Please try again."
+    }
+  },
+  "attendance": {
+    "title": "Attendance",
+    "subtitle": "Track employee check-ins, check-outs, and working hours",
+    "columns": {
+      "person": "Employee",
+      "date": "Date",
+      "checkIn": "Check-In",
+      "checkOut": "Check-Out",
+      "totalHours": "Total Hours",
+      "overtime": "Overtime",
+      "night": "Night",
+      "shift": "Shift",
+      "breaks": "Breaks",
+      "clockSpan": "Presence",
+      "status": "Status"
+    },
+    "breaksDialog": {
+      "title": "Breaks",
+      "start": "Start",
+      "end": "End",
+      "duration": "Duration",
+      "noEnd": "In progress"
+    },
+    "flags": {
+      "autoClosed": "Auto-closed",
+      "manual": "Manual",
+      "edited": "Edited",
+      "overtimePending": "Overtime pending",
+      "overtimeApproved": "Overtime approved",
+      "overtimeRejected": "Overtime rejected"
+    },
+    "overtime": {
+      "tabLabel": "Overtime Approval",
+      "approve": "Approve",
+      "reject": "Reject",
+      "noRecords": "No overtime records pending approval."
+    },
+    "manualEntry": {
+      "addButton": "Add Record",
+      "editTitle": "Edit Attendance",
+      "createTitle": "Add Attendance",
+      "person": "Employee",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "note": "Note",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "shiftTypes": {
+      "first": "First shift",
+      "second": "Second shift",
+      "night": "Night shift"
+    },
+    "filters": {
+      "dateFrom": "From",
+      "dateTo": "To",
+      "person": "Employee"
+    },
+    "summary": {
+      "workingDays": "Working Days",
+      "totalHours": "Total Hours",
+      "overtime": "Overtime",
+      "vacationUsed": "Vacation Used",
+      "vacationRemaining": "Vacation Remaining"
+    }
+  },
+  "kiosk": {
+    "scanPrompt": "Scan your card or enter credentials",
+    "employeeNumber": "Employee Number",
+    "pin": "PIN (4 digits)",
+    "confirm": "Confirm",
+    "switchToPin": "No card? Use employee number + PIN",
+    "switchToRfid": "Use card",
+    "checkedIn": "Checked In",
+    "checkedOut": "Checked Out",
+    "breakStarted": "Break Started",
+    "returnedFromBreak": "Back at Work",
+    "chooseAction": "What would you like to do?",
+    "checkOut": "Check Out",
+    "goOnBreak": "Go on Break",
+    "breakModeActive": "BREAK MODE — scan card to start break",
+    "autoClosedAndCheckedIn": "Previous session closed automatically. Checked in.",
+    "cancel": "Cancel",
+    "error": {
+      "title": "Error",
+      "unknown": "An error occurred. Please try again."
+    }
   },
   "common": {
     "cancel": "Cancel",

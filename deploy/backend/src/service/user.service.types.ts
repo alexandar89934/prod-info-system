@@ -10,6 +10,7 @@ export type User = {
   picture?: string;
   name?: string;
   id: string;
+  personId: string;
   employeeNumber: string;
   password: string;
   lastPasswordReset?: string;

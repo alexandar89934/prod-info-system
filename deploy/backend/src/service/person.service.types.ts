@@ -20,6 +20,8 @@ type PersonData = {
   rfidCardNumber?: string | null;
   status?: PersonStatus;
   currentPositionId?: number | null;
+  currentPositionName?: string | null;
+  currentPositionCategoryName?: string | null;
 };
 
 export type CreatePersonData = PersonData;

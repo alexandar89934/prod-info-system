@@ -127,6 +127,18 @@ export const renewAccessToken = catchAsync(
   },
 );
 
+export const setKioskPin = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = readPayloadOfToken<{ userId: string }>(
+    req.headers.token as string,
+  );
+  const { pin } = req.body;
+  await signInService.setPin(userId, pin);
+  return res.status(httpStatus.OK).send({
+    success: true,
+    message: "Kiosk PIN updated successfully.",
+  });
+});
+
 export const userLogout = catchAsync(async (req: Request, res: Response) => {
   const { userId } = readPayloadOfToken<{ userId: string }>(
     req.headers.token as string,

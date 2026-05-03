@@ -2,6 +2,7 @@ import { deleteRefreshToken } from "../infrastructure/refreshToken.redis";
 import {
   getUserByIdentifier,
   updateUserPasswordQuery,
+  updateUserPinQuery,
 } from "../models/user.model";
 import { ApiError } from "../shared/error/ApiError";
 import { AuthError } from "../shared/error/AuthError";
@@ -58,6 +59,11 @@ export const resetPassword = async (
     success: true,
     message: "Password updated successfully",
   };
+};
+
+export const setPin = async (userId: string, pin: string): Promise<void> => {
+  const hashed = await hashSensitiveData(pin);
+  await updateUserPinQuery(userId, hashed);
 };
 
 export const logout = async (userId: string, device: string) => {

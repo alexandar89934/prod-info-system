@@ -11,6 +11,8 @@ import {
   AdminPanelSettingsOutlined,
   PrecisionManufacturingOutlined,
   AssignmentOutlined,
+  AccessTimeOutlined,
+  TuneOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -81,6 +83,19 @@ const navItems: NavItem[] = [
     textKey: 'sidebar.machines',
     path: 'machine',
     icon: <PrecisionManufacturingOutlined />,
+    requiresAuth: true,
+  },
+  { textKey: 'sidebar.attendanceManagement', path: null, icon: null, requiresAuth: true },
+  {
+    textKey: 'sidebar.attendance',
+    path: 'attendance',
+    icon: <AccessTimeOutlined />,
+    requiresAuth: true,
+  },
+  {
+    textKey: 'sidebar.systemConfig',
+    path: 'system-config',
+    icon: <TuneOutlined />,
     requiresAuth: true,
   },
 ];

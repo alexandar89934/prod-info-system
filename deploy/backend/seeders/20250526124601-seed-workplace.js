@@ -59,6 +59,13 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          name: "Šef smene",
+          description: "Organizuje i koordinira rad zaposlenih tokom smene",
+          categoryId: categoryMap["Proizvodnja"],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
           name: "Serviser",
           description: "Održava i popravlja opremu",
           categoryId: categoryMap["Održavanje"],
@@ -101,7 +108,7 @@ module.exports = {
           updatedAt: new Date(),
         },
       ],
-      {},
+      { ignoreDuplicates: true },
     );
   },
 

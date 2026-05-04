@@ -1,25 +1,25 @@
 import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
+import ClearIcon from '@mui/icons-material/Clear';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SearchIcon from '@mui/icons-material/Search';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import {
+  Alert,
   Box,
   Button,
+  Chip,
   Grid,
   IconButton,
   InputAdornment,
   Pagination,
+  Snackbar,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
-  useTheme,
-  Snackbar,
-  Alert,
   useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
@@ -31,21 +31,21 @@ import ConfirmDialog from '@/reusableComponents/ConfirmDialog';
 import DataGridCustomToolbar from '@/reusableComponents/DataGridCustomToolbar';
 import Header from '@/reusableComponents/Header';
 import { useDataGridLocaleText } from '@/reusableComponents/useDataGridLocaleText';
-import { fetchMachines, deleteMachine } from '@/state/machine/machine.actions';
+import { deleteMold, fetchMolds } from '@/state/mold/mold.actions';
 import {
-  selectMachines,
-  selectMachineLoading,
-  selectMachineError,
-  selectMachineSuccess,
-  selectMachineTotal,
-} from '@/state/machine/machine.selectors';
-import { clearError, clearSuccess, resetState } from '@/state/machine/machine.slice';
-import { Machine } from '@/state/machine/machine.types';
+  selectMoldError,
+  selectMoldLoading,
+  selectMoldSuccess,
+  selectMoldTotal,
+  selectMolds,
+} from '@/state/mold/mold.selectors';
+import { clearError, clearSuccess, resetState } from '@/state/mold/mold.slice';
+import { Mold } from '@/state/mold/mold.types';
 import { AppDispatch } from '@/state/store';
 
-import MachineCard, { MachineListItem } from './MachineCard';
+import MoldCard, { MoldListItem } from './MoldCard';
 
-const MachineList = () => {
+const MoldList = () => {
   type SelectedItem = { id: string; name: string };
 
   const { t } = useTranslation();
@@ -56,7 +56,7 @@ const MachineList = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(isMobile ? 10 : 20);
+  const [pageSize, setPageSize] = useState(isMobile ? 10 : 50);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<SelectedItem | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -64,27 +64,27 @@ const MachineList = () => {
   const [search, setSearch] = useState('');
   const [sortModel, setSortModel] = useState<{ field: string; sort: string }[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>(
-    () => (localStorage.getItem('machineViewMode') as 'table' | 'grid') ?? 'table'
+    () => (localStorage.getItem('moldViewMode') as 'table' | 'grid') ?? 'table'
   );
 
-  const machines = useSelector(selectMachines);
-  const loading = useSelector(selectMachineLoading);
-  const error = useSelector(selectMachineError);
-  const success = useSelector(selectMachineSuccess);
-  const total = useSelector(selectMachineTotal);
+  const molds = useSelector(selectMolds);
+  const loading = useSelector(selectMoldLoading);
+  const error = useSelector(selectMoldError);
+  const success = useSelector(selectMoldSuccess);
+  const total = useSelector(selectMoldTotal);
 
   const sortField = sortModel[0]?.field ?? '';
   const sortOrder = sortModel[0]?.sort ?? '';
 
   useEffect(() => {
-    dispatch(fetchMachines({ page: page + 1, limit: pageSize, search, sortField, sortOrder }));
+    dispatch(fetchMolds({ page: page + 1, limit: pageSize, search, sortField, sortOrder }));
   }, [dispatch, page, pageSize, search, sortField, sortOrder]);
 
   useEffect(() => {
     if (success) {
       setNotification({ message: success, type: 'success' });
       dispatch(clearSuccess());
-      dispatch(fetchMachines({ page: page + 1, limit: pageSize, search, sortField, sortOrder }));
+      dispatch(fetchMolds({ page: page + 1, limit: pageSize, search, sortField, sortOrder }));
     }
     if (error) {
       setNotification({ message: error, type: 'error' });
@@ -103,50 +103,49 @@ const MachineList = () => {
   const handleConfirmDelete = async () => {
     if (!selected) return;
     setOpen(false);
-    dispatch(deleteMachine(selected.id));
+    dispatch(deleteMold(selected.id));
   };
 
-  const BooleanCell = ({ value }: { value: boolean }) =>
-    value ? <CheckIcon color="success" fontSize="small" /> : <CloseIcon color="disabled" fontSize="small" />;
+  const statusColor = (status: string) => {
+    if (status === 'ok') return 'success';
+    if (status === 'repair') return 'warning';
+    return 'error';
+  };
 
   const columns = [
-    { field: 'name', headerName: t('machine.columns.name'), flex: 1 },
-    { field: 'machineNumber', headerName: t('machine.columns.machineNumber'), flex: 1 },
-    { field: 'serialNumber', headerName: t('machine.columns.serialNumber'), flex: 1 },
-    { field: 'availabilityStatusName', headerName: t('machine.columns.availabilityStatus'), flex: 1 },
+    { field: 'inventoryNumber', headerName: t('mold.form.inventoryNumber'), width: 140 },
+    { field: 'name', headerName: t('mold.form.name'), flex: 1, minWidth: 180 },
     {
-      field: 'automaticMode',
-      headerName: t('machine.columns.automaticMode'),
-      width: 80,
-      renderCell: (params: GridRenderCellParams<Machine>) => <BooleanCell value={!!params.value} />,
+      field: 'status',
+      headerName: t('mold.form.status'),
+      width: 120,
+      renderCell: (params: GridRenderCellParams<Mold>) => (
+        <Chip
+          label={t(`mold.status.${params.row.status}`)}
+          color={statusColor(params.row.status) as 'success' | 'warning' | 'error'}
+          size="small"
+        />
+      ),
     },
-    {
-      field: 'workPermit',
-      headerName: t('machine.columns.workPermit'),
-      width: 110,
-      renderCell: (params: GridRenderCellParams<Machine>) => <BooleanCell value={!!params.value} />,
-    },
+    { field: 'cavities', headerName: t('mold.form.cavities'), width: 100 },
+    { field: 'weight', headerName: `${t('mold.form.weight')} (kg)`, width: 110 },
+    { field: 'serviceCategory', headerName: t('mold.form.serviceCategory'), width: 130 },
+    { field: 'requiredClampingForceKN', headerName: `${t('mold.form.requiredClampingForceKN')} (kN)`, width: 160 },
+    { field: 'pieceCounter', headerName: t('mold.form.pieceCounter'), width: 120 },
     {
       field: 'actions',
-      headerName: t('machine.columns.actions'),
-      width: 100,
+      headerName: t('mold.actions.label'),
+      width: 110,
       sortable: false,
-      renderCell: (params: GridRenderCellParams<Machine>) => (
+      renderCell: (params: GridRenderCellParams<Mold>) => (
         <Box>
-          <IconButton
-            size="small"
-            onClick={(e) => { e.stopPropagation(); navigate(`/editMachine/${params.row.id}`); }}
-          >
+          <IconButton size="small" onClick={(e) => { e.stopPropagation(); navigate(`/editMold/${params.row.id}`); }}>
             <EditIcon fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
             color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelected({ id: String(params.row.id), name: params.row.name });
-              setOpen(true);
-            }}
+            onClick={(e) => { e.stopPropagation(); setSelected({ id: params.row.id!, name: params.row.name }); setOpen(true); }}
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
@@ -155,19 +154,7 @@ const MachineList = () => {
     },
   ];
 
-  const handleViewMode = (_: React.MouseEvent<HTMLElement>, next: 'table' | 'grid' | null) => {
-    if (!next) return;
-    setViewMode(next);
-    setSearchInput('');
-    setSearch('');
-    setPage(0);
-    localStorage.setItem('machineViewMode', next);
-  };
-
-  const handleDeleteCard = (id: string, name: string) => {
-    setSelected({ id, name });
-    setOpen(true);
-  };
+  const gridPageCount = Math.ceil(total / pageSize);
 
   return (
     <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 1, display: 'flex', flexDirection: 'column', height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } }}>
@@ -179,14 +166,25 @@ const MachineList = () => {
         mb={2}
         gap={isMobile ? 2 : 0}
       >
-        <Header title={t('machine.title')} subtitle={t('machine.subtitle')} />
+        <Header title={t('mold.list.title')} subtitle={t('mold.list.subtitle')} />
         <Box display="flex" alignItems="center" gap={1}>
-          <ToggleButtonGroup value={viewMode} exclusive onChange={handleViewMode} size="small">
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            size="small"
+            onChange={(_, val) => { if (val) { setViewMode(val); setSearchInput(''); setSearch(''); setPage(0); localStorage.setItem('moldViewMode', val); } }}
+          >
             <ToggleButton value="table"><TableRowsIcon fontSize="small" /></ToggleButton>
             <ToggleButton value="grid"><ViewModuleIcon fontSize="small" /></ToggleButton>
           </ToggleButtonGroup>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/addMachine')} fullWidth={isMobile} size={isMobile ? 'medium' : 'large'}>
-            {t('machine.addButton')}
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/addMold')}
+            fullWidth={isMobile}
+            size={isMobile ? 'medium' : 'large'}
+          >
+            {t('mold.actions.add')}
           </Button>
         </Box>
       </Box>
@@ -208,10 +206,10 @@ const MachineList = () => {
         >
           <DataGrid
             loading={loading}
-            rows={machines || []}
-            getRowId={(row) => row.id}
+            rows={molds}
+            getRowId={(row) => row.id ?? ''}
             columns={columns}
-            rowCount={total || 0}
+            rowCount={total}
             rowsPerPageOptions={isMobile ? [10, 20] : [10, 20, 50]}
             pagination
             page={page}
@@ -220,12 +218,12 @@ const MachineList = () => {
             sortingMode="server"
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
-            onSortModelChange={(model) => setSortModel(model.map((m) => ({ field: m.field, sort: m.sort ?? 'asc' })))}
+            onSortModelChange={(model) => setSortModel(model.map((s) => ({ field: s.field, sort: s.sort ?? 'asc' })))}
             components={{ Toolbar: DataGridCustomToolbar }}
             componentsProps={{ toolbar: { searchInput, setSearchInput, setSearch } }}
             density="comfortable"
             localeText={localeText}
-            onRowClick={(params) => navigate(`/machine/${params.row.id}`)}
+            onRowClick={(params) => navigate(`/mold/${params.row.id}`)}
             sx={{
               '& .MuiDataGrid-virtualScroller': { overflow: 'auto', scrollbarWidth: 'thin' },
               '& .MuiDataGrid-row': { cursor: 'pointer' },
@@ -237,7 +235,7 @@ const MachineList = () => {
           />
         </Box>
       ) : (
-        <Box sx={{ flexGrow: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           <Box pb={1}>
             <TextField
               size="small"
@@ -252,7 +250,7 @@ const MachineList = () => {
                     <InputAdornment position="end">
                       {searchInput && (
                         <IconButton size="small" onClick={() => setSearchInput('')}>
-                          <CloseIcon fontSize="small" />
+                          <ClearIcon fontSize="small" />
                         </IconButton>
                       )}
                       <SearchIcon fontSize="small" color="action" />
@@ -262,26 +260,27 @@ const MachineList = () => {
               }}
             />
           </Box>
-          <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-            <Grid container spacing={2}>
-              {(machines as MachineListItem[]).map((machine) => (
-                <Grid item key={machine.id} xs={12} sm={6} md={4} lg={3}>
-                  <MachineCard machine={machine} onDelete={handleDeleteCard} />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-          {total > pageSize && (
+          <Grid container spacing={2}>
+            {molds.map((mold) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={mold.id}>
+                <MoldCard
+                  mold={mold as MoldListItem}
+                  onDelete={(m) => { setSelected({ id: m.id!, name: m.name }); setOpen(true); }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          {gridPageCount > 1 && (
             <Box
               display="flex"
               justifyContent="center"
               py={2}
-              sx={{ flexShrink: 0, borderTop: '1px solid', borderColor: 'divider' }}
+              sx={{ borderTop: '1px solid', borderColor: 'divider' }}
             >
               <Pagination
-                count={Math.ceil(total / pageSize)}
+                count={gridPageCount}
                 page={page + 1}
-                onChange={(_, value) => setPage(value - 1)}
+                onChange={(_, val) => setPage(val - 1)}
                 color="primary"
               />
             </Box>
@@ -291,19 +290,19 @@ const MachineList = () => {
 
       <ConfirmDialog
         open={open}
-        title={t('machine.confirmDelete.title')}
-        message={t('machine.confirmDelete.message', { name: selected?.name })}
-        onClose={() => setOpen(false)}
+        title={t('mold.actions.deleteConfirmTitle')}
+        message={t('mold.actions.deleteConfirmMessage', { name: selected?.name })}
         onConfirm={handleConfirmDelete}
+        onClose={() => setOpen(false)}
       />
 
       <Snackbar
         open={!!notification}
-        autoHideDuration={3000}
+        autoHideDuration={4000}
         onClose={() => setNotification(null)}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert onClose={() => setNotification(null)} severity={notification?.type ?? 'info'}>
+        <Alert severity={notification?.type} onClose={() => setNotification(null)} sx={{ width: '100%' }}>
           {notification?.message}
         </Alert>
       </Snackbar>
@@ -311,4 +310,4 @@ const MachineList = () => {
   );
 };
 
-export default MachineList;
+export default MoldList;

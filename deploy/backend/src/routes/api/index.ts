@@ -7,6 +7,8 @@ import { systemConfigRouter } from "./systemConfig.route";
 import { attendanceRouter } from "./attendance.route";
 import { attendanceEditRequestRouter } from "./attendanceEditRequest.route";
 import { leaveRecordRouter } from "./leaveRecord.route";
+import { moldRouter } from "./mold.route";
+import { moldMachineCompatibilityRouter } from "./moldMachineCompatibility.route";
 import { jobPositionRouter } from "./jobPosition.route";
 import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
@@ -83,6 +85,14 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/leave-record",
     route: leaveRecordRouter,
+  },
+  {
+    path: "/mold",
+    route: moldRouter,
+  },
+  {
+    path: "/mold-machine-compatibility",
+    route: moldMachineCompatibilityRouter,
   },
 ];
 

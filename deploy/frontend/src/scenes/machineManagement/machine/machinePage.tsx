@@ -68,6 +68,7 @@ const MachinePage = () => {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [mountedMold, setMountedMold] = useState<{ id: string; inventoryNumber: number; name: string } | null>(null);
 
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [equipmentSearch, setEquipmentSearch] = useState('');
@@ -115,7 +116,12 @@ const MachinePage = () => {
   };
 
   useEffect(() => {
-    if (id) dispatch(fetchMachineById(id));
+    if (id) {
+      dispatch(fetchMachineById(id));
+      axiosServer.get(`/mold/mounted-on/${id}`).then((res) => {
+        if (res.data.success) setMountedMold(res.data.content.mold ?? null);
+      }).catch(() => { setMountedMold(null); });
+    }
   }, [dispatch, id]);
 
   useEffect(() => () => { dispatch(resetState()); }, [dispatch]);
@@ -380,6 +386,34 @@ const MachinePage = () => {
               </Paper>
             </Grid>
           )}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2 }}>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                sx={{ mb: 1.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}
+              >
+                {t('machine.detail.currentMold')}
+              </Typography>
+              {mountedMold ? (
+                <Box display="flex" alignItems="center" gap={1} py={0.5}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={500}
+                    sx={{ cursor: 'pointer', color: theme.palette.secondary.main, '&:hover': { textDecoration: 'underline' } }}
+                    onClick={() => navigate(`/mold/${mountedMold.id}`)}
+                  >
+                    #{mountedMold.inventoryNumber} — {mountedMold.name}
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  {t('machine.detail.noMoldMounted')}
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
+
           <Grid item xs={12}>
             <Paper sx={{ p: 2 }}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>

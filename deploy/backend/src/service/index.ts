@@ -13,3 +13,5 @@ export * as systemConfigService from "./systemConfig.service";
 export * as attendanceService from "./attendance.service";
 export * as attendanceEditRequestService from "./attendanceEditRequest.service";
 export * as leaveRecordService from "./leaveRecord.service";
+export * as moldService from "./mold.service";
+export * as moldMachineCompatibilityService from "./moldMachineCompatibility.service";

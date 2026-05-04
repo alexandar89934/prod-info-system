@@ -13,3 +13,5 @@ export * as systemConfigController from "./systemConfig.controller";
 export * as attendanceController from "./attendance.controller";
 export * as attendanceEditRequestController from "./attendanceEditRequest.controller";
 export * as leaveRecordController from "./leaveRecord.controller";
+export * as moldController from "./mold.controller";
+export * as moldMachineCompatibilityController from "./moldMachineCompatibility.controller";

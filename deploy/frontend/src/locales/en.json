@@ -222,6 +222,8 @@
       "notSpecified": "Not specified",
       "view": "View",
       "download": "Download",
+      "currentMold": "Currently mounted mold",
+      "noMoldMounted": "No mold currently mounted",
       "attachedEquipment": "Attached Equipment",
       "noAttachedEquipment": "No equipment attached to this machine.",
       "addEquipment": "Add Equipment",
@@ -375,6 +377,8 @@
     "equipmentTypes": "Equipment Types",
     "equipment": "Equipment",
     "machines": "Machines",
+    "moldManagement": "Mold Management",
+    "molds": "Molds",
     "attendanceManagement": "Attendance Management",
     "attendance": "Attendance",
     "systemConfig": "System Settings"
@@ -505,6 +509,78 @@
     "delete": "Delete",
     "search": "Search...",
     "perPage": "Per page"
+  },
+  "mold": {
+    "list": {
+      "title": "Molds",
+      "subtitle": "Manage production molds (kalup)"
+    },
+    "page": {
+      "subtitle": "Mold details"
+    },
+    "status": {
+      "ok": "OK",
+      "fault": "Fault",
+      "repair": "Repair"
+    },
+    "form": {
+      "addTitle": "Add Mold",
+      "editTitle": "Edit Mold",
+      "addSubmit": "Add Mold",
+      "addSubmitLoading": "Adding...",
+      "editSubmit": "Save Changes",
+      "editSubmitLoading": "Saving...",
+      "cancel": "Cancel",
+      "inventoryNumber": "Inventory Number",
+      "name": "Name",
+      "status": "Status",
+      "selectStatus": "Select status",
+      "serviceCategory": "Service Category",
+      "selectServiceCategory": "Select category",
+      "notes": "Notes",
+      "cavities": "Cavities (gnezda)",
+      "heightMM": "Height",
+      "widthMM": "Width",
+      "depthMM": "Depth",
+      "weight": "Weight",
+      "centeringDiameterMM": "Centering Diameter",
+      "requiredClampingForceKN": "Required Clamping Force",
+      "pieceCounter": "Piece Counter",
+      "zone": "Zone",
+      "minTemp": "Min Temp",
+      "maxTemp": "Max Temp",
+      "addZone": "Add zone",
+      "sectionBasic": "Basic Information",
+      "sectionDimensions": "Dimensions & Compatibility",
+      "sectionTempering": "Tempering Temperatures",
+      "sectionCounters": "Counters",
+      "sectionMedia": "Photos",
+      "sectionDocuments": "Documents",
+      "currentMachine": "Currently mounted on",
+      "notMounted": "Not mounted",
+      "sectionCompatibleMachines": "Compatible Machines",
+      "addCompatibleMachine": "Add Machine",
+      "noCompatibleMachines": "No compatible machines assigned",
+      "cycleTimeSeconds": "Cycle Time (s)",
+      "startupScrapCount": "Startup Scrap",
+      "settingParameters": "Setting Parameters"
+    },
+    "actions": {
+      "label": "Actions",
+      "add": "Add Mold",
+      "edit": "Edit",
+      "delete": "Delete",
+      "back": "Back to list",
+      "deleteConfirmTitle": "Delete Mold",
+      "deleteConfirmMessage": "Are you sure you want to delete mold \"{{name}}\"?"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "inventoryNumberPositive": "Inventory number must be positive",
+      "intMax": "Value exceeds maximum",
+      "zoneRequired": "Zone name is required",
+      "tempRequired": "Temperature is required"
+    }
   },
   "dataGrid": {
     "toolbarColumns": "Columns",

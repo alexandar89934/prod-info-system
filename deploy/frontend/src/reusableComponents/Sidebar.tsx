@@ -13,6 +13,7 @@ import {
   AssignmentOutlined,
   AccessTimeOutlined,
   TuneOutlined,
+  ViewInArOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -83,6 +84,13 @@ const navItems: NavItem[] = [
     textKey: 'sidebar.machines',
     path: 'machine',
     icon: <PrecisionManufacturingOutlined />,
+    requiresAuth: true,
+  },
+  { textKey: 'sidebar.moldManagement', path: null, icon: null, requiresAuth: true },
+  {
+    textKey: 'sidebar.molds',
+    path: 'mold',
+    icon: <ViewInArOutlined />,
     requiresAuth: true,
   },
   { textKey: 'sidebar.attendanceManagement', path: null, icon: null, requiresAuth: true },

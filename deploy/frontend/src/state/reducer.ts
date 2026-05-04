@@ -16,6 +16,8 @@ import leaveRecordSlice from '@/state/leaveRecord/leaveRecord.slice.ts';
 import roleSlice from '@/state/role/role.slice.ts';
 import themeSlice from '@/state/theme/theme.slice.ts';
 import systemConfigSlice from '@/state/systemConfig/systemConfig.slice.ts';
+import moldSlice from '@/state/mold/mold.slice.ts';
+import moldMachineCompatibilitySlice from '@/state/moldMachineCompatibility/moldMachineCompatibility.slice.ts';
 
 const reducer = combineReducers({
   theme: themeSlice,
@@ -33,6 +35,8 @@ const reducer = combineReducers({
   attendance: attendanceSlice,
   leaveRecord: leaveRecordSlice,
   systemConfig: systemConfigSlice,
+  mold: moldSlice,
+  moldMachineCompatibility: moldMachineCompatibilitySlice,
 });
 
 export default { reducer };

@@ -33,6 +33,10 @@ import EditMachineEquipmentType from '@/scenes/machineManagement/machineEquipmen
 import ResponsibilityList from '@/scenes/responsibilityManagement';
 import AddResponsibility from '@/scenes/responsibilityManagement/AddResponsibility.tsx';
 import EditResponsibility from '@/scenes/responsibilityManagement/EditResponsibility.tsx';
+import MoldList from '@/scenes/moldManagement/mold/index.tsx';
+import AddMold from '@/scenes/moldManagement/mold/addMold.tsx';
+import EditMold from '@/scenes/moldManagement/mold/editMold.tsx';
+import MoldPage from '@/scenes/moldManagement/mold/MoldPage.tsx';
 import AttendanceManagement from '@/scenes/attendanceManagement';
 import SystemConfigPage from '@/scenes/systemConfig';
 import Kiosk from '@/scenes/kiosk';
@@ -102,6 +106,10 @@ function App() {
               <Route path="/machine/:id" element={<ProtectedRoute><MachinePage /></ProtectedRoute>} />
               <Route path="/addMachine" element={<ProtectedRoute><AddMachine /></ProtectedRoute>} />
               <Route path="/editMachine/:id" element={<ProtectedRoute><EditMachine /></ProtectedRoute>} />
+              <Route path="/mold" element={<ProtectedRoute><MoldList /></ProtectedRoute>} />
+              <Route path="/mold/:id" element={<ProtectedRoute><MoldPage /></ProtectedRoute>} />
+              <Route path="/addMold" element={<ProtectedRoute><AddMold /></ProtectedRoute>} />
+              <Route path="/editMold/:id" element={<ProtectedRoute><EditMold /></ProtectedRoute>} />
               <Route path="/attendance" element={<ProtectedRoute><AttendanceManagement /></ProtectedRoute>} />
               <Route path="/system-config" element={<ProtectedRoute><SystemConfigPage /></ProtectedRoute>} />
             </Route>

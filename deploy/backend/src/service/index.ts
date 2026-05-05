@@ -15,3 +15,5 @@ export * as attendanceEditRequestService from "./attendanceEditRequest.service";
 export * as leaveRecordService from "./leaveRecord.service";
 export * as moldService from "./mold.service";
 export * as moldMachineCompatibilityService from "./moldMachineCompatibility.service";
+export * as itemService from "./item.service";
+export * as bomLineService from "./bomLine.service";

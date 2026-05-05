@@ -363,7 +363,9 @@
     "changePassword": "Change Password",
     "logout": "Log Out",
     "login": "Log In",
-    "search": "Search..."
+    "search": "Search...",
+    "notifications": "Notifications",
+    "markAllRead": "Mark all as read"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -379,6 +381,8 @@
     "machines": "Machines",
     "moldManagement": "Mold Management",
     "molds": "Molds",
+    "itemManagement": "Item Management",
+    "items": "Items",
     "attendanceManagement": "Attendance Management",
     "attendance": "Attendance",
     "systemConfig": "System Settings"
@@ -518,6 +522,9 @@
     "page": {
       "subtitle": "Mold details"
     },
+    "detail": {
+      "producedItems": "Produced Items"
+    },
     "status": {
       "ok": "OK",
       "fault": "Fault",
@@ -563,6 +570,9 @@
       "noCompatibleMachines": "No compatible machines assigned",
       "cycleTimeSeconds": "Cycle Time (s)",
       "startupScrapCount": "Startup Scrap",
+      "normPerShift": "Norm per Shift",
+      "pieceWeightG": "Piece Weight (g)",
+      "runnerWeightG": "Runner Weight (g)",
       "settingParameters": "Setting Parameters"
     },
     "actions": {
@@ -580,6 +590,91 @@
       "intMax": "Value exceeds maximum",
       "zoneRequired": "Zone name is required",
       "tempRequired": "Temperature is required"
+    }
+  },
+  "item": {
+    "list": {
+      "title": "ITEMS",
+      "subtitle": "Item master: materials, components, finished goods",
+      "add": "Add Item",
+      "itemCode": "Code",
+      "name": "Name",
+      "category": "Category",
+      "unit": "Unit",
+      "price": "Price/Unit",
+      "tool": "Tool (Mold)",
+      "actions": "Actions",
+      "deleteTitle": "Delete Item",
+      "deleteDescription": "Are you sure you want to delete item \"{{name}}\"?"
+    },
+    "detail": {
+      "back": "Back",
+      "edit": "Edit",
+      "notFound": "Item not found"
+    },
+    "form": {
+      "addTitle": "Add Item",
+      "editTitle": "Edit Item",
+      "addSubmit": "Add Item",
+      "addSubmitLoading": "Adding...",
+      "editSubmit": "Update Item",
+      "editSubmitLoading": "Updating...",
+      "cancel": "Cancel",
+      "itemCode": "Item Code",
+      "name": "Name",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "unit": "Unit",
+      "selectUnit": "Select unit",
+      "approvalLevel": "Approval Level",
+      "noApproval": "No approval required",
+      "priceEurPerUnit": "Price per Unit",
+      "tool": "Tool (Mold)",
+      "noTool": "No tool assigned",
+      "notes": "Notes",
+      "sectionIdentity": "Identity & Classification",
+      "sectionPricing": "Pricing & Production",
+      "sectionMedia": "Photos",
+      "sectionDocuments": "Documents",
+      "sectionNotes": "Notes"
+    },
+    "category": {
+      "raw_material": "Raw Material",
+      "masterbatch": "Masterbatch",
+      "component": "Component",
+      "semi_finished": "Semi-Finished",
+      "finished_good": "Finished Good",
+      "regrind": "Regrind",
+      "packaging": "Packaging"
+    },
+    "approvalLevel": {
+      "qc_controller": "QC Controller",
+      "shift_manager": "Shift Manager"
+    },
+    "bom": {
+      "title": "Bill of Materials (BOM)",
+      "add": "Add Line",
+      "addTitle": "Add BOM Line",
+      "editTitle": "Edit BOM Line",
+      "empty": "No BOM lines defined",
+      "inputItem": "Input Item",
+      "quantity": "Quantity per Piece",
+      "unit": "Unit",
+      "notes": "Notes",
+      "actions": "Actions",
+      "cancel": "Cancel",
+      "confirm": "Save",
+      "inputRequired": "Please select an input item",
+      "quantityPositive": "Quantity must be greater than zero"
+    },
+    "validation": {
+      "itemCodeRequired": "Item code is required",
+      "itemCodeMax": "Item code cannot exceed 20 characters",
+      "nameRequired": "Name is required",
+      "categoryRequired": "Category is required",
+      "unitRequired": "Unit is required",
+      "inputItemRequired": "Input item is required",
+      "quantityPositive": "Quantity must be positive"
     }
   },
   "dataGrid": {

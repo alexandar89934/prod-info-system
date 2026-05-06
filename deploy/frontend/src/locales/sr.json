@@ -363,7 +363,9 @@
     "changePassword": "Promeni lozinku",
     "logout": "Odjavi se",
     "login": "Prijavi se",
-    "search": "Pretraži..."
+    "search": "Pretraži...",
+    "notifications": "Obaveštenja",
+    "markAllRead": "Označi sve kao pročitano"
   },
   "sidebar": {
     "dashboard": "Početna",
@@ -379,6 +381,9 @@
     "machines": "Mašine",
     "moldManagement": "Upravljanje kalupima",
     "molds": "Kalupi",
+    "itemManagement": "Upravljanje artiklima",
+    "items": "Artikli",
+    "packagingUnits": "Ambalaža",
     "attendanceManagement": "Evidencija prisustva",
     "attendance": "Prisustvo",
     "systemConfig": "Podešavanja sistema"
@@ -518,6 +523,9 @@
     "page": {
       "subtitle": "Detalji kalupa"
     },
+    "detail": {
+      "producedItems": "Artikli koji se proizvode ovim kalupom"
+    },
     "status": {
       "ok": "Ispravan",
       "fault": "Kvar",
@@ -563,6 +571,9 @@
       "noCompatibleMachines": "Nema dodeljenih kompatibilnih mašina",
       "cycleTimeSeconds": "Vreme ciklusa (s)",
       "startupScrapCount": "Škart pri startu",
+      "normPerShift": "Norma po smeni",
+      "pieceWeightG": "Masa komada (g)",
+      "runnerWeightG": "Masa uliva (g)",
       "settingParameters": "Parametri podešavanja"
     },
     "actions": {
@@ -580,6 +591,130 @@
       "intMax": "Vrednost premašuje maksimum",
       "zoneRequired": "Naziv zone je obavezan",
       "tempRequired": "Temperatura je obavezna"
+    }
+  },
+  "item": {
+    "list": {
+      "title": "ARTIKLI",
+      "subtitle": "Matične šifre: sirovine, komponente, gotovi proizvodi",
+      "add": "Dodaj artikal",
+      "itemCode": "Šifra",
+      "name": "Naziv",
+      "category": "Kategorija",
+      "unit": "JM",
+      "price": "Cena/JM",
+      "tool": "Alat (kalup)",
+      "actions": "Akcije",
+      "deleteTitle": "Obriši artikal",
+      "deleteDescription": "Da li ste sigurni da želite da obrišete artikal \"{{name}}\"?"
+    },
+    "detail": {
+      "back": "Nazad",
+      "edit": "Izmeni",
+      "notFound": "Artikal nije pronađen"
+    },
+    "form": {
+      "addTitle": "Dodaj artikal",
+      "editTitle": "Izmeni artikal",
+      "addSubmit": "Dodaj artikal",
+      "addSubmitLoading": "Dodavanje...",
+      "editSubmit": "Ažuriraj artikal",
+      "editSubmitLoading": "Ažuriranje...",
+      "cancel": "Otkaži",
+      "itemCode": "Šifra artikla",
+      "name": "Naziv",
+      "category": "Kategorija",
+      "selectCategory": "Izaberite kategoriju",
+      "unit": "Jedinica mere",
+      "selectUnit": "Izaberite JM",
+      "approvalLevel": "Nivo odobravanja",
+      "noApproval": "Bez odobravanja",
+      "priceEurPerUnit": "Cena po JM",
+      "tool": "Alat (kalup)",
+      "noTool": "Bez alata",
+      "notes": "Napomene",
+      "sectionIdentity": "Identifikacija i klasifikacija",
+      "sectionPricing": "Cena i proizvodnja",
+      "sectionMedia": "Fotografije",
+      "sectionDocuments": "Dokumenti",
+      "sectionNotes": "Napomene"
+    },
+    "category": {
+      "raw_material": "Sirovina",
+      "masterbatch": "Masterbatch",
+      "component": "Komponenta",
+      "semi_finished": "Poluproizvod",
+      "finished_good": "Gotov proizvod",
+      "regrind": "Reciklat",
+      "packaging": "Ambalažni materijal"
+    },
+    "approvalLevel": {
+      "qc_controller": "Kontrolor kvaliteta",
+      "shift_manager": "Šef smene"
+    },
+    "bom": {
+      "title": "Sastavnica (BOM)",
+      "add": "Dodaj liniju",
+      "addTitle": "Dodaj liniju sastavnice",
+      "editTitle": "Izmeni liniju sastavnice",
+      "empty": "Nema definisanih linija sastavnice",
+      "inputItem": "Ulazni artikal",
+      "quantity": "Količina po komadu",
+      "unit": "JM",
+      "notes": "Napomene",
+      "actions": "Akcije",
+      "cancel": "Otkaži",
+      "confirm": "Sačuvaj",
+      "inputRequired": "Izaberite ulazni artikal",
+      "quantityPositive": "Količina mora biti veća od nule"
+    },
+    "packaging": {
+      "title": "Ambalaža",
+      "add": "Dodaj ambalažu",
+      "addTitle": "Dodaj ambalažu",
+      "editTitle": "Izmeni ambalažu",
+      "empty": "Nema definisane ambalaže za ovaj artikal",
+      "packagingUnit": "Ambalažna jedinica",
+      "quantity": "Količina po jedinici",
+      "photos": "Fotografije",
+      "notes": "Napomene",
+      "actions": "Akcije",
+      "cancel": "Otkaži",
+      "confirm": "Sačuvaj",
+      "packagingRequired": "Izaberite ambalažnu jedinicu",
+      "quantityPositive": "Količina mora biti veća od nule"
+    },
+    "validation": {
+      "itemCodeRequired": "Šifra artikla je obavezna",
+      "itemCodeMax": "Šifra ne može biti duža od 20 znakova",
+      "nameRequired": "Naziv je obavezan",
+      "categoryRequired": "Kategorija je obavezna",
+      "unitRequired": "Jedinica mere je obavezna",
+      "inputItemRequired": "Ulazni artikal je obavezan",
+      "quantityPositive": "Količina mora biti pozitivna"
+    }
+  },
+  "packagingUnit": {
+    "list": {
+      "title": "AMBALAŽNE JEDINICE",
+      "subtitle": "Upravljanje katalogom ambalaže: kutije, kavezi, palete",
+      "add": "Dodaj ambalažnu jedinicu",
+      "name": "Naziv",
+      "description": "Opis",
+      "actions": "Akcije",
+      "deleteTitle": "Brisanje ambalažne jedinice",
+      "deleteDescription": "Da li ste sigurni da želite da obrišete ambalažnu jedinicu \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj ambalažnu jedinicu",
+      "editTitle": "Izmeni ambalažnu jedinicu",
+      "addSubmit": "Dodaj",
+      "editSubmit": "Ažuriraj",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "description": "Opis",
+      "picture": "Fotografija",
+      "uploadPicture": "Postavi fotografiju"
     }
   },
   "dataGrid": {

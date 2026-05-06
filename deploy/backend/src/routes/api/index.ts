@@ -9,6 +9,8 @@ import { attendanceEditRequestRouter } from "./attendanceEditRequest.route";
 import { leaveRecordRouter } from "./leaveRecord.route";
 import { moldRouter } from "./mold.route";
 import { moldMachineCompatibilityRouter } from "./moldMachineCompatibility.route";
+import { itemRouter } from "./item.route";
+import { packagingUnitRouter } from "./packagingUnit.route";
 import { jobPositionRouter } from "./jobPosition.route";
 import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
@@ -93,6 +95,14 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/mold-machine-compatibility",
     route: moldMachineCompatibilityRouter,
+  },
+  {
+    path: "/item",
+    route: itemRouter,
+  },
+  {
+    path: "/packaging-unit",
+    route: packagingUnitRouter,
   },
 ];
 

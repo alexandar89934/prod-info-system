@@ -33,8 +33,10 @@ export const createMoldMachineCompatibilityQuery = async (
 ): Promise<MoldMachineCompatibility> => {
   const sql = `
     INSERT INTO "MoldMachineCompatibility"
-      ("id", "moldId", "machineId", "cycleTimeSeconds", "startupScrapCount", "notes", "settingParameters", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6::jsonb, NOW(), NOW())
+      ("id", "moldId", "machineId", "cycleTimeSeconds", "startupScrapCount",
+       "normPerShift", "pieceWeightG", "runnerWeightG", "notes", "settingParameters",
+       "createdAt", "updatedAt")
+    VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, NOW(), NOW())
     RETURNING *
   `;
   return callQuery<MoldMachineCompatibility>(sql, [
@@ -42,6 +44,9 @@ export const createMoldMachineCompatibilityQuery = async (
     data.machineId,
     data.cycleTimeSeconds ?? null,
     data.startupScrapCount ?? null,
+    data.normPerShift ?? null,
+    data.pieceWeightG ?? null,
+    data.runnerWeightG ?? null,
     data.notes ?? null,
     data.settingParameters !== undefined && data.settingParameters !== null
       ? JSON.stringify(data.settingParameters)
@@ -57,15 +62,21 @@ export const updateMoldMachineCompatibilityQuery = async (
     SET
       "cycleTimeSeconds"  = $1,
       "startupScrapCount" = $2,
-      "notes"             = $3,
-      "settingParameters" = $4::jsonb,
+      "normPerShift"      = $3,
+      "pieceWeightG"      = $4,
+      "runnerWeightG"     = $5,
+      "notes"             = $6,
+      "settingParameters" = $7::jsonb,
       "updatedAt"         = NOW()
-    WHERE "id" = $5
+    WHERE "id" = $8
     RETURNING *
   `;
   return callQuery<MoldMachineCompatibility>(sql, [
     data.cycleTimeSeconds ?? null,
     data.startupScrapCount ?? null,
+    data.normPerShift ?? null,
+    data.pieceWeightG ?? null,
+    data.runnerWeightG ?? null,
     data.notes ?? null,
     data.settingParameters !== undefined && data.settingParameters !== null
       ? JSON.stringify(data.settingParameters)

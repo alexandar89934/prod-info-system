@@ -42,6 +42,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import Header from '@/reusableComponents/Header';
+import axiosServer from '@/services/axios.service';
 import { fetchMachines } from '@/state/machine/machine.actions';
 import { selectMachines } from '@/state/machine/machine.selectors';
 import { fetchMoldById } from '@/state/mold/mold.actions';
@@ -107,6 +108,7 @@ const MoldPage = () => {
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [producedItems, setProducedItems] = useState<{ id: string; itemCode: string; name: string }[]>([]);
 
   // Assign dialog
   const [assignOpen, setAssignOpen] = useState(false);
@@ -114,6 +116,9 @@ const MoldPage = () => {
   const [selectedMachineId, setSelectedMachineId] = useState('');
   const [assignCycleTime, setAssignCycleTime] = useState('');
   const [assignStartupScrap, setAssignStartupScrap] = useState('');
+  const [assignNormPerShift, setAssignNormPerShift] = useState('');
+  const [assignPieceWeightG, setAssignPieceWeightG] = useState('');
+  const [assignRunnerWeightG, setAssignRunnerWeightG] = useState('');
   const [assignNotes, setAssignNotes] = useState('');
 
   // Edit dialog
@@ -121,12 +126,18 @@ const MoldPage = () => {
   const [editItem, setEditItem] = useState<MoldMachineCompatibility | null>(null);
   const [editCycleTime, setEditCycleTime] = useState('');
   const [editStartupScrap, setEditStartupScrap] = useState('');
+  const [editNormPerShift, setEditNormPerShift] = useState('');
+  const [editPieceWeightG, setEditPieceWeightG] = useState('');
+  const [editRunnerWeightG, setEditRunnerWeightG] = useState('');
   const [editNotes, setEditNotes] = useState('');
 
   useEffect(() => {
     if (id) {
       dispatch(fetchMoldById(id));
       dispatch(fetchCompatibleMachines(id));
+      axiosServer.get(`/item/produced-by/${id}`).then((res) => {
+        if (res.data.success) setProducedItems(res.data.content.items ?? []);
+      }).catch(() => {});
     }
     return () => { dispatch(resetState()); };
   }, [dispatch, id]);
@@ -136,6 +147,9 @@ const MoldPage = () => {
     setSelectedMachineId('');
     setAssignCycleTime('');
     setAssignStartupScrap('');
+    setAssignNormPerShift('');
+    setAssignPieceWeightG('');
+    setAssignRunnerWeightG('');
     setAssignNotes('');
     setAssignOpen(true);
     dispatch(fetchMachines({ page: 1, limit: 200, search: '', sortField: '', sortOrder: '' }));
@@ -159,6 +173,9 @@ const MoldPage = () => {
         machineId: selectedMachineId,
         cycleTimeSeconds: assignCycleTime !== '' ? Number(assignCycleTime) : null,
         startupScrapCount: assignStartupScrap !== '' ? Number(assignStartupScrap) : null,
+        normPerShift: assignNormPerShift !== '' ? Number(assignNormPerShift) : null,
+        pieceWeightG: assignPieceWeightG !== '' ? Number(assignPieceWeightG) : null,
+        runnerWeightG: assignRunnerWeightG !== '' ? Number(assignRunnerWeightG) : null,
         notes: assignNotes || null,
       }),
     );
@@ -172,6 +189,9 @@ const MoldPage = () => {
     setEditItem(item);
     setEditCycleTime(item.cycleTimeSeconds !== null ? String(item.cycleTimeSeconds) : '');
     setEditStartupScrap(item.startupScrapCount !== null ? String(item.startupScrapCount) : '');
+    setEditNormPerShift(item.normPerShift !== null ? String(item.normPerShift) : '');
+    setEditPieceWeightG(item.pieceWeightG !== null ? String(item.pieceWeightG) : '');
+    setEditRunnerWeightG(item.runnerWeightG !== null ? String(item.runnerWeightG) : '');
     setEditNotes(item.notes ?? '');
     setEditOpen(true);
   };
@@ -183,6 +203,9 @@ const MoldPage = () => {
         id: editItem.id,
         cycleTimeSeconds: editCycleTime !== '' ? Number(editCycleTime) : null,
         startupScrapCount: editStartupScrap !== '' ? Number(editStartupScrap) : null,
+        normPerShift: editNormPerShift !== '' ? Number(editNormPerShift) : null,
+        pieceWeightG: editPieceWeightG !== '' ? Number(editPieceWeightG) : null,
+        runnerWeightG: editRunnerWeightG !== '' ? Number(editRunnerWeightG) : null,
         notes: editNotes || null,
       }),
     );
@@ -445,6 +468,12 @@ const MoldPage = () => {
                           `${t('mold.form.cycleTimeSeconds')}: ${item.cycleTimeSeconds}s`,
                         item.startupScrapCount !== null &&
                           `${t('mold.form.startupScrapCount')}: ${item.startupScrapCount}`,
+                        item.normPerShift !== null &&
+                          `${t('mold.form.normPerShift')}: ${item.normPerShift}`,
+                        item.pieceWeightG !== null &&
+                          `${t('mold.form.pieceWeightG')}: ${item.pieceWeightG}g`,
+                        item.runnerWeightG !== null &&
+                          `${t('mold.form.runnerWeightG')}: ${item.runnerWeightG}g`,
                         item.notes,
                       ]
                         .filter(Boolean)
@@ -471,6 +500,29 @@ const MoldPage = () => {
             )}
           </Paper>
         </Grid>
+
+        {/* Produced Items panel */}
+        {producedItems.length > 0 && (
+          <Grid item xs={12}>
+            <Paper elevation={1} sx={{ p: 2, borderRadius: 2, backgroundColor: theme.palette.background.paper }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+                {t('mold.detail.producedItems')}
+              </Typography>
+              {producedItems.map((pi) => (
+                <Box key={pi.id} sx={{ display: 'flex', alignItems: 'center', py: 0.75, borderBottom: '1px solid', borderColor: 'divider', '&:last-child': { borderBottom: 'none' } }}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={500}
+                    sx={{ cursor: 'pointer', color: theme.palette.secondary.main, '&:hover': { textDecoration: 'underline' } }}
+                    onClick={() => navigate(`/item/${pi.id}`)}
+                  >
+                    {pi.itemCode} — {pi.name}
+                  </Typography>
+                </Box>
+              ))}
+            </Paper>
+          </Grid>
+        )}
       </Grid>
 
       {/* Lightbox dialog */}
@@ -587,7 +639,7 @@ const MoldPage = () => {
             </List>
           )}
 
-          <Box display="flex" gap={2}>
+          <Box display="flex" gap={2} mt={2}>
             <TextField
               label={t('mold.form.cycleTimeSeconds')}
               type="number"
@@ -605,6 +657,35 @@ const MoldPage = () => {
               onChange={(e) => setAssignStartupScrap(e.target.value)}
               sx={{ flex: 1 }}
               inputProps={{ min: 0 }}
+            />
+            <TextField
+              label={t('mold.form.normPerShift')}
+              type="number"
+              size="small"
+              value={assignNormPerShift}
+              onChange={(e) => setAssignNormPerShift(e.target.value)}
+              sx={{ flex: 1 }}
+              inputProps={{ min: 1 }}
+            />
+          </Box>
+          <Box display="flex" gap={2} mt={2}>
+            <TextField
+              label={`${t('mold.form.pieceWeightG')} (g)`}
+              type="number"
+              size="small"
+              value={assignPieceWeightG}
+              onChange={(e) => setAssignPieceWeightG(e.target.value)}
+              sx={{ flex: 1 }}
+              inputProps={{ min: 0, step: 'any' }}
+            />
+            <TextField
+              label={`${t('mold.form.runnerWeightG')} (g)`}
+              type="number"
+              size="small"
+              value={assignRunnerWeightG}
+              onChange={(e) => setAssignRunnerWeightG(e.target.value)}
+              sx={{ flex: 1 }}
+              inputProps={{ min: 0, step: 'any' }}
             />
           </Box>
           <TextField
@@ -662,6 +743,35 @@ const MoldPage = () => {
               onChange={(e) => setEditStartupScrap(e.target.value)}
               sx={{ flex: 1 }}
               inputProps={{ min: 0 }}
+            />
+            <TextField
+              label={t('mold.form.normPerShift')}
+              type="number"
+              size="small"
+              value={editNormPerShift}
+              onChange={(e) => setEditNormPerShift(e.target.value)}
+              sx={{ flex: 1 }}
+              inputProps={{ min: 1 }}
+            />
+          </Box>
+          <Box display="flex" gap={2} mt={2}>
+            <TextField
+              label={`${t('mold.form.pieceWeightG')} (g)`}
+              type="number"
+              size="small"
+              value={editPieceWeightG}
+              onChange={(e) => setEditPieceWeightG(e.target.value)}
+              sx={{ flex: 1 }}
+              inputProps={{ min: 0, step: 'any' }}
+            />
+            <TextField
+              label={`${t('mold.form.runnerWeightG')} (g)`}
+              type="number"
+              size="small"
+              value={editRunnerWeightG}
+              onChange={(e) => setEditRunnerWeightG(e.target.value)}
+              sx={{ flex: 1 }}
+              inputProps={{ min: 0, step: 'any' }}
             />
           </Box>
           <TextField

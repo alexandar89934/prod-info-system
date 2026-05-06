@@ -6,11 +6,18 @@ import {
   SettingsOutlined,
   ArrowDropDownOutlined,
   Close,
+  NotificationsOutlined,
 } from '@mui/icons-material';
 import {
   AppBar,
+  Badge,
   Button,
   Box,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Popover,
   Typography,
   IconButton,
   InputBase,
@@ -60,6 +67,16 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [notifAnchor, setNotifAnchor] = useState<null | HTMLElement>(null);
+  const [readNotifs, setReadNotifs] = useState<Set<number>>(new Set());
+
+  const notifications = [
+    { id: 1, message: 'New production plan added for next shift.' },
+    { id: 2, message: 'Your leave request has been approved.' },
+    { id: 3, message: 'You are assigned to machine #16 on your upcoming shift.' },
+    { id: 4, message: 'Working on plan #123455 — producing LEČA VRAT 6N.' },
+    { id: 5, message: 'Tool mounting confirmed on machine #16 by regler.' },
+  ];
   const isOpen = Boolean(anchorEl);
   const navigate = useNavigate();
   const isLoggedIn: boolean = useSelector(getIsLoggedIn);
@@ -153,6 +170,20 @@ const Navbar: React.FC<NavbarProps> = ({
           )}
         </FlexBetween>
 
+        {!searchOpen && (
+          <Typography
+            fontWeight="bold"
+            sx={{
+              color: theme.palette.secondary[100],
+              userSelect: 'none',
+              whiteSpace: 'nowrap',
+              fontSize: { xs: '0.95rem', sm: '1.1rem', md: '1.35rem' },
+            }}
+          >
+            Production Info System
+          </Typography>
+        )}
+
         {!searchOpen || !isMobileOrTablet ? (
           <FlexBetween
             gap={isMobileOrTablet ? '0.5rem' : '1.5rem'}
@@ -167,6 +198,19 @@ const Navbar: React.FC<NavbarProps> = ({
                 )}
               </IconButton>
             ) : null}
+
+            <IconButton
+              size="small"
+              onClick={(e) => setNotifAnchor(e.currentTarget)}
+            >
+              <Badge
+                badgeContent={notifications.length - readNotifs.size}
+                color="error"
+                max={99}
+              >
+                <NotificationsOutlined sx={{ fontSize: '22px' }} />
+              </Badge>
+            </IconButton>
 
             <Button
               size="small"
@@ -307,6 +351,67 @@ const Navbar: React.FC<NavbarProps> = ({
           </FlexBetween>
         ) : null}
       </Toolbar>
+      <Popover
+        open={Boolean(notifAnchor)}
+        anchorEl={notifAnchor}
+        onClose={() => setNotifAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{ sx: { width: 340, maxHeight: 420, display: 'flex', flexDirection: 'column' } }}
+      >
+        <Box sx={{ px: 2, py: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="subtitle2" fontWeight={700}>
+            {t('navbar.notifications')}
+          </Typography>
+          {readNotifs.size < notifications.length && (
+            <Typography
+              variant="caption"
+              sx={{ cursor: 'pointer', color: theme.palette.primary.main }}
+              onClick={() => setReadNotifs(new Set(notifications.map((n) => n.id)))}
+            >
+              {t('navbar.markAllRead')}
+            </Typography>
+          )}
+        </Box>
+        <Divider />
+        <List disablePadding sx={{ overflowY: 'auto' }}>
+          {notifications.map((n, idx) => {
+            const isRead = readNotifs.has(n.id);
+            return (
+              <ListItem
+                key={n.id}
+                alignItems="flex-start"
+                divider={idx < notifications.length - 1}
+                onClick={() => setReadNotifs((prev) => new Set(Array.from(prev).concat(n.id)))}
+                sx={{
+                  cursor: 'pointer',
+                  backgroundColor: isRead ? 'transparent' : theme.palette.action.hover,
+                  '&:hover': { backgroundColor: theme.palette.action.selected },
+                  gap: 1,
+                }}
+              >
+                {!isRead && (
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: theme.palette.error.main,
+                      flexShrink: 0,
+                      mt: 0.75,
+                    }}
+                  />
+                )}
+                <ListItemText
+                  primary={n.message}
+                  primaryTypographyProps={{ variant: 'body2', color: isRead ? 'text.secondary' : 'text.primary' }}
+                  sx={{ ml: isRead ? '16px' : 0 }}
+                />
+              </ListItem>
+            );
+          })}
+        </List>
+      </Popover>
     </AppBar>
   );
 };

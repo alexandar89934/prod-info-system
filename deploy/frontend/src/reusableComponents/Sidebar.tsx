@@ -1,5 +1,4 @@
 import {
-  SettingsOutlined,
   ChevronLeft,
   ChevronRightOutlined,
   HomeOutlined,
@@ -14,10 +13,10 @@ import {
   AccessTimeOutlined,
   TuneOutlined,
   ViewInArOutlined,
+  InventoryOutlined,
 } from '@mui/icons-material';
 import {
   Box,
-  Divider,
   Drawer,
   IconButton,
   List,
@@ -32,8 +31,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-
-import FlexBetween from './FlexBetween';
 
 import { getIsLoggedIn } from '@/state/auth/auth.selectors.ts';
 
@@ -61,6 +58,9 @@ const navItems: NavItem[] = [
   { textKey: 'sidebar.jobPositions', path: 'jobPosition', icon: <ReceiptLongOutlined />, requiresAuth: true },
   { textKey: 'sidebar.jobPositionCategories', path: 'jobPositionCategories', icon: <CategoryOutlined />, requiresAuth: true },
   { textKey: 'sidebar.responsibilities', path: 'responsibilities', icon: <AssignmentOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.attendanceManagement', path: null, icon: null, requiresAuth: true },
+  { textKey: 'sidebar.attendance', path: 'attendance', icon: <AccessTimeOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.systemConfig', path: 'system-config', icon: <TuneOutlined />, requiresAuth: true },
   { textKey: 'sidebar.machineManagement', path: null, icon: null, requiresAuth: true },
   {
     textKey: 'sidebar.availabilityStatuses',
@@ -93,23 +93,22 @@ const navItems: NavItem[] = [
     icon: <ViewInArOutlined />,
     requiresAuth: true,
   },
-  { textKey: 'sidebar.attendanceManagement', path: null, icon: null, requiresAuth: true },
+  { textKey: 'sidebar.itemManagement', path: null, icon: null, requiresAuth: true },
   {
-    textKey: 'sidebar.attendance',
-    path: 'attendance',
-    icon: <AccessTimeOutlined />,
+    textKey: 'sidebar.items',
+    path: 'item',
+    icon: <InventoryOutlined />,
     requiresAuth: true,
   },
   {
-    textKey: 'sidebar.systemConfig',
-    path: 'system-config',
-    icon: <TuneOutlined />,
+    textKey: 'sidebar.packagingUnits',
+    path: 'packaging-unit',
+    icon: <CategoryOutlined />,
     requiresAuth: true,
   },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
-  user,
   drawerWidth,
   isSidebarOpen,
   setIsSidebarOpen,
@@ -134,9 +133,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     return [...acc, item];
   }, []);
 
-  const handleProfileClick = () => {
-    navigate('/profilePage');
-  };
 
   useEffect(() => {
     setActive(pathname.substring(1));
@@ -178,20 +174,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         <Box display="flex" flexDirection="column" height="100%">
-          <Box m="1.5rem 1rem 1.5rem 1.5rem">
-            <FlexBetween color={theme.palette.secondary.main}>
-              <Box display="flex" alignItems="center" gap="0.5rem">
-                <Typography variant="h4" fontWeight="bold">
-                  Production Info System
-                </Typography>
-              </Box>
-              {!isNonMobile ? (
-                <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                  <ChevronLeft />
-                </IconButton>
-              ) : null}
-            </FlexBetween>
-          </Box>
+          {!isNonMobile && (
+            <Box display="flex" justifyContent="flex-end" p="0.75rem 0.5rem 0">
+              <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+                <ChevronLeft />
+              </IconButton>
+            </Box>
+          )}
 
           <Box flexGrow={1}>
             <List>
@@ -246,30 +235,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             </List>
           </Box>
 
-          <Box position="relative" padding="1rem 2rem">
-            <Divider />
-            {isLoggedIn ? (
-              <FlexBetween textTransform="none" gap="1rem" m="1.5rem 0 0">
-                <Box textAlign="left">
-                  <Typography
-                    fontWeight="bold"
-                    fontSize="0.9rem"
-                    sx={{ color: theme.palette.secondary[100] }}
-                  >
-                    {user.name}
-                  </Typography>
-                </Box>
-                <IconButton onClick={handleProfileClick}>
-                  <SettingsOutlined
-                    sx={{
-                      color: theme.palette.secondary[300],
-                      fontSize: '25px',
-                    }}
-                  />
-                </IconButton>
-              </FlexBetween>
-            ) : null}
-          </Box>
         </Box>
       </Drawer>
     </Box>

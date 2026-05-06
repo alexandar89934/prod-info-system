@@ -4,5 +4,3 @@
 - manual adding/editing of attandance need to be possible by person with workplace haveing that responsability manual_attendance_entry, manual_attendance_update
 - edited column need to be marked as edited
 - on creating new person, default password need to be applied, and it is NEW_USER_PASSWORD from env variables,that password need to be changed by user on first login
-
-

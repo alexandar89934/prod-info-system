@@ -14,6 +14,23 @@ export type BomLine = z.infer<typeof bomLineSchema> & {
   inputItemUnit?: string;
 };
 
+export type ItemPackagingPicture = { name: string; path: string; dateAdded: string | Date };
+
+export type ItemPackaging = {
+  id: string;
+  itemId: string;
+  packagingUnitId: string;
+  quantityPerUnit: number;
+  pictures: ItemPackagingPicture[];
+  notes: string | null;
+  packagingUnitName?: string;
+  packagingUnitDescription?: string | null;
+  packagingUnitPicture?: ItemPackagingPicture | null;
+};
+
+export type ItemPackagingSingleResponse = ApiResponse<{ packaging: ItemPackaging }>;
+export type ItemPackagingListResponse = ApiResponse<{ packagings: ItemPackaging[] }>;
+
 export type AddItemFormData = Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'toolName' | 'toolInventoryNumber'>;
 export type EditItemFormData = Item & { id: string };
 
@@ -30,6 +47,7 @@ export type ItemState = {
   currentItem: EditItemFormData | null;
   items: Item[];
   bomLines: BomLine[];
+  packagings: ItemPackaging[];
   loading: boolean;
   error: string | null;
   success: string | null;

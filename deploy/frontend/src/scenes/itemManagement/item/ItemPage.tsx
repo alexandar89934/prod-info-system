@@ -34,18 +34,23 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { fetchItems, fetchItemById, fetchBomLines, addBomLine, updateBomLine, deleteBomLine } from '@/state/item/item.actions';
+import { fetchItems, fetchItemById, fetchBomLines, addBomLine, updateBomLine, deleteBomLine, fetchItemPackagings, addItemPackaging, updateItemPackaging, deleteItemPackaging } from '@/state/item/item.actions';
 import {
   selectBomLines,
   selectCurrentItem,
   selectItemError,
   selectItemLoading,
+  selectItemPackagings,
   selectItems,
 } from '@/state/item/item.selectors';
 import { clearError, resetState } from '@/state/item/item.slice';
-import { BomLine } from '@/state/item/item.types';
+import { BomLine, ItemPackaging } from '@/state/item/item.types';
 import { useAppDispatch } from '@/state/hooks';
 import { ITEM_UNITS } from '@/zodValidationSchemas/item.schema';
+import ImageGallery, { GalleryImage } from '@/reusableComponents/ImageGallery';
+import { uploadSingleFile, deleteFileMachineEquipment } from '@/state/fileUploads/files.actions';
+import { fetchPackagingUnits } from '@/state/packagingUnit/packagingUnit.actions';
+import { selectPackagingUnits } from '@/state/packagingUnit/packagingUnit.selectors';
 
 const InfoRow = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
   <Box display="flex" py={0.75} borderBottom="1px solid" borderColor="divider">
@@ -91,6 +96,8 @@ const ItemPage = () => {
   const error = useSelector(selectItemError);
   const bomLines = useSelector(selectBomLines);
   const allItems = useSelector(selectItems);
+  const packagings = useSelector(selectItemPackagings);
+  const allPackagingUnits = useSelector(selectPackagingUnits);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -99,11 +106,22 @@ const ItemPage = () => {
   const [formData, setFormData] = useState(emptyBomLine);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const emptyPackagingForm = { packagingUnitId: '', quantityPerUnit: 1, notes: '' };
+  const [pkgAddOpen, setPkgAddOpen] = useState(false);
+  const [pkgEditOpen, setPkgEditOpen] = useState(false);
+  const [editingPkg, setEditingPkg] = useState<ItemPackaging | null>(null);
+  const [pkgFormData, setPkgFormData] = useState(emptyPackagingForm);
+  const [pkgFormError, setPkgFormError] = useState<string | null>(null);
+  const [pkgPictures, setPkgPictures] = useState<GalleryImage[]>([]);
+  const [pkgFileLoading, setPkgFileLoading] = useState(false);
+
   useEffect(() => {
     if (id) {
       dispatch(fetchItemById(id));
       dispatch(fetchBomLines(id));
+      dispatch(fetchItemPackagings(id));
       dispatch(fetchItems({ page: 1, limit: 500, search: '', sortField: 'itemCode', sortOrder: 'asc' }));
+      dispatch(fetchPackagingUnits({ page: 1, limit: 500, search: '' }));
     }
     return () => { dispatch(resetState()); };
   }, [dispatch, id]);
@@ -176,6 +194,96 @@ const ItemPage = () => {
       dispatch(fetchBomLines(id ?? ''));
     }
   };
+
+  const openPkgAddDialog = () => {
+    setPkgFormData(emptyPackagingForm);
+    setPkgPictures([]);
+    setPkgFormError(null);
+    setPkgAddOpen(true);
+  };
+
+  const openPkgEditDialog = (pkg: ItemPackaging) => {
+    setEditingPkg(pkg);
+    setPkgFormData({ packagingUnitId: pkg.packagingUnitId, quantityPerUnit: pkg.quantityPerUnit, notes: pkg.notes ?? '' });
+    setPkgPictures(pkg.pictures.map((p) => ({ name: p.name, path: p.path, dateAdded: p.dateAdded })));
+    setPkgFormError(null);
+    setPkgEditOpen(true);
+  };
+
+  const handlePkgAddConfirm = async () => {
+    if (!pkgFormData.packagingUnitId) { setPkgFormError(t('item.packaging.packagingRequired')); return; }
+    if (!pkgFormData.quantityPerUnit || pkgFormData.quantityPerUnit <= 0) { setPkgFormError(t('item.packaging.quantityPositive')); return; }
+    const result = await dispatch(addItemPackaging({
+      itemId: id ?? '',
+      packagingUnitId: pkgFormData.packagingUnitId,
+      quantityPerUnit: Number(pkgFormData.quantityPerUnit),
+      pictures: pkgPictures.map((p) => ({ name: p.name, path: p.path, dateAdded: p.dateAdded })),
+      notes: pkgFormData.notes || null,
+    }));
+    if (addItemPackaging.fulfilled.match(result)) {
+      setPkgAddOpen(false);
+      dispatch(fetchItemPackagings(id ?? ''));
+    } else {
+      setPkgFormError(result.payload as string);
+    }
+  };
+
+  const handlePkgEditConfirm = async () => {
+    if (!editingPkg) return;
+    if (!pkgFormData.packagingUnitId) { setPkgFormError(t('item.packaging.packagingRequired')); return; }
+    if (!pkgFormData.quantityPerUnit || pkgFormData.quantityPerUnit <= 0) { setPkgFormError(t('item.packaging.quantityPositive')); return; }
+    const result = await dispatch(updateItemPackaging({
+      id: editingPkg.id,
+      itemId: id ?? '',
+      packagingUnitId: pkgFormData.packagingUnitId,
+      quantityPerUnit: Number(pkgFormData.quantityPerUnit),
+      pictures: pkgPictures.map((p) => ({ name: p.name, path: p.path, dateAdded: p.dateAdded })),
+      notes: pkgFormData.notes || null,
+    }));
+    if (updateItemPackaging.fulfilled.match(result)) {
+      setPkgEditOpen(false);
+      setEditingPkg(null);
+      dispatch(fetchItemPackagings(id ?? ''));
+    } else {
+      setPkgFormError(result.payload as string);
+    }
+  };
+
+  const handlePkgDelete = async (pkgId: string) => {
+    const result = await dispatch(deleteItemPackaging({ itemId: id ?? '', id: pkgId }));
+    if (deleteItemPackaging.fulfilled.match(result)) {
+      dispatch(fetchItemPackagings(id ?? ''));
+    }
+  };
+
+  const handlePkgImagesSelected = async (files: FileList) => {
+    setPkgFileLoading(true);
+    const results = await Promise.all(
+      Array.from(files).map((file) => {
+        const formData = new FormData();
+        formData.append('uploadSingleFile', file);
+        return dispatch(uploadSingleFile(formData));
+      })
+    );
+    results.forEach((result) => {
+      if (uploadSingleFile.fulfilled.match(result)) {
+        setPkgPictures((prev) => [...prev, { name: result.payload.name, path: result.payload.path, dateAdded: new Date().toISOString() }]);
+      }
+    });
+    setPkgFileLoading(false);
+  };
+
+  const handlePkgImageRemove = async (image: GalleryImage) => {
+    const result = await dispatch(deleteFileMachineEquipment({ documentPath: image.path }));
+    if (deleteFileMachineEquipment.fulfilled.match(result)) {
+      setPkgPictures((prev) => prev.filter((p) => p.path !== image.path));
+    }
+  };
+
+  const addedPackagingUnitIds = new Set(packagings.map((p) => p.packagingUnitId));
+  const addablePackagingUnits = allPackagingUnits.filter((pu) => !addedPackagingUnitIds.has(pu.id ?? ''));
+  const editablePackagingUnits = (editing: ItemPackaging | null) =>
+    allPackagingUnits.filter((pu) => !addedPackagingUnitIds.has(pu.id ?? '') || pu.id === editing?.packagingUnitId);
 
   const addedInputIds = new Set(bomLines.map((l) => l.inputItemId));
   const availableInputItems = allItems.filter((i) => i.id !== id);
@@ -302,6 +410,54 @@ const ItemPage = () => {
           </Table>
         )}
       </Paper>
+      {/* Packaging Section */}
+      <Paper variant="outlined" sx={{ p: 2.5, mb: 3 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+          {sectionLabel(t('item.packaging.title'))}
+          <Button size="small" variant="contained" startIcon={<AddIcon />} onClick={openPkgAddDialog}>
+            {t('item.packaging.add')}
+          </Button>
+        </Box>
+
+        {packagings.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">{t('item.packaging.empty')}</Typography>
+        ) : (
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>{t('item.packaging.packagingUnit')}</TableCell>
+                <TableCell>{t('item.packaging.quantity')}</TableCell>
+                <TableCell>{t('item.packaging.photos')}</TableCell>
+                <TableCell>{t('item.packaging.notes')}</TableCell>
+                <TableCell align="right">{t('item.packaging.actions')}</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {packagings.map((pkg) => (
+                <TableRow key={pkg.id}>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>{pkg.packagingUnitName}</Typography>
+                    {pkg.packagingUnitDescription && (
+                      <Typography variant="caption" color="text.secondary">{pkg.packagingUnitDescription}</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>{pkg.quantityPerUnit}</TableCell>
+                  <TableCell>{pkg.pictures?.length ?? 0}</TableCell>
+                  <TableCell>{pkg.notes ?? '—'}</TableCell>
+                  <TableCell align="right">
+                    <IconButton size="small" onClick={() => openPkgEditDialog(pkg)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" color="error" onClick={() => handlePkgDelete(pkg.id)}>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Paper>
       </Box>
 
       {/* Add BOM line dialog */}
@@ -408,6 +564,115 @@ const ItemPage = () => {
           <Button color="inherit" onClick={() => setEditOpen(false)}>{t('item.bom.cancel')}</Button>
           <Button variant="contained" onClick={handleEditConfirm} disabled={loading}>
             {loading ? <CircularProgress size={20} /> : t('item.bom.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Add Packaging dialog */}
+      <Dialog open={pkgAddOpen} onClose={() => setPkgAddOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('item.packaging.addTitle')}</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={2} pt={1}>
+            <FormControl fullWidth size="small">
+              <InputLabel>{t('item.packaging.packagingUnit')}</InputLabel>
+              <Select
+                value={pkgFormData.packagingUnitId}
+                label={t('item.packaging.packagingUnit')}
+                onChange={(e: SelectChangeEvent) => setPkgFormData((prev) => ({ ...prev, packagingUnitId: e.target.value }))}
+              >
+                {addablePackagingUnits.map((pu) => (
+                  <MenuItem key={pu.id} value={pu.id ?? ''}>{pu.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label={t('item.packaging.quantity')}
+              type="number"
+              size="small"
+              value={pkgFormData.quantityPerUnit}
+              onChange={(e) => setPkgFormData((prev) => ({ ...prev, quantityPerUnit: Number(e.target.value) }))}
+              inputProps={{ min: 1 }}
+            />
+            <TextField
+              label={t('item.packaging.notes')}
+              size="small"
+              multiline
+              rows={2}
+              value={pkgFormData.notes}
+              onChange={(e) => setPkgFormData((prev) => ({ ...prev, notes: e.target.value }))}
+            />
+            <Box>
+              <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
+                {t('item.packaging.photos')}
+              </Typography>
+              <ImageGallery
+                galleryImages={pkgPictures}
+                onImagesSelected={handlePkgImagesSelected}
+                onImageRemove={handlePkgImageRemove}
+                isLoading={pkgFileLoading}
+              />
+            </Box>
+            {pkgFormError && <Alert severity="error">{pkgFormError}</Alert>}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setPkgAddOpen(false)}>{t('item.packaging.cancel')}</Button>
+          <Button variant="contained" onClick={handlePkgAddConfirm} disabled={loading || pkgFileLoading}>
+            {loading ? <CircularProgress size={20} /> : t('item.packaging.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Packaging dialog */}
+      <Dialog open={pkgEditOpen} onClose={() => setPkgEditOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('item.packaging.editTitle')}</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={2} pt={1}>
+            <FormControl fullWidth size="small">
+              <InputLabel>{t('item.packaging.packagingUnit')}</InputLabel>
+              <Select
+                value={pkgFormData.packagingUnitId}
+                label={t('item.packaging.packagingUnit')}
+                onChange={(e: SelectChangeEvent) => setPkgFormData((prev) => ({ ...prev, packagingUnitId: e.target.value }))}
+              >
+                {editablePackagingUnits(editingPkg).map((pu) => (
+                  <MenuItem key={pu.id} value={pu.id ?? ''}>{pu.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label={t('item.packaging.quantity')}
+              type="number"
+              size="small"
+              value={pkgFormData.quantityPerUnit}
+              onChange={(e) => setPkgFormData((prev) => ({ ...prev, quantityPerUnit: Number(e.target.value) }))}
+              inputProps={{ min: 1 }}
+            />
+            <TextField
+              label={t('item.packaging.notes')}
+              size="small"
+              multiline
+              rows={2}
+              value={pkgFormData.notes}
+              onChange={(e) => setPkgFormData((prev) => ({ ...prev, notes: e.target.value }))}
+            />
+            <Box>
+              <Typography variant="caption" color="text.secondary" display="block" mb={0.5}>
+                {t('item.packaging.photos')}
+              </Typography>
+              <ImageGallery
+                galleryImages={pkgPictures}
+                onImagesSelected={handlePkgImagesSelected}
+                onImageRemove={handlePkgImageRemove}
+                isLoading={pkgFileLoading}
+              />
+            </Box>
+            {pkgFormError && <Alert severity="error">{pkgFormError}</Alert>}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={() => setPkgEditOpen(false)}>{t('item.packaging.cancel')}</Button>
+          <Button variant="contained" onClick={handlePkgEditConfirm} disabled={loading || pkgFileLoading}>
+            {loading ? <CircularProgress size={20} /> : t('item.packaging.confirm')}
           </Button>
         </DialogActions>
       </Dialog>

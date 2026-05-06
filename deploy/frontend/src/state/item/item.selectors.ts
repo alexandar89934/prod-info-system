@@ -7,3 +7,4 @@ export const selectItemError = (state: RootState) => state.reducer.item.error;
 export const selectItemSuccess = (state: RootState) => state.reducer.item.success;
 export const selectItemTotal = (state: RootState) => state.reducer.item.total;
 export const selectBomLines = (state: RootState) => state.reducer.item.bomLines;
+export const selectItemPackagings = (state: RootState) => state.reducer.item.packagings;

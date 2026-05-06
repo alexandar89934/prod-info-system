@@ -100,10 +100,15 @@ const navItems: NavItem[] = [
     icon: <InventoryOutlined />,
     requiresAuth: true,
   },
+  {
+    textKey: 'sidebar.packagingUnits',
+    path: 'packaging-unit',
+    icon: <CategoryOutlined />,
+    requiresAuth: true,
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
-  user,
   drawerWidth,
   isSidebarOpen,
   setIsSidebarOpen,

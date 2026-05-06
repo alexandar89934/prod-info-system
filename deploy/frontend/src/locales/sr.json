@@ -383,6 +383,7 @@
     "molds": "Kalupi",
     "itemManagement": "Upravljanje artiklima",
     "items": "Artikli",
+    "packagingUnits": "Ambalaža",
     "attendanceManagement": "Evidencija prisustva",
     "attendance": "Prisustvo",
     "systemConfig": "Podešavanja sistema"
@@ -667,6 +668,22 @@
       "inputRequired": "Izaberite ulazni artikal",
       "quantityPositive": "Količina mora biti veća od nule"
     },
+    "packaging": {
+      "title": "Ambalaža",
+      "add": "Dodaj ambalažu",
+      "addTitle": "Dodaj ambalažu",
+      "editTitle": "Izmeni ambalažu",
+      "empty": "Nema definisane ambalaže za ovaj artikal",
+      "packagingUnit": "Ambalažna jedinica",
+      "quantity": "Količina po jedinici",
+      "photos": "Fotografije",
+      "notes": "Napomene",
+      "actions": "Akcije",
+      "cancel": "Otkaži",
+      "confirm": "Sačuvaj",
+      "packagingRequired": "Izaberite ambalažnu jedinicu",
+      "quantityPositive": "Količina mora biti veća od nule"
+    },
     "validation": {
       "itemCodeRequired": "Šifra artikla je obavezna",
       "itemCodeMax": "Šifra ne može biti duža od 20 znakova",
@@ -675,6 +692,29 @@
       "unitRequired": "Jedinica mere je obavezna",
       "inputItemRequired": "Ulazni artikal je obavezan",
       "quantityPositive": "Količina mora biti pozitivna"
+    }
+  },
+  "packagingUnit": {
+    "list": {
+      "title": "AMBALAŽNE JEDINICE",
+      "subtitle": "Upravljanje katalogom ambalaže: kutije, kavezi, palete",
+      "add": "Dodaj ambalažnu jedinicu",
+      "name": "Naziv",
+      "description": "Opis",
+      "actions": "Akcije",
+      "deleteTitle": "Brisanje ambalažne jedinice",
+      "deleteDescription": "Da li ste sigurni da želite da obrišete ambalažnu jedinicu \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Dodaj ambalažnu jedinicu",
+      "editTitle": "Izmeni ambalažnu jedinicu",
+      "addSubmit": "Dodaj",
+      "editSubmit": "Ažuriraj",
+      "cancel": "Otkaži",
+      "name": "Naziv",
+      "description": "Opis",
+      "picture": "Fotografija",
+      "uploadPicture": "Postavi fotografiju"
     }
   },
   "dataGrid": {

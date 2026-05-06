@@ -3,13 +3,17 @@ import { createSlice } from '@reduxjs/toolkit';
 import {
   addBomLine,
   addItem,
+  addItemPackaging,
   deleteBomLine,
   deleteItem,
+  deleteItemPackaging,
   fetchBomLines,
   fetchItemById,
+  fetchItemPackagings,
   fetchItems,
   updateBomLine,
   updateItem,
+  updateItemPackaging,
 } from './item.actions';
 import { ItemState } from './item.types';
 
@@ -17,6 +21,7 @@ const initialState: ItemState = {
   currentItem: null,
   items: [],
   bomLines: [],
+  packagings: [],
   loading: false,
   error: null,
   success: null,
@@ -71,7 +76,23 @@ const itemSlice = createSlice({
 
       .addCase(deleteBomLine.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(deleteBomLine.fulfilled, (state, action) => { state.loading = false; state.success = action.payload.message || 'BOM line deleted'; })
-      .addCase(deleteBomLine.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to delete BOM line'; });
+      .addCase(deleteBomLine.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to delete BOM line'; })
+
+      .addCase(fetchItemPackagings.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchItemPackagings.fulfilled, (state, action) => { state.loading = false; state.packagings = action.payload.content.packagings; })
+      .addCase(fetchItemPackagings.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to fetch packagings'; })
+
+      .addCase(addItemPackaging.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(addItemPackaging.fulfilled, (state, action) => { state.loading = false; state.success = action.payload.message || 'Packaging added'; })
+      .addCase(addItemPackaging.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to add packaging'; })
+
+      .addCase(updateItemPackaging.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(updateItemPackaging.fulfilled, (state, action) => { state.loading = false; state.success = action.payload.message || 'Packaging updated'; })
+      .addCase(updateItemPackaging.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to update packaging'; })
+
+      .addCase(deleteItemPackaging.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(deleteItemPackaging.fulfilled, (state, action) => { state.loading = false; state.success = action.payload.message || 'Packaging deleted'; })
+      .addCase(deleteItemPackaging.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to delete packaging'; });
   },
 });
 

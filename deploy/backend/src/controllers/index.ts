@@ -17,3 +17,5 @@ export * as moldController from "./mold.controller";
 export * as moldMachineCompatibilityController from "./moldMachineCompatibility.controller";
 export * as itemController from "./item.controller";
 export * as bomLineController from "./bomLine.controller";
+export * as packagingUnitController from "./packagingUnit.controller";
+export * as itemPackagingController from "./itemPackaging.controller";

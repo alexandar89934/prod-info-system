@@ -20,6 +20,9 @@ import AddItem from '@/scenes/itemManagement/item/addItem.tsx';
 import EditItem from '@/scenes/itemManagement/item/editItem.tsx';
 import ItemList from '@/scenes/itemManagement/item/index.tsx';
 import ItemPage from '@/scenes/itemManagement/item/ItemPage.tsx';
+import PackagingUnitList from '@/scenes/itemManagement/packagingUnit/index.tsx';
+import AddPackagingUnit from '@/scenes/itemManagement/packagingUnit/addPackagingUnit.tsx';
+import EditPackagingUnit from '@/scenes/itemManagement/packagingUnit/editPackagingUnit.tsx';
 import JobPositionCategoryList from '@/scenes/jobPositionCategoryManagement';
 import AddJobPositionCategory from '@/scenes/jobPositionCategoryManagement/AddJobPositionCategory.tsx';
 import EditJobPositionCategory from '@/scenes/jobPositionCategoryManagement/EditJobPositionCategory.tsx';
@@ -374,6 +377,30 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <EditItem />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/packaging-unit"
+                element={
+                  <ProtectedRoute>
+                    <PackagingUnitList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/addPackagingUnit"
+                element={
+                  <ProtectedRoute>
+                    <AddPackagingUnit />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/editPackagingUnit/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditPackagingUnit />
                   </ProtectedRoute>
                 }
               />

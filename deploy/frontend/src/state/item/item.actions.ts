@@ -12,6 +12,9 @@ import {
   EditItemFormData,
   FetchItemParams,
   ItemListResponse,
+  ItemPackaging,
+  ItemPackagingListResponse,
+  ItemPackagingSingleResponse,
   ItemSingleResponse,
 } from './item.types';
 
@@ -141,6 +144,67 @@ export const deleteBomLine = createAsyncThunk<BomLineSingleResponse, { outputIte
       return response.data;
     } catch (error: unknown) {
       return rejectWithValue(extractErrorMessage(error, 'Failed to delete BOM line'));
+    }
+  },
+);
+
+export const fetchItemPackagings = createAsyncThunk<ItemPackagingListResponse, string, { rejectValue: string }>(
+  'item/fetchItemPackagings',
+  async (itemId, { rejectWithValue }) => {
+    try {
+      const response = await axiosServer.get(`/item/${itemId}/packaging`);
+      if (!response.data.success) return rejectWithValue(response.data.message || 'Failed to fetch packagings');
+      return response.data;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error, 'Failed to fetch packagings'));
+    }
+  },
+);
+
+export const addItemPackaging = createAsyncThunk<
+  ItemPackagingSingleResponse,
+  Omit<ItemPackaging, 'id' | 'packagingUnitName' | 'packagingUnitDescription' | 'packagingUnitPicture'>,
+  { rejectValue: string }
+>(
+  'item/addItemPackaging',
+  async (data, { rejectWithValue }) => {
+    try {
+      const { itemId, ...body } = data;
+      const response = await axiosServer.post(`/item/${itemId}/packaging/create`, body);
+      if (!response.data.success) return rejectWithValue(response.data.message || 'Failed to add packaging');
+      return response.data;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error, 'Failed to add packaging'));
+    }
+  },
+);
+
+export const updateItemPackaging = createAsyncThunk<
+  ItemPackagingSingleResponse,
+  ItemPackaging & { id: string },
+  { rejectValue: string }
+>(
+  'item/updateItemPackaging',
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosServer.put(`/item/${data.itemId}/packaging/update/${data.id}`, data);
+      if (!response.data.success) return rejectWithValue(response.data.message || 'Failed to update packaging');
+      return response.data;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error, 'Failed to update packaging'));
+    }
+  },
+);
+
+export const deleteItemPackaging = createAsyncThunk<ItemPackagingSingleResponse, { itemId: string; id: string }, { rejectValue: string }>(
+  'item/deleteItemPackaging',
+  async ({ itemId, id }, { rejectWithValue }) => {
+    try {
+      const response = await axiosServer.delete(`/item/${itemId}/packaging/delete/${id}`);
+      if (!response.data.success) return rejectWithValue(response.data.message || 'Failed to delete packaging');
+      return response.data;
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error, 'Failed to delete packaging'));
     }
   },
 );

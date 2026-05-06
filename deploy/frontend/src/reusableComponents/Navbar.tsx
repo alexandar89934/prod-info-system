@@ -382,7 +382,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 key={n.id}
                 alignItems="flex-start"
                 divider={idx < notifications.length - 1}
-                onClick={() => setReadNotifs((prev) => new Set([...prev, n.id]))}
+                onClick={() => setReadNotifs((prev) => new Set(Array.from(prev).concat(n.id)))}
                 sx={{
                   cursor: 'pointer',
                   backgroundColor: isRead ? 'transparent' : theme.palette.action.hover,

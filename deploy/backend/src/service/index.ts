@@ -17,3 +17,5 @@ export * as moldService from "./mold.service";
 export * as moldMachineCompatibilityService from "./moldMachineCompatibility.service";
 export * as itemService from "./item.service";
 export * as bomLineService from "./bomLine.service";
+export * as packagingUnitService from "./packagingUnit.service";
+export * as itemPackagingService from "./itemPackaging.service";

@@ -383,6 +383,7 @@
     "molds": "Molds",
     "itemManagement": "Item Management",
     "items": "Items",
+    "packagingUnits": "Packaging Units",
     "attendanceManagement": "Attendance Management",
     "attendance": "Attendance",
     "systemConfig": "System Settings"
@@ -667,6 +668,22 @@
       "inputRequired": "Please select an input item",
       "quantityPositive": "Quantity must be greater than zero"
     },
+    "packaging": {
+      "title": "Packaging",
+      "add": "Add Packaging",
+      "addTitle": "Add Packaging",
+      "editTitle": "Edit Packaging",
+      "empty": "No packaging defined for this item",
+      "packagingUnit": "Packaging Unit",
+      "quantity": "Quantity per Unit",
+      "photos": "Photos",
+      "notes": "Notes",
+      "actions": "Actions",
+      "cancel": "Cancel",
+      "confirm": "Save",
+      "packagingRequired": "Please select a packaging unit",
+      "quantityPositive": "Quantity must be greater than zero"
+    },
     "validation": {
       "itemCodeRequired": "Item code is required",
       "itemCodeMax": "Item code cannot exceed 20 characters",
@@ -675,6 +692,29 @@
       "unitRequired": "Unit is required",
       "inputItemRequired": "Input item is required",
       "quantityPositive": "Quantity must be positive"
+    }
+  },
+  "packagingUnit": {
+    "list": {
+      "title": "PACKAGING UNITS",
+      "subtitle": "Manage packaging unit catalog: boxes, cages, pallets",
+      "add": "Add Packaging Unit",
+      "name": "Name",
+      "description": "Description",
+      "actions": "Actions",
+      "deleteTitle": "Delete Packaging Unit",
+      "deleteDescription": "Are you sure you want to delete packaging unit \"{{name}}\"?"
+    },
+    "form": {
+      "addTitle": "Add Packaging Unit",
+      "editTitle": "Edit Packaging Unit",
+      "addSubmit": "Add",
+      "editSubmit": "Update",
+      "cancel": "Cancel",
+      "name": "Name",
+      "description": "Description",
+      "picture": "Picture",
+      "uploadPicture": "Upload Picture"
     }
   },
   "dataGrid": {

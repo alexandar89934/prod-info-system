@@ -41,6 +41,7 @@ export const moldSchema = z.object({
   serviceCategory: z.enum(['S-1', 'S-2', 'S-3', 'S-4']).optional().nullable(),
   notes: z.string().optional().nullable(),
   currentMachineId: z.string().uuid().optional().nullable(),
+  ownedByCompanyId: z.string().uuid().optional().nullable(),
 });
 
 export type MoldSchemaType = z.infer<typeof moldSchema>;

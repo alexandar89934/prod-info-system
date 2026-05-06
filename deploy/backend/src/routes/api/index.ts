@@ -11,6 +11,7 @@ import { moldRouter } from "./mold.route";
 import { moldMachineCompatibilityRouter } from "./moldMachineCompatibility.route";
 import { itemRouter } from "./item.route";
 import { packagingUnitRouter } from "./packagingUnit.route";
+import { companyRouter } from "./company.route";
 import { jobPositionRouter } from "./jobPosition.route";
 import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
@@ -103,6 +104,10 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/packaging-unit",
     route: packagingUnitRouter,
+  },
+  {
+    path: "/company",
+    route: companyRouter,
   },
 ];
 

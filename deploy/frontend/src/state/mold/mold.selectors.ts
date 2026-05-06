@@ -6,3 +6,4 @@ export const selectMoldLoading = (state: RootState) => state.reducer.mold.loadin
 export const selectMoldError = (state: RootState) => state.reducer.mold.error;
 export const selectMoldSuccess = (state: RootState) => state.reducer.mold.success;
 export const selectMoldTotal = (state: RootState) => state.reducer.mold.total;
+export const selectMoldsByCompany = (state: RootState) => state.reducer.mold.moldsByCompany;

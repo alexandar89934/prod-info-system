@@ -32,6 +32,7 @@ export const CreateMoldSchema = Joi.object({
   serviceCategory: Joi.string().valid("S-1", "S-2", "S-3", "S-4").optional().allow(null),
   notes: Joi.string().optional().allow("", null),
   currentMachineId: Joi.string().uuid().optional().allow(null),
+  ownedByCompanyId: Joi.string().uuid().optional().allow(null),
 });
 
 export const UpdateMoldSchema = Joi.object({
@@ -53,6 +54,7 @@ export const UpdateMoldSchema = Joi.object({
   serviceCategory: Joi.string().valid("S-1", "S-2", "S-3", "S-4").optional().allow(null),
   notes: Joi.string().optional().allow("", null),
   currentMachineId: Joi.string().uuid().optional().allow(null),
+  ownedByCompanyId: Joi.string().uuid().optional().allow(null),
   createdAt: Joi.date().iso().optional(),
   updatedAt: Joi.date().iso().optional(),
 });

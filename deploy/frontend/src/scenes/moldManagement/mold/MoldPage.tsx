@@ -298,6 +298,23 @@ const MoldPage = () => {
                 <Typography variant="body2" color="text.secondary">{t('mold.form.notMounted')}</Typography>
               )}
             </Box>
+            <Box display="flex" py={0.75} borderBottom="1px solid" borderColor="divider" alignItems="center">
+              <Typography variant="body2" color="text.secondary" sx={{ width: 220, flexShrink: 0 }}>
+                {t('mold.form.ownedByCompany')}
+              </Typography>
+              {mold.ownedByCompanyId && mold.ownedByCompanyName ? (
+                <Typography
+                  variant="body2"
+                  fontWeight={500}
+                  sx={{ cursor: 'pointer', color: theme.palette.secondary.main, '&:hover': { textDecoration: 'underline' } }}
+                  onClick={() => navigate(`/company/${mold.ownedByCompanyId}`)}
+                >
+                  {mold.ownedByCompanyName}
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="text.secondary">{t('mold.form.noOwner')}</Typography>
+              )}
+            </Box>
           </Paper>
         </Grid>
 

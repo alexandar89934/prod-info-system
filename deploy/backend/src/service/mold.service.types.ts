@@ -29,6 +29,8 @@ export type Mold = {
   currentMachineId: string | null;
   currentMachineName?: string | null;
   currentMachineNumber?: number | null;
+  ownedByCompanyId: string | null;
+  ownedByCompanyName?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 };

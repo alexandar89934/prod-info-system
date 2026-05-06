@@ -32,9 +32,11 @@ export const getTotalMoldsCountQuery = async (search: string): Promise<number> =
 
 export const getMoldByIdQuery = async (id: string): Promise<Mold> => {
   const sql = `
-    SELECT m.*, mac."name" AS "currentMachineName", mac."machineNumber" AS "currentMachineNumber"
+    SELECT m.*, mac."name" AS "currentMachineName", mac."machineNumber" AS "currentMachineNumber",
+           c."name" AS "ownedByCompanyName"
     FROM "Molds" m
     LEFT JOIN "Machines" mac ON mac."id" = m."currentMachineId"
+    LEFT JOIN "Companies" c ON c."id" = m."ownedByCompanyId"
     WHERE m."id" = $1
   `;
   return callQuery<Mold>(sql, [id]);
@@ -42,9 +44,11 @@ export const getMoldByIdQuery = async (id: string): Promise<Mold> => {
 
 export const getMoldMountedOnMachineQuery = async (machineId: string): Promise<Mold | null> => {
   const sql = `
-    SELECT m.*, mac."name" AS "currentMachineName", mac."machineNumber" AS "currentMachineNumber"
+    SELECT m.*, mac."name" AS "currentMachineName", mac."machineNumber" AS "currentMachineNumber",
+           c."name" AS "ownedByCompanyName"
     FROM "Molds" m
     LEFT JOIN "Machines" mac ON mac."id" = m."currentMachineId"
+    LEFT JOIN "Companies" c ON c."id" = m."ownedByCompanyId"
     WHERE m."currentMachineId" = $1
     LIMIT 1
   `;
@@ -58,12 +62,12 @@ export const createMoldQuery = async (data: CreateMoldData): Promise<Mold> => {
       ("id", "inventoryNumber", "name", "cavities", "requiredClampingForceKN",
        "heightMM", "widthMM", "depthMM", "centeringDiameterMM", "temperingTemperatures",
        "weight", "pictures", "documents", "status", "pieceCounter", "serviceCategory", "notes",
-       "currentMachineId", "createdAt", "updatedAt")
+       "currentMachineId", "ownedByCompanyId", "createdAt", "updatedAt")
     VALUES (
       gen_random_uuid(), $1, $2, $3, $4,
       $5, $6, $7, $8, $9::jsonb,
       $10, $11::jsonb, $12::jsonb, $13, $14, $15, $16,
-      $17, NOW(), NOW()
+      $17, $18, NOW(), NOW()
     )
     RETURNING *
   `;
@@ -85,6 +89,7 @@ export const createMoldQuery = async (data: CreateMoldData): Promise<Mold> => {
     data.serviceCategory ?? null,
     data.notes ?? null,
     data.currentMachineId ?? null,
+    data.ownedByCompanyId ?? null,
   ]);
 };
 
@@ -109,8 +114,9 @@ export const updateMoldQuery = async (data: EditMoldData): Promise<Mold> => {
       "serviceCategory"        = $15,
       "notes"                  = $16,
       "currentMachineId"       = $17,
+      "ownedByCompanyId"       = $18,
       "updatedAt"              = NOW()
-    WHERE "id" = $18
+    WHERE "id" = $19
     RETURNING *
   `;
   return callQuery<Mold>(sql, [
@@ -131,6 +137,7 @@ export const updateMoldQuery = async (data: EditMoldData): Promise<Mold> => {
     data.serviceCategory ?? null,
     data.notes ?? null,
     data.currentMachineId ?? null,
+    data.ownedByCompanyId ?? null,
     data.id,
   ]);
 };
@@ -138,6 +145,19 @@ export const updateMoldQuery = async (data: EditMoldData): Promise<Mold> => {
 export const deleteMoldQuery = async (id: string): Promise<Mold> => {
   const sql = `DELETE FROM "Molds" WHERE "id" = $1 RETURNING *`;
   return callQuery<Mold>(sql, [id]);
+};
+
+export const getMoldsByCompanyIdQuery = async (companyId: string): Promise<Mold[]> => {
+  const sql = `
+    SELECT m.*, mac."name" AS "currentMachineName", mac."machineNumber" AS "currentMachineNumber",
+           c."name" AS "ownedByCompanyName"
+    FROM "Molds" m
+    LEFT JOIN "Machines" mac ON mac."id" = m."currentMachineId"
+    LEFT JOIN "Companies" c ON c."id" = m."ownedByCompanyId"
+    WHERE m."ownedByCompanyId" = $1
+    ORDER BY m."inventoryNumber" ASC
+  `;
+  return callQuery<Mold[]>(sql, [companyId], true) || [];
 };
 
 export const checkInventoryNumberExistsQuery = async (

@@ -6,6 +6,7 @@ import {
   AddMoldFormData,
   EditMoldFormData,
   FetchMoldParams,
+  Mold,
   MoldListResponse,
   MoldSingleResponse,
 } from './mold.types';
@@ -90,6 +91,19 @@ export const updateMold = createAsyncThunk<
     return rejectWithValue(extractErrorMessage(error, 'Failed to update mold'));
   }
 });
+
+export const fetchMoldsByCompany = createAsyncThunk<Mold[], string, { rejectValue: string }>(
+  'mold/fetchByCompany',
+  async (companyId, { rejectWithValue }) => {
+    try {
+      const response = await axiosServer.get(`/mold/by-company/${companyId}`);
+      if (!response.data.success) return rejectWithValue(response.data.message || 'Failed to fetch molds');
+      return response.data.content.molds as Mold[];
+    } catch (error: unknown) {
+      return rejectWithValue(extractErrorMessage(error, 'Failed to fetch molds by company'));
+    }
+  },
+);
 
 export const deleteMold = createAsyncThunk<
   MoldSingleResponse,

@@ -14,6 +14,7 @@ import {
   TuneOutlined,
   ViewInArOutlined,
   InventoryOutlined,
+  BusinessOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -53,6 +54,8 @@ type SidebarProps = {
 
 const navItems: NavItem[] = [
   { textKey: 'sidebar.dashboard', path: 'dashboard', icon: <HomeOutlined />, requiresAuth: false },
+  { textKey: 'sidebar.companyManagement', path: null, icon: null, requiresAuth: true },
+  { textKey: 'sidebar.companies', path: 'company', icon: <BusinessOutlined />, requiresAuth: true },
   { textKey: 'sidebar.personManagement', path: null, icon: null, requiresAuth: true },
   { textKey: 'sidebar.persons', path: 'person', icon: <Groups2Outlined />, requiresAuth: true },
   { textKey: 'sidebar.jobPositions', path: 'jobPosition', icon: <ReceiptLongOutlined />, requiresAuth: true },

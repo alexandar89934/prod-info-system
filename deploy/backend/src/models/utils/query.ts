@@ -19,7 +19,8 @@ export const callQuery = async <T>(
     return getAll ? result.rows : result.rows[0];
   } catch (error) {
     logger.error(error);
-    throw new DBError(error);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new DBError(message);
   } finally {
     if (client) {
       client.release();

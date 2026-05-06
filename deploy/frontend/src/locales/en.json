@@ -369,6 +369,8 @@
   },
   "sidebar": {
     "dashboard": "Dashboard",
+    "companyManagement": "Company Management",
+    "companies": "Companies",
     "personManagement": "Person Management",
     "persons": "Persons",
     "jobPositions": "Job Positions",
@@ -566,6 +568,8 @@
       "sectionDocuments": "Documents",
       "currentMachine": "Currently mounted on",
       "notMounted": "Not mounted",
+      "ownedByCompany": "Owned by",
+      "noOwner": "Factory owned",
       "sectionCompatibleMachines": "Compatible Machines",
       "addCompatibleMachine": "Add Machine",
       "noCompatibleMachines": "No compatible machines assigned",
@@ -715,6 +719,60 @@
       "description": "Description",
       "picture": "Picture",
       "uploadPicture": "Upload Picture"
+    }
+  },
+  "company": {
+    "list": {
+      "title": "COMPANIES",
+      "subtitle": "Manage own companies, customers and suppliers",
+      "add": "Add Company",
+      "name": "Name",
+      "pib": "PIB",
+      "mb": "MB",
+      "type": "Type",
+      "actions": "Actions",
+      "deleteTitle": "Delete Company",
+      "deleteDescription": "Are you sure you want to delete company \"{{name}}\"?",
+      "filterAll": "All",
+      "filterOwn": "Own",
+      "filterCustomer": "Customer",
+      "filterSupplier": "Supplier"
+    },
+    "form": {
+      "addTitle": "Add Company",
+      "editTitle": "Edit Company",
+      "addSubmit": "Add",
+      "editSubmit": "Update",
+      "cancel": "Cancel",
+      "name": "Full Name",
+      "pib": "PIB",
+      "mb": "MB (Registration Number)",
+      "address": "Address",
+      "phones": "Phone Numbers",
+      "addPhone": "Add Phone",
+      "emails": "Email Addresses",
+      "addEmail": "Add Email",
+      "primaryEmail": "Primary",
+      "ownerInfo": "Owner",
+      "representative": "Representative",
+      "isOwnCompany": "Own Company",
+      "isCustomer": "Customer",
+      "isSupplier": "Supplier",
+      "notes": "Notes",
+      "rolesSection": "Company Type",
+      "contactSection": "Contact Information",
+      "legalSection": "Legal Information",
+      "uploadLogo": "Upload Logo",
+      "removeLogo": "Remove"
+    },
+    "badge": {
+      "own": "Own",
+      "customer": "Customer",
+      "supplier": "Supplier"
+    },
+    "detail": {
+      "ownedMolds": "Owned Molds",
+      "ownedMoldsEmpty": "No molds owned by this company"
     }
   },
   "dataGrid": {

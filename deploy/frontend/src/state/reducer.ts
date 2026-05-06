@@ -20,6 +20,7 @@ import moldSlice from '@/state/mold/mold.slice.ts';
 import moldMachineCompatibilitySlice from '@/state/moldMachineCompatibility/moldMachineCompatibility.slice.ts';
 import itemSlice from '@/state/item/item.slice.ts';
 import packagingUnitSlice from '@/state/packagingUnit/packagingUnit.slice.ts';
+import companySlice from '@/state/company/company.slice.ts';
 
 const reducer = combineReducers({
   theme: themeSlice,
@@ -41,6 +42,7 @@ const reducer = combineReducers({
   moldMachineCompatibility: moldMachineCompatibilitySlice,
   item: itemSlice,
   packagingUnit: packagingUnitSlice,
+  company: companySlice,
 });
 
 export default { reducer };

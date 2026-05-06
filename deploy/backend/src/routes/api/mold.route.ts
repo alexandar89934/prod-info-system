@@ -15,6 +15,7 @@ moldRouter.use(verifyTokenMiddleware);
 
 moldRouter.route("/").get(moldController.getAllMolds);
 moldRouter.route("/mounted-on/:machineId").get(moldController.getMoldMountedOnMachine);
+moldRouter.route("/by-company/:companyId").get(moldController.getMoldsByCompany);
 moldRouter.route("/:id").get(moldController.getMoldById);
 moldRouter.route("/create").post(validateRequestBody(CreateMoldSchema), authorizeAdmin, moldController.createMold);
 moldRouter.route("/update/:id").put(validateRequestBody(UpdateMoldSchema), authorizeAdmin, moldController.updateMold);

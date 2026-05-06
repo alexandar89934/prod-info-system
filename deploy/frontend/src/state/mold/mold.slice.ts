@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { addMold, deleteMold, fetchMoldById, fetchMolds, updateMold } from './mold.actions';
+import { addMold, deleteMold, fetchMoldById, fetchMolds, fetchMoldsByCompany, updateMold } from './mold.actions';
 import { MoldState } from './mold.types';
 
 const initialState: MoldState = {
   currentMold: null,
   molds: [],
+  moldsByCompany: [],
   loading: false,
   error: null,
   success: null,
@@ -47,6 +48,10 @@ const moldSlice = createSlice({
       .addCase(updateMold.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(updateMold.fulfilled, (state, action) => { state.loading = false; state.success = action.payload.message || 'Mold updated successfully'; })
       .addCase(updateMold.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to update mold'; })
+
+      .addCase(fetchMoldsByCompany.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchMoldsByCompany.fulfilled, (state, action) => { state.loading = false; state.moldsByCompany = action.payload; })
+      .addCase(fetchMoldsByCompany.rejected, (state, action) => { state.loading = false; state.error = action.payload || 'Failed to fetch molds'; })
 
       .addCase(deleteMold.pending, (state) => { state.loading = true; state.error = null; })
       .addCase(deleteMold.fulfilled, (state, action) => { state.loading = false; state.success = action.payload.message || 'Mold deleted successfully'; })

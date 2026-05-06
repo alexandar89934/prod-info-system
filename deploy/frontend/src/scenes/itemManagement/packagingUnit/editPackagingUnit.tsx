@@ -6,25 +6,23 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControl,
   IconButton,
-  Paper,
-  Snackbar,
-  TextField,
+  InputLabel,
   Typography,
   useTheme,
 } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import Header from '@/reusableComponents/Header';
+import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
 import { uploadSingleFile } from '@/state/fileUploads/files.actions';
 import { selectLoading as selectFileLoading } from '@/state/fileUploads/files.selectors';
 import { fetchPackagingUnitById, updatePackagingUnit } from '@/state/packagingUnit/packagingUnit.actions';
-import { selectCurrentPackagingUnit, selectPackagingUnitError, selectPackagingUnitLoading, selectPackagingUnitSuccess } from '@/state/packagingUnit/packagingUnit.selectors';
-import { clearError, clearSuccess } from '@/state/packagingUnit/packagingUnit.slice';
+import { selectCurrentPackagingUnit, selectPackagingUnitError, selectPackagingUnitLoading } from '@/state/packagingUnit/packagingUnit.selectors';
 import { useAppDispatch } from '@/state/hooks';
 import { PackagingUnitFormData, packagingUnitSchema } from '@/zodValidationSchemas/packagingUnit.schema';
 
@@ -40,14 +38,12 @@ const EditPackagingUnit = () => {
   const current = useSelector(selectCurrentPackagingUnit);
   const loading = useSelector(selectPackagingUnitLoading);
   const error = useSelector(selectPackagingUnitError);
-  const success = useSelector(selectPackagingUnitSuccess);
   const fileLoading = useSelector(selectFileLoading);
 
   const [picture, setPicture] = useState<PictureRef | null>(null);
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<PackagingUnitFormData>({
+  const { handleSubmit, control, reset, formState: { errors } } = useForm<PackagingUnitFormData>({
     resolver: zodResolver(packagingUnitSchema),
     defaultValues: { name: '', description: '' },
   });
@@ -63,18 +59,6 @@ const EditPackagingUnit = () => {
     }
   }, [current, reset]);
 
-  useEffect(() => {
-    if (success) {
-      setNotification({ message: success, type: 'success' });
-      dispatch(clearSuccess());
-      setTimeout(() => navigate('/packaging-unit'), 1200);
-    }
-    if (error) {
-      setNotification({ message: error, type: 'error' });
-      dispatch(clearError());
-    }
-  }, [success, error, dispatch, navigate]);
-
   const handlePictureSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -89,12 +73,36 @@ const EditPackagingUnit = () => {
 
   const onSubmit = async (data: PackagingUnitFormData) => {
     if (!id) return;
-    await dispatch(updatePackagingUnit({
+    const result = await dispatch(updatePackagingUnit({
       id,
       name: data.name,
       description: data.description ?? null,
       picture: picture ?? null,
     }));
+    if (updatePackagingUnit.fulfilled.match(result)) navigate('/packaging-unit');
+  };
+
+  const sectionLabel = (text: string) => (
+    <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1, mb: 0.5, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+      {text}
+    </Typography>
+  );
+
+  const cancelSx = {
+    color: theme.palette.primary[100],
+    borderColor: theme.palette.primary[100],
+    '&:hover': { borderColor: theme.palette.primary[200], backgroundColor: theme.palette.primary[100], color: theme.palette.common.white },
+  };
+
+  const arrayLabelSx = {
+    minWidth: '220px',
+    position: 'relative' as const,
+    transform: 'none',
+    marginBottom: { xs: 1, sm: 0 },
+    whiteSpace: 'normal' as const,
+    overflow: 'visible' as const,
+    lineHeight: 1.4,
+    paddingTop: { sm: '14px' },
   };
 
   if (loading && !current) {
@@ -102,92 +110,87 @@ const EditPackagingUnit = () => {
   }
 
   return (
-    <Box sx={{ px: { xs: 1, sm: 2, md: 3 }, pt: { xs: 1, sm: 2 }, pb: 2 }}>
-      <Header title={t('packagingUnit.form.editTitle')} subtitle="" />
+    <Box display="flex" justifyContent="center" alignItems="center" height="100%" sx={{ p: 2, overflow: 'hidden' }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        width="100%"
+        maxWidth="1100px"
+        p={3}
+        border="1px solid"
+        borderColor="grey.300"
+        borderRadius={2}
+        boxShadow={1}
+        sx={{
+          backgroundColor: theme.palette.background.default,
+          maxHeight: '80vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Typography variant="h4" align="center" mb={1}>{t('packagingUnit.form.editTitle')}</Typography>
 
-      <Paper variant="outlined" sx={{ p: 3, maxWidth: 600, mt: 2 }}>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} display="flex" flexDirection="column" gap={2.5}>
-          <TextField
-            label={t('packagingUnit.form.name')}
-            size="small"
-            fullWidth
-            {...register('name')}
-            error={!!errors.name}
-            helperText={errors.name?.message}
-          />
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            overscrollBehavior: 'contain',
+            display: 'flex',
+            flexDirection: 'column',
+            pb: 2,
+            '&::-webkit-scrollbar': { width: 8 },
+            '&::-webkit-scrollbar-thumb': { backgroundColor: theme.palette.primary.main, borderRadius: 4 },
+            '&::-webkit-scrollbar-track': { backgroundColor: theme.palette.background.default },
+          }}
+        >
+          {sectionLabel(t('packagingUnit.form.editTitle'))}
+          <Controller name="name" control={control} render={({ field }) => (
+            <LabeledXtField id="name" label={t('packagingUnit.form.name')} value={field.value ?? ''} onChange={field.onChange} error={errors.name} />
+          )} />
+          <Controller name="description" control={control} render={({ field }) => (
+            <LabeledXtField id="description" label={t('packagingUnit.form.description')} value={field.value ?? ''} onChange={field.onChange} error={errors.description} multiline rows={3} />
+          )} />
 
-          <TextField
-            label={t('packagingUnit.form.description')}
-            size="small"
-            fullWidth
-            multiline
-            rows={3}
-            {...register('description')}
-            error={!!errors.description}
-            helperText={errors.description?.message as string | undefined}
-          />
+          {sectionLabel(t('packagingUnit.form.picture'))}
+          <FormControl fullWidth margin="normal" sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'flex-start', gap: { xs: 1, sm: 2 } }}>
+            <InputLabel sx={arrayLabelSx}>{t('packagingUnit.form.picture')}:</InputLabel>
+            <Box>
+              {picture ? (
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box
+                    component="img"
+                    src={`${import.meta.env.VITE_API_URL ?? ''}${picture.path}`}
+                    alt={picture.name}
+                    sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1, border: `1px solid ${theme.palette.divider}` }}
+                    onError={(e) => { const img = e.target as HTMLImageElement; img.onerror = null; img.style.display = 'none'; }}
+                  />
+                  <IconButton color="error" size="small" onClick={() => setPicture(null)}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              ) : (
+                <Button variant="outlined" size="small" startIcon={fileLoading ? <CircularProgress size={16} /> : <AddPhotoAlternateIcon />} onClick={() => fileInputRef.current?.click()} disabled={fileLoading} sx={cancelSx}>
+                  {t('packagingUnit.form.uploadPicture')}
+                </Button>
+              )}
+              <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePictureSelect} />
+            </Box>
+          </FormControl>
+        </Box>
 
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
-              {t('packagingUnit.form.picture')}
-            </Typography>
-            {picture ? (
-              <Box display="flex" alignItems="center" gap={1}>
-                <Box
-                  component="img"
-                  src={`${import.meta.env.VITE_API_URL ?? ''}${picture.path}`}
-                  alt={picture.name}
-                  sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 1, border: `1px solid ${theme.palette.divider}` }}
-                  onError={(e) => { const img = e.target as HTMLImageElement; img.onerror = null; img.style.display = 'none'; }}
-                />
-                <IconButton color="error" size="small" onClick={() => setPicture(null)}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ) : (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={fileLoading ? <CircularProgress size={16} /> : <AddPhotoAlternateIcon />}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={fileLoading}
-                sx={{
-                  color: theme.palette.primary[100],
-                  borderColor: theme.palette.primary[100],
-                  '&:hover': { borderColor: theme.palette.primary[200], backgroundColor: theme.palette.primary[100], color: theme.palette.common.white },
-                }}
-              >
-                {t('packagingUnit.form.uploadPicture')}
-              </Button>
-            )}
-            <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handlePictureSelect} />
-          </Box>
-
-          <Box display="flex" gap={1} justifyContent="flex-end" pt={1}>
-            <Button
-              variant="outlined"
-              disabled={loading}
-              onClick={() => navigate('/packaging-unit')}
-              sx={{
-                color: theme.palette.primary[100],
-                borderColor: theme.palette.primary[100],
-                '&:hover': { borderColor: theme.palette.primary[200], backgroundColor: theme.palette.primary[100], color: theme.palette.common.white },
-              }}
-            >
-              {t('packagingUnit.form.cancel')}
+        <Box sx={{ flexShrink: 0, pt: 2, pb: 2, px: 2, borderTop: '1px solid', borderColor: 'divider', backgroundColor: theme.palette.background.default }}>
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          <Box display="flex" gap={2}>
+            <Button type="submit" variant="contained" disabled={loading || fileLoading} startIcon={loading ? <CircularProgress size={20} color="inherit" /> : undefined}>
+              {loading ? `${t('packagingUnit.form.editSubmit')}...` : t('packagingUnit.form.editSubmit')}
             </Button>
-            <Button type="submit" variant="contained" disabled={loading || fileLoading}>
-              {loading ? <CircularProgress size={20} /> : t('packagingUnit.form.editSubmit')}
+            <Button variant="outlined" disabled={loading} onClick={() => navigate('/packaging-unit')} sx={cancelSx}>
+              {t('packagingUnit.form.cancel')}
             </Button>
           </Box>
         </Box>
-      </Paper>
-
-      <Snackbar open={!!notification} autoHideDuration={4000} onClose={() => setNotification(null)} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-        <Alert severity={notification?.type} onClose={() => setNotification(null)} sx={{ width: '100%' }}>
-          {notification?.message}
-        </Alert>
-      </Snackbar>
+      </Box>
     </Box>
   );
 };

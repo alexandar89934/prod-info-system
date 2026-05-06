@@ -369,6 +369,8 @@
   },
   "sidebar": {
     "dashboard": "Početna",
+    "companyManagement": "Upravljanje firmama",
+    "companies": "Firme",
     "personManagement": "Upravljanje zaposlenima",
     "persons": "Zaposleni",
     "jobPositions": "Radna mesta",
@@ -566,6 +568,8 @@
       "sectionDocuments": "Dokumenta",
       "currentMachine": "Trenutno montiran na",
       "notMounted": "Nije montiran",
+      "ownedByCompany": "Vlasnik kalupa",
+      "noOwner": "Vlasništvo fabrike",
       "sectionCompatibleMachines": "Kompatibilne mašine",
       "addCompatibleMachine": "Dodaj mašinu",
       "noCompatibleMachines": "Nema dodeljenih kompatibilnih mašina",
@@ -715,6 +719,60 @@
       "description": "Opis",
       "picture": "Fotografija",
       "uploadPicture": "Postavi fotografiju"
+    }
+  },
+  "company": {
+    "list": {
+      "title": "FIRME",
+      "subtitle": "Upravljanje matičnim firmama, kupcima i dobavljačima",
+      "add": "Dodaj firmu",
+      "name": "Naziv",
+      "pib": "PIB",
+      "mb": "MB",
+      "type": "Tip",
+      "actions": "Akcije",
+      "deleteTitle": "Obriši firmu",
+      "deleteDescription": "Da li ste sigurni da želite obrisati firmu \"{{name}}\"?",
+      "filterAll": "Sve",
+      "filterOwn": "Matična",
+      "filterCustomer": "Kupac",
+      "filterSupplier": "Dobavljač"
+    },
+    "form": {
+      "addTitle": "Dodaj firmu",
+      "editTitle": "Uredi firmu",
+      "addSubmit": "Dodaj",
+      "editSubmit": "Ažuriraj",
+      "cancel": "Otkaži",
+      "name": "Puni naziv",
+      "pib": "PIB",
+      "mb": "MB (Matični broj)",
+      "address": "Adresa",
+      "phones": "Brojevi telefona",
+      "addPhone": "Dodaj telefon",
+      "emails": "Email adrese",
+      "addEmail": "Dodaj email",
+      "primaryEmail": "Glavni",
+      "ownerInfo": "Vlasnik",
+      "representative": "Zastupnik",
+      "isOwnCompany": "Matična firma",
+      "isCustomer": "Kupac",
+      "isSupplier": "Dobavljač",
+      "notes": "Napomene",
+      "rolesSection": "Tip firme",
+      "contactSection": "Kontakt informacije",
+      "legalSection": "Pravne informacije",
+      "uploadLogo": "Postavi logo",
+      "removeLogo": "Ukloni"
+    },
+    "badge": {
+      "own": "Matična",
+      "customer": "Kupac",
+      "supplier": "Dobavljač"
+    },
+    "detail": {
+      "ownedMolds": "Kalupi u vlasništvu",
+      "ownedMoldsEmpty": "Ova firma ne poseduje nijedan kalup"
     }
   },
   "dataGrid": {

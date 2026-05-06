@@ -23,6 +23,10 @@ import ItemPage from '@/scenes/itemManagement/item/ItemPage.tsx';
 import PackagingUnitList from '@/scenes/itemManagement/packagingUnit/index.tsx';
 import AddPackagingUnit from '@/scenes/itemManagement/packagingUnit/addPackagingUnit.tsx';
 import EditPackagingUnit from '@/scenes/itemManagement/packagingUnit/editPackagingUnit.tsx';
+import CompanyList from '@/scenes/companyManagement/index.tsx';
+import AddCompany from '@/scenes/companyManagement/addCompany.tsx';
+import EditCompany from '@/scenes/companyManagement/editCompany.tsx';
+import CompanyPage from '@/scenes/companyManagement/CompanyPage.tsx';
 import JobPositionCategoryList from '@/scenes/jobPositionCategoryManagement';
 import AddJobPositionCategory from '@/scenes/jobPositionCategoryManagement/AddJobPositionCategory.tsx';
 import EditJobPositionCategory from '@/scenes/jobPositionCategoryManagement/EditJobPositionCategory.tsx';
@@ -401,6 +405,38 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <EditPackagingUnit />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/company"
+                element={
+                  <ProtectedRoute>
+                    <CompanyList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/addCompany"
+                element={
+                  <ProtectedRoute>
+                    <AddCompany />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/editCompany/:id"
+                element={
+                  <ProtectedRoute>
+                    <EditCompany />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/company/:id"
+                element={
+                  <ProtectedRoute>
+                    <CompanyPage />
                   </ProtectedRoute>
                 }
               />

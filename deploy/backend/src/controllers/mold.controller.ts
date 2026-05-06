@@ -55,6 +55,15 @@ export const updateMold = catchAsync(async (req: Request, res: Response) => {
   return res.status(httpStatus.OK).send({ success: true, message: "Successfully updated mold!", content: { mold } });
 });
 
+export const getMoldsByCompany = catchAsync(async (req: Request, res: Response) => {
+  const { companyId } = req.params;
+  if (!companyId) {
+    return res.status(httpStatus.BAD_REQUEST).send({ success: false, message: "Missing company ID." });
+  }
+  const molds = await moldService.getMoldsByCompanyId(companyId);
+  return res.status(httpStatus.OK).send({ success: true, message: "OK", content: { molds } });
+});
+
 export const getMoldMountedOnMachine = catchAsync(async (req: Request, res: Response) => {
   const { machineId } = req.params;
   if (!machineId) {

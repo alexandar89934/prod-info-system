@@ -7,6 +7,7 @@ import {
   getAllMoldsQuery,
   getMoldByIdQuery,
   getMoldMountedOnMachineQuery,
+  getMoldsByCompanyIdQuery,
   getTotalMoldsCountQuery,
   updateMoldQuery,
 } from "../models/mold.model";
@@ -97,6 +98,14 @@ export const updateMold = async (data: EditMoldData): Promise<Mold> => {
       );
     }
     throw new ApiError("Error while updating mold!", httpStatus.INTERNAL_SERVER_ERROR);
+  }
+};
+
+export const getMoldsByCompanyId = async (companyId: string): Promise<Mold[]> => {
+  try {
+    return await getMoldsByCompanyIdQuery(companyId);
+  } catch (error) {
+    throw new ApiError("Error while fetching molds by company!", httpStatus.INTERNAL_SERVER_ERROR);
   }
 };
 

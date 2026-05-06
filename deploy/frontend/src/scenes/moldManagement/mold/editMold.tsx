@@ -24,6 +24,8 @@ import { LabeledXtField } from '@/reusableComponents/LabeledТеxtField';
 import MachineDocumentUpload from '@/reusableComponents/MachineDocumentUpload.tsx';
 import { fetchMachines } from '@/state/machine/machine.actions';
 import { selectMachines } from '@/state/machine/machine.selectors';
+import { fetchCompaniesList } from '@/state/company/company.actions';
+import { selectCompaniesList } from '@/state/company/company.selectors';
 import { fetchMoldById, updateMold } from '@/state/mold/mold.actions';
 import {
   selectCurrentMold,
@@ -56,6 +58,7 @@ const EditMold = () => {
   const success = useSelector(selectMoldSuccess);
   const currentMold = useSelector(selectCurrentMold);
   const machines = useSelector(selectMachines);
+  const companiesList = useSelector(selectCompaniesList);
 
   const {
     pictures,
@@ -80,6 +83,7 @@ const EditMold = () => {
   useEffect(() => {
     if (id) dispatch(fetchMoldById(id));
     dispatch(fetchMachines({ page: 1, limit: 200, search: '', sortField: '', sortOrder: '' }));
+    dispatch(fetchCompaniesList());
   }, [dispatch, id]);
 
   useEffect(() => {
@@ -173,6 +177,17 @@ const EditMold = () => {
               error={fieldState.error}
               options={machines.map((m) => ({ value: m.id, label: `#${m.machineNumber} — ${m.name}` }))}
               disabledDefaultText={t('mold.form.notMounted')}
+            />
+          )} />
+          <Controller name="ownedByCompanyId" control={control} render={({ field, fieldState }) => (
+            <LabeledXtSelect
+              id="ownedByCompanyId"
+              label={t('mold.form.ownedByCompany')}
+              value={field.value ?? ''}
+              onChange={(e) => field.onChange(e.target.value || null)}
+              error={fieldState.error}
+              options={companiesList.map((c) => ({ value: c.id, label: c.name }))}
+              disabledDefaultText={t('mold.form.noOwner')}
             />
           )} />
 

@@ -4,3 +4,124 @@
 - manual adding/editing of attandance need to be possible by person with workplace haveing that responsability manual_attendance_entry, manual_attendance_update
 - edited column need to be marked as edited
 - on creating new person, default password need to be applied, and it is NEW_USER_PASSWORD from env variables,that password need to be changed by user on first login
+
+//PROMPTED
+-for plan itself, apparently we need different types of view based on what role we are looking at.(role is not important for now, we first need to create all requirev views)
+-Now it is set as list/grid view but it will actually be planner/production view and we may add more, because of what information need to be shown to who.
+-current list view is good for planners, but we need to change few things:
+ plans also need to be grouped by machine,and we need to remove sorting by column headers
+ plan order should go from top to bottom,that is order by which should be worked.
+ we need to show only one last completed,
+ one in proggress,
+ and next 5 plans,
+ on clicking in machine we need to go on detail view page where we will see details.
+ those details are all plans build in that machine so far,one in proggress, and all next plans.but also show only last finished, one in progress, and all next plans.
+ by filtering planner will be able to fetch and show all previous finished plans.
+ planner than can filter also by mold number, and by item number,or item name.
+ in that view planer must be able to reorder plans for that machine,but only plans that are not started yet.
+ consider reordering with drag and drop
+ some plan changes doesn't require mold change,some does.
+ it need to be pointed for every next plan which requires mold change.
+ //PROMPTED
+
+//PROMPTED
+-lets move production flow and chenges fully to production view,by adding form on click of plan,list of actions need to be possible to do:
+   - mold change started by 'Regler name' - choose from dropdown of employees. ->this can be started by regler if plan which need to be started requires mold change
+   - scrap enter, types we have so far
+   - plan started by 'Regler name' - choose from dropdown of employees.
+   - first good peace approved by - 'QA name' - choose from dropdown of employees.
+   - machine operator ,'Operatorr name' - choose from dropdown of employees,started work on plan
+   - scrap enter, types we have so far
+   - increase amount of qty
+   - package unit 'kavez'(select from list of package units that are possible to use for that unit - ItemPackaging) full by 'Operatorr name' - choose from dropdown of
+   employees,started work on plan
+   - Operator changed, another operator 'Operatorr name' - choose from dropdown of employees,started work on plan
+   - item quality checked by - 'QA name' - choose from dropdown of employees
+   - plan stopped by  'Employee name' - choose from dropdown of employees,started work on plan
+   - plan complete by  'Employee name' - choose from dropdown of employees,started work on plan
+   - plan change started by 'Employee name' - choose from dropdown of employees,started work on plan ->this can be done by chef if mold change is not required
+   Consider adding these actions into Responibilities table (as other actions,these need to be in serbian)
+Every action need to have timestamp.
+on planners view, when plan is expanded, we need to have list of all actions related to that plan from beginning with names and timestamps, like timeline,
+but that timeline need to have some max height after which it will have scroll.
+no single action can be performed by planner, but he can be able to delete plan only if not started
+he can edit plan also if not started, and what he can edit is to change amount of items to be made, and he can also change machine on which will be produced
+on click of finished plan, he can see timeline with scrap overview.
+bom lines list of materials per unit need to be visible on collapsed plan.
+also calculated amount of materials per shift,so the warehouse/transporter can know when he need to bring material to a machine
+//PROMPTED
+
+//PROMPTED
+when creating plan from order,after selecting machine, we need to be able to see plans for that machines in progress one if there is any,
+and also next plans, with starting date/time , expected end time for each plan.
+then by default if nothing changed  new plan start time is last plan in array expected endtime
+new plan's endtime should be calculated by normPerShift, or cycleTymeSeconds from MoldMachineCompatibility table.
+also you need to calculate raw materials/ or materials from BomLines needed for that plan and to place that information.
+//PROMPTED
+
+//PROMPTED
+instead of choosing one date, can we select period, and please style date selector a bit better,align with general design,now label even cant be seen fully
+//PROMPTED
+
+//PROMPTED
+- only first plan in a row can be started,if there is no previous one paused.
+- only one plan can be in progress state on a machine, so you cant start plan if there is another one in proggress.
+- there are few reasons for trigering a pause:
+1.operater can go on a break, and continue later
+2.there can ce urgent plan change,so we pause current one, start next one,after which operater can continue
+3.lack of material
+3.lack of packiging units
+3.machine service
+4.machine failiure
+- if current mold on machine is not one that can produce item required in a plan, only action that can be triggerd is mold change start
+- we need few more actions in production:
+1.machine service start
+2.machine service end
+3.machine repair start
+4.machine repair end
+- selecting of packiging unit from dropdown,similar like selecting empolyee should replace current implementation,for action cage full, it should be packiging unit full,ajd that dropdown should show only packiging units assigned to item in that plan,from ItemPackiging table.
+- when triggering any action we should have posibility to enter timedate,if not entered it should take current timestamp,like now is implemented.
+//PROMPTED
+- there are few egde cases now,so i will explain
+if there is plan in progress,you can do actions only on that plan,
+after we put that plan into pause, in that case we need to be able to start next one,or previous one if it is in paused state
+//PROMPTED
+
+
+pokretanje_izmene_kalupa
+zavrsetak_izmene_kalupa
+pokretanje_plana
+odobrenje_prvog_komada_kk
+pocetak_rada_operatera
+unos_skarta_produkcija
+povecanje_kolicine
+potvrda_pune_kaveze
+izmena_operatera
+kontrola_kk_u_produkciji
+zaustavljanje_plana
+zavrsetak_plana
+pokretanje_promene_plana
+resposabilities must be added to a person that tries to trigger action work position.
+all actions need to be verified/authenticated for now,in a same way we are doing it in checkin on kiosk mode,with employee number/mail and pin code if it is set.
+if person without proper work position is trying to triger action, he need to get message that will inform him about it.
+//PROMPTED
+//PROMPTED
+on every update qty, end time of plan,and also other plan in queue should be revised.
+how the calculation of material is done due to a fact thet there can be more than one nest into a mold, which means that for four nests it will produce four items per one injection.
+also, important question is if calculation includes mass of runner, specially if we know that for one nest there can be one runner,but also for several nests
+all information which should be used for calculation shluld come from MoldMachineCompatibility table, and about nests from Molds
+we need to show also amount of material spent in production against needed one for that plan.
+that is where scrap calculation need to be refined, because,material is also used for scrap and it is spent.
+7.0000	g	9.8 kg	7 kg this is example from app now which is not correct, 9.8kg is per shift, but it is bigger than 7kg that is all required.
+Also, time calclulation for spending to a plan is not correct, it also need to take in consideration number of nests, because,if there is two nests and amount of items needed in plan is 100,that means we will have 50 cycles.
+we also need to count time needed to mount mold to a machine, i propose adding new field to MoldMachineCompatibility. that time also need to be included in calculation of how much time will be needed to finish plan.
+we need to add information about time of expected mold change in that line where mold change is needed.
+//PROMPTED
+
+
+mold change time is not calculated in between plans. for example Poč.:13/05/2026, 22:04
+                                                                 Kraj:19/05/2026, 21:16 one plan, and than we have mold changeIzmena kalupaproc. 1h· 19/05, 21:16— 19/05, 22:16, and than Poč.:19/05/2026, 21:16
+                                                                                                                                                                                          Kraj:25/05/2026, 01:16, so it should be clear that mold change time should be calculated and beggining of next plan should be moved for that duration
+- leave requests
+- sick day requests
+-

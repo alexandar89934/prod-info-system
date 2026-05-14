@@ -15,6 +15,9 @@ import {
   ViewInArOutlined,
   InventoryOutlined,
   BusinessOutlined,
+  ListAltOutlined,
+  EventNoteOutlined,
+  PlayCircleOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -109,6 +112,10 @@ const navItems: NavItem[] = [
     icon: <CategoryOutlined />,
     requiresAuth: true,
   },
+  { textKey: 'sidebar.orderManagement', path: null, icon: null, requiresAuth: true },
+  { textKey: 'sidebar.customerOrders', path: 'customer-order', icon: <ListAltOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.productionPlan', path: 'production-plan', icon: <EventNoteOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.productionView', path: 'production-view', icon: <PlayCircleOutlined />, requiresAuth: true },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({

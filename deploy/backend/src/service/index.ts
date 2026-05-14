@@ -20,3 +20,6 @@ export * as bomLineService from "./bomLine.service";
 export * as packagingUnitService from "./packagingUnit.service";
 export * as itemPackagingService from "./itemPackaging.service";
 export * as companyService from "./company.service";
+export * as customerOrderService from "./customerOrder.service";
+export * as productionPlanService from "./productionPlan.service";
+export * as productionPlanActionService from "./productionPlanAction.service";

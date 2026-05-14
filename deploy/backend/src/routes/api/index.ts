@@ -1,25 +1,28 @@
 import express, { Router } from "express";
 
-import { fileUploadRouter } from "./fileUpload.router";
-import { machineRouter } from "./machine.router";
-import { responsibilityRouter } from "./responsibility.route";
-import { systemConfigRouter } from "./systemConfig.route";
 import { attendanceRouter } from "./attendance.route";
 import { attendanceEditRequestRouter } from "./attendanceEditRequest.route";
-import { leaveRecordRouter } from "./leaveRecord.route";
-import { moldRouter } from "./mold.route";
-import { moldMachineCompatibilityRouter } from "./moldMachineCompatibility.route";
-import { itemRouter } from "./item.route";
-import { packagingUnitRouter } from "./packagingUnit.route";
 import { companyRouter } from "./company.route";
+import { customerOrderRouter } from "./customerOrder.route";
+import { fileUploadRouter } from "./fileUpload.router";
+import { itemRouter } from "./item.route";
 import { jobPositionRouter } from "./jobPosition.route";
 import { jobPositionCategoryRouter } from "./jobPositionCategory.route";
+import { leaveRecordRouter } from "./leaveRecord.route";
+import { machineRouter } from "./machine.router";
 import { machineAvailabilityStatusRouter } from "./machineAvailabilityStatus.router";
 import { machineEquipmentRouter } from "./machineEquipment.router";
 import { machineEquipmentTypeRouter } from "./machineEquipmentType.router";
+import { moldRouter } from "./mold.route";
+import { moldMachineCompatibilityRouter } from "./moldMachineCompatibility.route";
+import { packagingUnitRouter } from "./packagingUnit.route";
 import { personRouter } from "./person.route";
+import { productionPlanRouter } from "./productionPlan.route";
+import { productionPlanActionRouter } from "./productionPlanAction.route";
+import { responsibilityRouter } from "./responsibility.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
+import { systemConfigRouter } from "./systemConfig.route";
 
 export const apiRouter = express.Router();
 
@@ -108,6 +111,18 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/company",
     route: companyRouter,
+  },
+  {
+    path: "/customer-order",
+    route: customerOrderRouter,
+  },
+  {
+    path: "/production-plan",
+    route: productionPlanRouter,
+  },
+  {
+    path: "/production-plan-action",
+    route: productionPlanActionRouter,
   },
 ];
 

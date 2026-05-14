@@ -144,6 +144,31 @@ const makeResponsibilityMiddleware = (code: string, errorMessage: string) =>
     }
   };
 
+export const authorizeOrderCreator = makeResponsibilityMiddleware(
+  "kreiranje_naloga",
+  "Nemate nadležnost za kreiranje kupovnog naloga.",
+);
+
+export const authorizeOrderEditor = makeResponsibilityMiddleware(
+  "izmena_naloga",
+  "Nemate nadležnost za izmenu kupovnog naloga.",
+);
+
+export const authorizePlanCreator = makeResponsibilityMiddleware(
+  "kreiranje_plana",
+  "Nemate nadležnost za kreiranje plana proizvodnje.",
+);
+
+export const authorizePlanEditor = makeResponsibilityMiddleware(
+  "izmena_plana",
+  "Nemate nadležnost za izmenu plana proizvodnje.",
+);
+
+export const authorizePlanDeleter = makeResponsibilityMiddleware(
+  "brisanje_plana",
+  "Nemate nadležnost za brisanje plana proizvodnje.",
+);
+
 export const authorizeVacationApprover = makeResponsibilityMiddleware(
   "odobrenje_odmora",
   "Nemate nadležnost za odobrenje odmora.",

@@ -8,8 +8,8 @@ export const CreateMoldMachineCompatibilitySchema = Joi.object({
   cycleTimeSeconds: Joi.number().integer().min(0).max(PG_INT_MAX).optional().allow(null),
   startupScrapCount: Joi.number().integer().min(0).max(PG_INT_MAX).optional().allow(null),
   normPerShift: Joi.number().integer().positive().max(PG_INT_MAX).optional().allow(null),
-  pieceWeightG: Joi.number().positive().optional().allow(null),
-  runnerWeightG: Joi.number().positive().optional().allow(null),
+  runnerWeightG: Joi.number().min(0).optional().allow(null),
+  moldMountingTimeMinutes: Joi.number().integer().min(0).max(PG_INT_MAX).optional().allow(null),
   notes: Joi.string().optional().allow("", null),
   settingParameters: Joi.object().optional().allow(null),
 });
@@ -19,8 +19,8 @@ export const UpdateMoldMachineCompatibilitySchema = Joi.object({
   cycleTimeSeconds: Joi.number().integer().min(0).max(PG_INT_MAX).optional().allow(null),
   startupScrapCount: Joi.number().integer().min(0).max(PG_INT_MAX).optional().allow(null),
   normPerShift: Joi.number().integer().positive().max(PG_INT_MAX).optional().allow(null),
-  pieceWeightG: Joi.number().positive().optional().allow(null),
-  runnerWeightG: Joi.number().positive().optional().allow(null),
+  runnerWeightG: Joi.number().min(0).optional().allow(null),
+  moldMountingTimeMinutes: Joi.number().integer().min(0).max(PG_INT_MAX).optional().allow(null),
   notes: Joi.string().optional().allow("", null),
   settingParameters: Joi.object().optional().allow(null),
 });

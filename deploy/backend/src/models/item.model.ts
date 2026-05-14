@@ -66,8 +66,8 @@ export const createItemQuery = async (data: CreateItemData): Promise<Item> => {
        "priceEurPerUnit", "approvalLevel", "toolId", "pictures", "documents", "notes",
        "createdAt", "updatedAt")
     VALUES (
-      gen_random_uuid(), $1, $2, $3::item_category, $4::item_unit,
-      $5, $6::item_approval_level, $7, $8, $9, $10,
+      gen_random_uuid(), $1, $2, $3::"enum_Items_category", $4::"enum_Items_unit",
+      $5, $6::"enum_Items_approvalLevel", $7, $8, $9, $10,
       NOW(), NOW()
     )
     RETURNING *
@@ -91,10 +91,10 @@ export const updateItemQuery = async (data: EditItemData): Promise<Item> => {
     UPDATE "Items" SET
       "itemCode" = $1,
       "name" = $2,
-      "category" = $3::item_category,
-      "unit" = $4::item_unit,
+      "category" = $3::"enum_Items_category",
+      "unit" = $4::"enum_Items_unit",
       "priceEurPerUnit" = $5,
-      "approvalLevel" = $6::item_approval_level,
+      "approvalLevel" = $6::"enum_Items_approvalLevel",
       "toolId" = $7,
       "pictures" = $8,
       "documents" = $9,

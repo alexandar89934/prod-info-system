@@ -24,6 +24,14 @@ import PackagingUnitList from '@/scenes/itemManagement/packagingUnit/index.tsx';
 import AddPackagingUnit from '@/scenes/itemManagement/packagingUnit/addPackagingUnit.tsx';
 import EditPackagingUnit from '@/scenes/itemManagement/packagingUnit/editPackagingUnit.tsx';
 import CompanyList from '@/scenes/companyManagement/index.tsx';
+import CustomerOrderList from '@/scenes/orderManagement/customerOrder/index.tsx';
+import AddCustomerOrder from '@/scenes/orderManagement/customerOrder/addCustomerOrder.tsx';
+import EditCustomerOrder from '@/scenes/orderManagement/customerOrder/editCustomerOrder.tsx';
+import CustomerOrderPage from '@/scenes/orderManagement/customerOrder/CustomerOrderPage.tsx';
+import ProductionPlanList from '@/scenes/planManagement/productionPlan/index.tsx';
+import ProductionView from '@/scenes/planManagement/productionPlan/productionView.tsx';
+import AddProductionPlan from '@/scenes/planManagement/productionPlan/addProductionPlan.tsx';
+import MachinePlanDetail from '@/scenes/planManagement/productionPlan/machinePlanDetail.tsx';
 import AddCompany from '@/scenes/companyManagement/addCompany.tsx';
 import EditCompany from '@/scenes/companyManagement/editCompany.tsx';
 import CompanyPage from '@/scenes/companyManagement/CompanyPage.tsx';
@@ -439,6 +447,38 @@ function App() {
                     <CompanyPage />
                   </ProtectedRoute>
                 }
+              />
+              <Route
+                path="/customer-order"
+                element={<ProtectedRoute><CustomerOrderList /></ProtectedRoute>}
+              />
+              <Route
+                path="/addCustomerOrder"
+                element={<ProtectedRoute><AddCustomerOrder /></ProtectedRoute>}
+              />
+              <Route
+                path="/editCustomerOrder/:id"
+                element={<ProtectedRoute><EditCustomerOrder /></ProtectedRoute>}
+              />
+              <Route
+                path="/customer-order/:id"
+                element={<ProtectedRoute><CustomerOrderPage /></ProtectedRoute>}
+              />
+              <Route
+                path="/production-plan"
+                element={<ProtectedRoute><ProductionPlanList /></ProtectedRoute>}
+              />
+              <Route
+                path="/production-view"
+                element={<ProtectedRoute><ProductionView /></ProtectedRoute>}
+              />
+              <Route
+                path="/addProductionPlan"
+                element={<ProtectedRoute><AddProductionPlan /></ProtectedRoute>}
+              />
+              <Route
+                path="/machine-plan/:machineId"
+                element={<ProtectedRoute><MachinePlanDetail /></ProtectedRoute>}
               />
               <Route
                 path="/attendance"

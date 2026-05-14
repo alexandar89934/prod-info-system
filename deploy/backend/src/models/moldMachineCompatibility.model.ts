@@ -34,8 +34,8 @@ export const createMoldMachineCompatibilityQuery = async (
   const sql = `
     INSERT INTO "MoldMachineCompatibility"
       ("id", "moldId", "machineId", "cycleTimeSeconds", "startupScrapCount",
-       "normPerShift", "pieceWeightG", "runnerWeightG", "notes", "settingParameters",
-       "createdAt", "updatedAt")
+       "normPerShift", "runnerWeightG", "moldMountingTimeMinutes",
+       "notes", "settingParameters", "createdAt", "updatedAt")
     VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, NOW(), NOW())
     RETURNING *
   `;
@@ -45,8 +45,8 @@ export const createMoldMachineCompatibilityQuery = async (
     data.cycleTimeSeconds ?? null,
     data.startupScrapCount ?? null,
     data.normPerShift ?? null,
-    data.pieceWeightG ?? null,
     data.runnerWeightG ?? null,
+    data.moldMountingTimeMinutes ?? null,
     data.notes ?? null,
     data.settingParameters !== undefined && data.settingParameters !== null
       ? JSON.stringify(data.settingParameters)
@@ -60,14 +60,14 @@ export const updateMoldMachineCompatibilityQuery = async (
   const sql = `
     UPDATE "MoldMachineCompatibility"
     SET
-      "cycleTimeSeconds"  = $1,
-      "startupScrapCount" = $2,
-      "normPerShift"      = $3,
-      "pieceWeightG"      = $4,
-      "runnerWeightG"     = $5,
-      "notes"             = $6,
-      "settingParameters" = $7::jsonb,
-      "updatedAt"         = NOW()
+      "cycleTimeSeconds"        = $1,
+      "startupScrapCount"       = $2,
+      "normPerShift"            = $3,
+      "runnerWeightG"           = $4,
+      "moldMountingTimeMinutes" = $5,
+      "notes"                   = $6,
+      "settingParameters"       = $7::jsonb,
+      "updatedAt"               = NOW()
     WHERE "id" = $8
     RETURNING *
   `;
@@ -75,8 +75,8 @@ export const updateMoldMachineCompatibilityQuery = async (
     data.cycleTimeSeconds ?? null,
     data.startupScrapCount ?? null,
     data.normPerShift ?? null,
-    data.pieceWeightG ?? null,
     data.runnerWeightG ?? null,
+    data.moldMountingTimeMinutes ?? null,
     data.notes ?? null,
     data.settingParameters !== undefined && data.settingParameters !== null
       ? JSON.stringify(data.settingParameters)

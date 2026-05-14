@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 interface FormFieldProps {
   id: string;
   label: string;
-  type?: 'number' | 'text' | 'email' | 'password' | 'string' | 'date';
+  type?: 'number' | 'text' | 'email' | 'password' | 'string' | 'date' | 'datetime-local';
   value: string | number;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error?: FieldError;
@@ -35,7 +35,7 @@ export const LabeledXtField = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
-    if (type === 'date') inputRef.current?.showPicker();
+    if (type === 'date' || type === 'datetime-local') inputRef.current?.showPicker();
   };
 
   return (
@@ -77,7 +77,7 @@ export const LabeledXtField = ({
         multiline={multiline}
         rows={rows}
         fullWidth={fullWidth}
-        InputLabelProps={type === 'date' ? { shrink: true, ...InputLabelProps } : InputLabelProps}
+        InputLabelProps={(type === 'date' || type === 'datetime-local') ? { shrink: true, ...InputLabelProps } : InputLabelProps}
         sx={{
           '& textarea': {
             maxHeight: '25vh',

@@ -217,12 +217,30 @@ const EditJobPosition = () => {
                       .join(', ')
                   }
                 >
-                  {allResponsibilities.map((r) => (
-                    <MenuItem key={r.code} value={r.code}>
-                      <Checkbox checked={((field.value as string[]) ?? []).includes(r.code)} />
-                      <ListItemText primary={r.label} secondary={r.code} />
-                    </MenuItem>
-                  ))}
+                  {allResponsibilities.map((r) => {
+                    const isChecked = ((field.value as string[]) ?? []).includes(r.code);
+                    return (
+                      <MenuItem
+                        key={r.code}
+                        value={r.code}
+                        sx={{
+                          '&.Mui-selected': {
+                            backgroundColor: `${theme.palette.secondary.main}22`,
+                          },
+                          '&.Mui-selected:hover': {
+                            backgroundColor: `${theme.palette.secondary.main}33`,
+                          },
+                        }}
+                      >
+                        <Checkbox checked={isChecked} />
+                        <ListItemText
+                          primary={r.label}
+                          secondary={r.code}
+                          primaryTypographyProps={{ fontWeight: isChecked ? 700 : 400 }}
+                        />
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               )}
             />

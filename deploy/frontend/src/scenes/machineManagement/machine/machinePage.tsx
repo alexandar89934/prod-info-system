@@ -45,6 +45,8 @@ import {
 } from '@/state/machine/machine.selectors';
 import { AttachedEquipment } from '@/state/machine/machine.types';
 import { resetState } from '@/state/machine/machine.slice';
+import { fetchProductionPlansByMachine } from '@/state/productionPlan/productionPlan.actions';
+import { selectProductionPlansByMachine } from '@/state/productionPlan/productionPlan.selectors';
 import { useAppDispatch } from '@/state/hooks';
 import axiosServer from '@/services/axios.service';
 
@@ -65,6 +67,7 @@ const MachinePage = () => {
   const { id } = useParams<{ id: string }>();
   const machine = useSelector(selectCurrentMachine);
   const loading = useSelector(selectMachineLoading);
+  const planQueue = useSelector(selectProductionPlansByMachine);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -118,6 +121,7 @@ const MachinePage = () => {
   useEffect(() => {
     if (id) {
       dispatch(fetchMachineById(id));
+      dispatch(fetchProductionPlansByMachine(id));
       axiosServer.get(`/mold/mounted-on/${id}`).then((res) => {
         if (res.data.success) setMountedMold(res.data.content.mold ?? null);
       }).catch(() => { setMountedMold(null); });
@@ -410,6 +414,38 @@ const MachinePage = () => {
                 <Typography variant="body2" color="text.secondary">
                   {t('machine.detail.noMoldMounted')}
                 </Typography>
+              )}
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+                  {t('machine.detail.productionQueue')}
+                </Typography>
+              </Box>
+              {planQueue.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">{t('machine.detail.noProductionQueue')}</Typography>
+              ) : (
+                planQueue.map((plan, idx) => (
+                  <Box key={plan.id} sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.75, borderBottom: '1px solid', borderColor: 'divider', '&:last-child': { borderBottom: 'none' } }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ minWidth: 24, fontWeight: 700 }}>#{idx + 1}</Typography>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={500}>{plan.itemCode} — {plan.itemName}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {t('productionPlan.list.quantity')}: {plan.quantity.toLocaleString()}
+                        {plan.expectedStartDate && ` · ${new Date(plan.expectedStartDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}`}
+                        {plan.orderNumber && ` · ${plan.orderNumber}`}
+                      </Typography>
+                    </Box>
+                    <Chip
+                      label={t(`productionPlan.status.${plan.status}`)}
+                      size="small"
+                      color={plan.status === 'in_progress' ? 'warning' : 'default'}
+                    />
+                  </Box>
+                ))
               )}
             </Paper>
           </Grid>

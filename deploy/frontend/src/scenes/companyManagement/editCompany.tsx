@@ -96,11 +96,18 @@ const EditCompany = () => {
     if (!id) return;
     const result = await dispatch(updateCompany({
       id,
-      ...data,
-      address: data.address || null,
-      ownerInfo: data.ownerInfo || null,
-      representative: data.representative || null,
-      notes: data.notes || null,
+      name: data.name,
+      pib: data.pib,
+      mb: data.mb,
+      address: data.address ?? null,
+      phones: data.phones,
+      emails: data.emails.map((e) => ({ address: e.address as string, isPrimary: e.isPrimary as boolean })),
+      ownerInfo: data.ownerInfo ?? null,
+      representative: data.representative ?? null,
+      isOwnCompany: data.isOwnCompany,
+      isCustomer: data.isCustomer,
+      isSupplier: data.isSupplier,
+      notes: data.notes ?? null,
       logo: logoPath,
     }));
     if (updateCompany.fulfilled.match(result)) navigate('/company');

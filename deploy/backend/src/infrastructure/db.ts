@@ -6,7 +6,7 @@ import { logger } from "./../config/logger";
 // Return DATE and TIMESTAMP WITHOUT TZ as raw strings so Node.js (TZ=Europe/Belgrade)
 // does not shift them — timestamps are stored as local-time strings and must be read back as-is.
 pg.types.setTypeParser(1082, (val: string) => val);  // DATE  → "YYYY-MM-DD"
-pg.types.setTypeParser(1114, (val: string) => val);  // TIMESTAMP → "YYYY-MM-DD HH:MM:SS"
+pg.types.setTypeParser(1114, (val: string) => val ? val.replace(' ', 'T') : val);  // TIMESTAMP → "YYYY-MM-DDTHH:MM:SS"
 
 export const pool = new Pool({
   user: config.database.options.user,

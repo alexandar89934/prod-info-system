@@ -142,6 +142,13 @@ export const updateMoldQuery = async (data: EditMoldData): Promise<Mold> => {
   ]);
 };
 
+export const setMoldCurrentMachineQuery = async (moldId: string, machineId: string | null): Promise<void> => {
+  await callQuery(
+    `UPDATE "Molds" SET "currentMachineId" = $1, "updatedAt" = NOW() WHERE "id" = $2`,
+    [machineId, moldId]
+  );
+};
+
 export const deleteMoldQuery = async (id: string): Promise<Mold> => {
   const sql = `DELETE FROM "Molds" WHERE "id" = $1 RETURNING *`;
   return callQuery<Mold>(sql, [id]);

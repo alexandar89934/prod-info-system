@@ -9,8 +9,8 @@ export type MoldMachineCompatibility = {
   cycleTimeSeconds: number | null;
   startupScrapCount: number | null;
   normPerShift: number | null;
-  pieceWeightG: number | null;
   runnerWeightG: number | null;
+  moldMountingTimeMinutes: number | null;
   notes: string | null;
   settingParameters: Record<string, unknown> | null;
   createdAt?: string;
@@ -23,8 +23,8 @@ export type CreateCompatibilityData = {
   cycleTimeSeconds?: number | null;
   startupScrapCount?: number | null;
   normPerShift?: number | null;
-  pieceWeightG?: number | null;
   runnerWeightG?: number | null;
+  moldMountingTimeMinutes?: number | null;
   notes?: string | null;
   settingParameters?: Record<string, unknown> | null;
 };
@@ -34,8 +34,8 @@ export type UpdateCompatibilityData = {
   cycleTimeSeconds?: number | null;
   startupScrapCount?: number | null;
   normPerShift?: number | null;
-  pieceWeightG?: number | null;
   runnerWeightG?: number | null;
+  moldMountingTimeMinutes?: number | null;
   notes?: string | null;
   settingParameters?: Record<string, unknown> | null;
 };

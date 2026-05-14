@@ -20,3 +20,6 @@ export * as bomLineController from "./bomLine.controller";
 export * as packagingUnitController from "./packagingUnit.controller";
 export * as itemPackagingController from "./itemPackaging.controller";
 export * as companyController from "./company.controller";
+export * as customerOrderController from "./customerOrder.controller";
+export * as productionPlanController from "./productionPlan.controller";
+export * as productionPlanActionController from "./productionPlanAction.controller";

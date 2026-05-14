@@ -34,6 +34,18 @@ export const getPersonByEmployeeNumberForKioskQuery = async (employeeNumber: str
   return callQuery<PersonKioskLookup>(sql, [employeeNumber]);
 };
 
+export const getPersonForActionVerificationQuery = async (
+  employeeNumber: string
+): Promise<{ personId: string; userId: string; name: string; pin: string | null } | null> => {
+  const sql = `
+    SELECT p.id AS "personId", u.id AS "userId", p.name, u.pin
+    FROM "Person" p
+    JOIN "User" u ON u."personId" = p.id
+    WHERE u."employeeNumber" = CAST($1 AS INTEGER)
+  `;
+  return callQuery<{ personId: string; userId: string; name: string; pin: string | null }>(sql, [employeeNumber]);
+};
+
 export const getOpenAttendanceByPersonQuery = async (personId: string): Promise<Attendance> => {
   const sql = `
     SELECT * FROM "Attendance"

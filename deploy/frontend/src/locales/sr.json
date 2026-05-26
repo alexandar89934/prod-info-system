@@ -90,7 +90,8 @@
       "description": "Opis",
       "category": "Kategorija",
       "addCategory": "Dodaj kategoriju radnog mesta",
-      "responsibilities": "Odgovornosti"
+      "responsibilities": "Odgovornosti",
+      "otherResponsibilities": "Ostalo"
     }
   },
   "responsibility": {
@@ -583,6 +584,7 @@
       "cycleTimeSeconds": "Vreme ciklusa (s)",
       "startupScrapCount": "Škart pri startu",
       "normPerShift": "Norma po smeni",
+      "normPerShiftHint": "Broj komada po smeni (ne injekcija)",
       "pieceWeightG": "Masa komada",
       "fromBom": "iz sastavnice",
       "runnerWeightG": "Masa uliva (g)",
@@ -968,7 +970,11 @@
       "moldChangeOffset": "Promena alata: {{minutes}} min — uključeno u trajanje plana",
       "initialMountOffset": "Montaža kalupa: {{minutes}} min — uključeno u trajanje plana",
       "shifts": "smena",
-      "days": "dan/a"
+      "days": "dan/a",
+      "activeShifts": "Aktivne smene",
+      "shift1": "1. smena (06:00–14:00)",
+      "shift2": "2. smena (14:00–22:00)",
+      "shift3": "3. smena (22:00–06:00)"
     },
     "actions": {
       "title": "Evidentiraj akciju",
@@ -997,10 +1003,13 @@
       "types": {
         "mold_change_started": "Izmena kalupa pokrenuta",
         "mold_change_completed": "Izmena kalupa završena",
+        "machine_setup_started": "Podešavanje mašine pokrenuto",
+        "machine_setup_completed": "Podešavanje mašine završeno",
+        "cycle_completed": "Ciklus završen",
         "plan_started": "Plan pokrenut",
         "first_good_part_approved": "Odobren prvi dobar komad",
         "operator_started": "Operater počeo rad",
-        "operator_changed": "Izmena operatera",
+        "operator_ended": "Operater završio rad",
         "scrap_entry": "Unos škarta",
         "qty_increased": "Ažurirana količina",
         "packaging_unit_full": "Ambalaža puna",
@@ -1043,7 +1052,15 @@
       "quantity": "Količina",
       "machine": "Mašina",
       "save": "Sačuvaj izmene",
-      "cancel": "Odustani"
+      "cancel": "Odustani",
+      "startDateTooEarly": "Preklapa se sa planom iznad (najranije: {{date}})",
+      "startDateInPast": "Datum početka mora biti u budućnosti"
+    },
+    "stats": {
+      "good": "Dobri komadi",
+      "gross": "Ukupno proizvedeno",
+      "injections": "Ubrizgavanja",
+      "cavities": "{{count}} gnezd(a)"
     }
   },
   "dataGrid": {

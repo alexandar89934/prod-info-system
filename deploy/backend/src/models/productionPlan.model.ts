@@ -77,8 +77,9 @@ export const createProductionPlanQuery = async (
   callQuery<ProductionPlan>(
     `INSERT INTO "ProductionPlan"
        ("id", "customerOrderLineId", "itemId", "machineId", "moldId",
-        "quantity", "expectedStartDate", "expectedEndDate", "position", "status", "notes", "createdAt", "updatedAt")
-     VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, 'queued', $9, NOW(), NOW())
+        "quantity", "expectedStartDate", "expectedEndDate", "position", "status", "notes",
+        "shift1", "shift2", "shift3", "createdAt", "updatedAt")
+     VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, 'queued', $9, $10, $11, $12, NOW(), NOW())
      RETURNING *`,
     [
       data.customerOrderLineId ?? null,
@@ -87,6 +88,7 @@ export const createProductionPlanQuery = async (
       data.expectedStartDate ?? null, data.expectedEndDate ?? null,
       position,
       data.notes ?? null,
+      data.shift1 ?? true, data.shift2 ?? true, data.shift3 ?? true,
     ]
   );
 
@@ -95,14 +97,16 @@ export const updateProductionPlanQuery = async (data: UpdateProductionPlanData):
     `UPDATE "ProductionPlan" SET
        "customerOrderLineId" = $1, "itemId" = $2, "machineId" = $3, "moldId" = $4,
        "quantity" = $5, "expectedStartDate" = $6, "expectedEndDate" = $7,
-       "status" = $8, "notes" = $9, "updatedAt" = NOW()
-     WHERE "id" = $10 RETURNING *`,
+       "status" = $8, "notes" = $9, "shift1" = $10, "shift2" = $11, "shift3" = $12, "updatedAt" = NOW()
+     WHERE "id" = $13 RETURNING *`,
     [
       data.customerOrderLineId ?? null,
       data.itemId, data.machineId, data.moldId ?? null,
       data.quantity,
       data.expectedStartDate ?? null, data.expectedEndDate ?? null,
-      data.status, data.notes ?? null, data.id,
+      data.status, data.notes ?? null,
+      data.shift1 ?? true, data.shift2 ?? true, data.shift3 ?? true,
+      data.id,
     ]
   );
 
@@ -164,6 +168,17 @@ export const incrementScrapQuantityQuery = async (
   );
 };
 
+export const decrementProducedQuantityQuery = async (
+  id: string, quantity: number
+): Promise<void> => {
+  await callQuery<ProductionPlan>(
+    `UPDATE "ProductionPlan"
+     SET "producedQuantity" = GREATEST(COALESCE("producedQuantity", 0) - $1, 0), "updatedAt" = NOW()
+     WHERE "id" = $2`,
+    [quantity, id]
+  );
+};
+
 export const getQueuedPlansAfterPositionQuery = async (
   machineId: string, position: number
 ): Promise<ProductionPlan[]> =>
@@ -201,6 +216,16 @@ export const getPreviousActivePlanQuery = async (
      WHERE pp."machineId" = $1 AND pp."position" < $2 AND pp."status" NOT IN ('done', 'cancelled')
      ORDER BY pp."position" DESC LIMIT 1`,
     [machineId, position]
+  ) ?? null;
+
+export const getInProgressPlanByMachineNumberQuery = async (
+  machineNumber: number
+): Promise<ProductionPlan | null> =>
+  callQuery<ProductionPlan>(
+    `${PLAN_SELECT} ${PLAN_JOIN}
+     WHERE mac."machineNumber" = $1 AND pp."status" = 'in_progress'
+     LIMIT 1`,
+    [machineNumber]
   ) ?? null;
 
 export const reorderProductionPlansQuery = async (

@@ -238,8 +238,7 @@ module.exports = {
       );
       if (existing) continue;
 
-      const hashedPassword = await hashPassword(String(emp.number));
-
+      const hashedPassword = await hashPassword(process.env.EMPLOYEE_PASSWORD);
       const [[person]] = await queryInterface.sequelize.query(
         `INSERT INTO "Person" (name, address, mail, documents, "startDate", status, "createdAt", "updatedAt", "createdBy", "updatedBy")
          VALUES (:name, :address, :mail, '[]', NOW(), 'off', NOW(), NOW(), :name, :name)

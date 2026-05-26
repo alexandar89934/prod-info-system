@@ -13,13 +13,14 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SaveIcon from '@mui/icons-material/Save';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import ScienceIcon from '@mui/icons-material/Science';
 import SearchIcon from '@mui/icons-material/Search';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import TuneIcon from '@mui/icons-material/Tune';
 import {
   Alert,
   Box,
@@ -84,10 +85,13 @@ type BomLineEntry = {
 const ACTION_COLORS: Record<ProductionPlanActionType, 'error' | 'success' | 'warning' | 'info' | 'primary' | 'secondary' | 'default'> = {
   mold_change_started: 'warning',
   mold_change_completed: 'success',
+  machine_setup_started: 'warning',
+  machine_setup_completed: 'success',
+  cycle_completed: 'info',
   plan_started: 'success',
   first_good_part_approved: 'success',
   operator_started: 'primary',
-  operator_changed: 'info',
+  operator_ended: 'default',
   scrap_entry: 'error',
   qty_increased: 'secondary',
   packaging_unit_full: 'secondary',
@@ -110,10 +114,13 @@ const ACTION_COLORS: Record<ProductionPlanActionType, 'error' | 'success' | 'war
 const ACTION_ICON_MAP: Record<ProductionPlanActionType, ReactNode> = {
   mold_change_started: <BuildIcon sx={{ fontSize: 16 }} />,
   mold_change_completed: <CheckCircleIcon sx={{ fontSize: 16 }} />,
+  machine_setup_started: <TuneIcon sx={{ fontSize: 16 }} />,
+  machine_setup_completed: <CheckCircleIcon sx={{ fontSize: 16 }} />,
+  cycle_completed: <AutorenewIcon sx={{ fontSize: 16 }} />,
   plan_started: <PlayArrowIcon sx={{ fontSize: 16 }} />,
   first_good_part_approved: <CheckCircleIcon sx={{ fontSize: 16 }} />,
   operator_started: <PersonAddIcon sx={{ fontSize: 16 }} />,
-  operator_changed: <SwapHorizIcon sx={{ fontSize: 16 }} />,
+  operator_ended: <PersonRemoveIcon sx={{ fontSize: 16 }} />,
   scrap_entry: <ErrorOutlineIcon sx={{ fontSize: 16 }} />,
   qty_increased: <ScienceIcon sx={{ fontSize: 16 }} />,
   packaging_unit_full: <InventoryIcon sx={{ fontSize: 16 }} />,
@@ -704,6 +711,59 @@ const MachinePlanDetail = () => {
     );
   };
 
+  const renderProductionStats = (plan: ProductionPlan) => {
+    const good = plan.producedQuantity ?? 0;
+    const scrap = plan.scrapQuantity ?? 0;
+    const gross = good + scrap;
+    if (gross === 0) return null;
+
+    const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
+    const injections = Math.floor(gross / effectiveCavities);
+    const progressPct = Math.min((good / plan.quantity) * 100, 100);
+
+    return (
+      <Box sx={{ mb: 1.5 }}>
+        <Box display="flex" gap={3} alignItems="flex-end" flexWrap="wrap" mb={0.75}>
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t('productionPlan.stats.good')}
+            </Typography>
+            <Typography variant="caption" fontWeight={700}>
+              {good.toLocaleString()} / {plan.quantity.toLocaleString()}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t('productionPlan.stats.gross')}
+            </Typography>
+            <Typography variant="caption" fontWeight={700}>
+              {gross.toLocaleString()}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t('productionPlan.stats.injections')}
+              {effectiveCavities > 1 && (
+                <Box component="span" sx={{ ml: 0.5, opacity: 0.6 }}>
+                  · {t('productionPlan.stats.cavities', { count: effectiveCavities })}
+                </Box>
+              )}
+            </Typography>
+            <Typography variant="caption" fontWeight={700}>
+              {injections.toLocaleString()}
+            </Typography>
+          </Box>
+        </Box>
+        <LinearProgress
+          variant="determinate"
+          value={progressPct}
+          color={progressPct >= 100 ? 'success' : 'primary'}
+          sx={{ height: 4, borderRadius: 2 }}
+        />
+      </Box>
+    );
+  };
+
   const renderScrapOverview = (planId: string) => {
     const actions = actionsByPlan[planId];
     if (!actions) return null;
@@ -920,6 +980,7 @@ const MachinePlanDetail = () => {
                 expandedContent={
                   <>
                     {renderBomSection(plan)}
+                    {renderProductionStats(plan)}
                     {renderScrapOverview(plan.id)}
                     {renderTimeline(plan.id)}
                   </>
@@ -953,6 +1014,7 @@ const MachinePlanDetail = () => {
                   expandedContent={
                     <>
                       {renderBomSection(plan)}
+                      {renderProductionStats(plan)}
                       {renderTimeline(plan.id)}
                     </>
                   }

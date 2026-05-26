@@ -11,12 +11,13 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import TuneIcon from '@mui/icons-material/Tune';
 import ScienceIcon from '@mui/icons-material/Science';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -28,6 +29,7 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   Dialog,
@@ -36,6 +38,7 @@ import {
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputLabel,
   LinearProgress,
@@ -104,10 +107,13 @@ type BomLineEntry = {
 const ACTION_COLORS: Record<ProductionPlanActionType, 'error' | 'success' | 'warning' | 'info' | 'primary' | 'secondary' | 'default'> = {
   mold_change_started: 'warning',
   mold_change_completed: 'success',
+  machine_setup_started: 'warning',
+  machine_setup_completed: 'success',
+  cycle_completed: 'info',
   plan_started: 'success',
   first_good_part_approved: 'success',
   operator_started: 'primary',
-  operator_changed: 'info',
+  operator_ended: 'default',
   scrap_entry: 'error',
   qty_increased: 'secondary',
   packaging_unit_full: 'secondary',
@@ -130,10 +136,13 @@ const ACTION_COLORS: Record<ProductionPlanActionType, 'error' | 'success' | 'war
 const ACTION_ICON_MAP: Record<ProductionPlanActionType, React.ReactElement> = {
   mold_change_started: <BuildIcon sx={{ fontSize: 16 }} />,
   mold_change_completed: <CheckCircleIcon sx={{ fontSize: 16 }} />,
+  machine_setup_started: <TuneIcon sx={{ fontSize: 16 }} />,
+  machine_setup_completed: <CheckCircleIcon sx={{ fontSize: 16 }} />,
+  cycle_completed: <AutorenewIcon sx={{ fontSize: 16 }} />,
   plan_started: <PlayArrowIcon sx={{ fontSize: 16 }} />,
   first_good_part_approved: <CheckCircleIcon sx={{ fontSize: 16 }} />,
   operator_started: <PersonAddIcon sx={{ fontSize: 16 }} />,
-  operator_changed: <SwapHorizIcon sx={{ fontSize: 16 }} />,
+  operator_ended: <PersonRemoveIcon sx={{ fontSize: 16 }} />,
   scrap_entry: <ErrorOutlineIcon sx={{ fontSize: 16 }} />,
   qty_increased: <ScienceIcon sx={{ fontSize: 16 }} />,
   packaging_unit_full: <InventoryIcon sx={{ fontSize: 16 }} />,
@@ -174,8 +183,147 @@ const addMinutes = (dateStr: string, minutes: number): string => {
   return toDatetimeLocal(d);
 };
 
-const renderDateRange = (plan: ProductionPlan, t: (k: string) => string, startOverride?: string | null) => {
+const SHIFT_WINDOWS: [number, number, 's1' | 's2' | 's3'][] = [
+  [0,    360,  's3'],
+  [360,  840,  's1'],
+  [840,  1320, 's2'],
+  [1320, 1440, 's3'],
+];
+
+const advanceShiftMinutes = (
+  startDateStr: string,
+  totalMinutes: number,
+  s1: boolean, s2: boolean, s3: boolean
+): string => {
+  if (!s1 && !s2 && !s3) return addMinutes(startDateStr, totalMinutes);
+  const flags: Record<'s1' | 's2' | 's3', boolean> = { s1, s2, s3 };
+
+  let d = new Date(startDateStr);
+  let remaining = totalMinutes;
+
+  for (let guard = 0; remaining > 0 && guard < 100000; guard++) {
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const minsOfDay = Math.round((d.getTime() - dayStart.getTime()) / 60000);
+
+    const winIdx = SHIFT_WINDOWS.findIndex(([ws, we]) => minsOfDay >= ws && minsOfDay < we);
+    if (winIdx === -1) {
+      d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      continue;
+    }
+
+    const [, winEnd, shift] = SHIFT_WINDOWS[winIdx];
+    const active = flags[shift];
+
+    if (active) {
+      const room = winEnd - minsOfDay;
+      if (remaining <= room) {
+        d = new Date(d.getTime() + remaining * 60000);
+        remaining = 0;
+      } else {
+        remaining -= room;
+        const nextIdx = winIdx + 1;
+        if (nextIdx >= SHIFT_WINDOWS.length) {
+          d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+        } else {
+          const [nextStart] = SHIFT_WINDOWS[nextIdx];
+          d = new Date(dayStart.getTime() + nextStart * 60000);
+        }
+      }
+    } else {
+      const nextIdx = winIdx + 1;
+      if (nextIdx >= SHIFT_WINDOWS.length) {
+        d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      } else {
+        const [nextStart] = SHIFT_WINDOWS[nextIdx];
+        d = new Date(dayStart.getTime() + nextStart * 60000);
+      }
+    }
+  }
+  return toDatetimeLocal(d);
+};
+
+const retreatShiftMinutes = (
+  endDateStr: string,
+  totalMinutes: number,
+  s1: boolean, s2: boolean, s3: boolean
+): string => {
+  if (!s1 && !s2 && !s3) return addMinutes(endDateStr, -totalMinutes);
+  const flags: Record<'s1' | 's2' | 's3', boolean> = { s1, s2, s3 };
+
+  let d = new Date(endDateStr);
+  let remaining = totalMinutes;
+
+  for (let guard = 0; remaining > 0 && guard < 100000; guard++) {
+    const h = d.getHours();
+    const m = d.getMinutes();
+    let minsOfDay: number;
+    let dayStart: Date;
+
+    if (h === 0 && m === 0) {
+      const prevDay = new Date(d);
+      prevDay.setDate(prevDay.getDate() - 1);
+      dayStart = new Date(prevDay.getFullYear(), prevDay.getMonth(), prevDay.getDate());
+      minsOfDay = 1440;
+    } else {
+      dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      minsOfDay = Math.round((d.getTime() - dayStart.getTime()) / 60000);
+    }
+
+    const winIdx = SHIFT_WINDOWS.findIndex(([ws, we]) => minsOfDay > ws && minsOfDay <= we);
+    if (winIdx === -1) {
+      const prevDayStart = new Date(dayStart.getTime() - 24 * 60 * 60 * 1000);
+      d = new Date(prevDayStart.getTime() + 1440 * 60000);
+      continue;
+    }
+
+    const [winStart, , shift] = SHIFT_WINDOWS[winIdx];
+    const active = flags[shift];
+
+    if (active) {
+      const room = minsOfDay - winStart;
+      if (remaining <= room) {
+        d = new Date(d.getTime() - remaining * 60000);
+        remaining = 0;
+      } else {
+        remaining -= room;
+        const prevIdx = winIdx - 1;
+        if (prevIdx < 0) {
+          d = new Date(dayStart.getTime());
+        } else {
+          const [, prevEnd] = SHIFT_WINDOWS[prevIdx];
+          d = new Date(dayStart.getTime() + prevEnd * 60000);
+        }
+      }
+    } else {
+      const prevIdx = winIdx - 1;
+      if (prevIdx < 0) {
+        d = new Date(dayStart.getTime());
+      } else {
+        const [, prevEnd] = SHIFT_WINDOWS[prevIdx];
+        d = new Date(dayStart.getTime() + prevEnd * 60000);
+      }
+    }
+  }
+  return toDatetimeLocal(d);
+};
+
+const renderDateRange = (plan: ProductionPlan, t: (k: string) => string, startOverride?: string | null, needsMounting?: boolean) => {
   const startDate = startOverride ?? plan.expectedStartDate;
+  const sh1 = plan.shift1 ?? true;
+  const sh2 = plan.shift2 ?? true;
+  const sh3 = plan.shift3 ?? true;
+  const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
+  const cycles = Math.ceil(plan.quantity / effectiveCavities);
+  let productionMinutes: number | null = null;
+  if (plan.normPerShift && plan.normPerShift > 0) {
+    productionMinutes = Math.ceil((plan.quantity / plan.normPerShift) * 480);
+  } else if (plan.cycleTimeSeconds && plan.cycleTimeSeconds > 0) {
+    productionMinutes = Math.ceil((cycles * plan.cycleTimeSeconds) / 60);
+  }
+  const mountingMins = (needsMounting && plan.moldMountingTimeMinutes) ? plan.moldMountingTimeMinutes : 0;
+  const displayEndDate = (productionMinutes !== null && plan.expectedStartDate)
+    ? advanceShiftMinutes(plan.expectedStartDate, mountingMins + productionMinutes, sh1, sh2, sh3)
+    : plan.expectedEndDate;
   return (
     <Box sx={{ width: 130, flexShrink: 0 }}>
       {startDate && (
@@ -184,10 +332,10 @@ const renderDateRange = (plan: ProductionPlan, t: (k: string) => string, startOv
           {fmtDt(startDate)}
         </Typography>
       )}
-      {plan.expectedEndDate && (
+      {displayEndDate && (
         <Typography variant="caption" color="text.secondary" display="block">
           <Box component="span" sx={{ opacity: 0.6, mr: 0.5 }}>{t('productionPlan.dates.end')}:</Box>
-          {fmtDt(plan.expectedEndDate)}
+          {fmtDt(displayEndDate)}
         </Typography>
       )}
     </Box>
@@ -290,6 +438,9 @@ const ProductionPlanList = () => {
   const [editMachineId, setEditMachineId] = useState('');
   const [editStartDate, setEditStartDate] = useState('');
   const [editEndDate, setEditEndDate] = useState('');
+  const [editShift1, setEditShift1] = useState(true);
+  const [editShift2, setEditShift2] = useState(true);
+  const [editShift3, setEditShift3] = useState(true);
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -389,51 +540,113 @@ const ProductionPlanList = () => {
     if (qty < 1) return null;
     const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
     const cycles = Math.ceil(qty / effectiveCavities);
-    if (plan.normPerShift && plan.normPerShift > 0) return Math.ceil((cycles / plan.normPerShift) * 480);
+    if (plan.normPerShift && plan.normPerShift > 0) return Math.ceil((qty / plan.normPerShift) * 480);
     if (plan.cycleTimeSeconds && plan.cycleTimeSeconds > 0) return Math.ceil((cycles * plan.cycleTimeSeconds) / 60);
     return null;
   };
 
-  // Mounting minutes for the plan currently being edited (mold change from previous plan in queue)
+  // Mounting minutes for the plan currently being edited (mold change OR initial mount)
   const editPrevPlan = editDialogPlan
     ? plans.find((p) => p.machineId === editDialogPlan.machineId && p.position === editDialogPlan.position - 1)
     : null;
   const editMoldChanging = !!(editDialogPlan?.moldId && editPrevPlan?.moldId && editDialogPlan.moldId !== editPrevPlan.moldId);
-  const editMountingMinutes = editMoldChanging && editDialogPlan?.moldMountingTimeMinutes ? editDialogPlan.moldMountingTimeMinutes : 0;
+  const editNeedsInitialMount = !editPrevPlan && !!editDialogPlan?.moldId && !!editDialogPlan?.moldMountingTimeMinutes && editDialogPlan?.moldCurrentMachineId !== editDialogPlan?.machineId;
+  const editMountingMinutes = (editMoldChanging || editNeedsInitialMount) && editDialogPlan?.moldMountingTimeMinutes ? editDialogPlan.moldMountingTimeMinutes : 0;
 
-  const recalcEditEndDate = (qty: number, startDate: string, plan: ProductionPlan) => {
+  // Minimum allowed start date: computed end of the plan directly above
+  const prevPrevPlan = editPrevPlan
+    ? plans.find((p) => p.machineId === editPrevPlan.machineId && p.position === editPrevPlan.position - 1)
+    : null;
+  const prevMoldChanging = !!(editPrevPlan?.moldId && prevPrevPlan?.moldId && editPrevPlan.moldId !== prevPrevPlan.moldId);
+  const prevNeedsInitialMount = !prevPrevPlan && !!editPrevPlan?.moldId && !!editPrevPlan?.moldMountingTimeMinutes && editPrevPlan?.moldCurrentMachineId !== editPrevPlan?.machineId;
+  const prevMountingMins = (prevMoldChanging || prevNeedsInitialMount) && editPrevPlan?.moldMountingTimeMinutes ? editPrevPlan.moldMountingTimeMinutes : 0;
+  const prevProdMins = editPrevPlan ? calcEditProductionMinutes(editPrevPlan.quantity, editPrevPlan) : null;
+  const editMinStartDate = (editPrevPlan?.expectedStartDate && prevProdMins !== null)
+    ? advanceShiftMinutes(editPrevPlan.expectedStartDate, prevMountingMins + prevProdMins, editPrevPlan.shift1 ?? true, editPrevPlan.shift2 ?? true, editPrevPlan.shift3 ?? true)
+    : null;
+  const editStartDateError = !!(editMinStartDate && editStartDate && editStartDate < editMinStartDate);
+
+  const recalcEditEndDate = (qty: number, startDate: string, plan: ProductionPlan, sh1: boolean, sh2: boolean, sh3: boolean) => {
     if (!startDate || qty < 1) return;
     const productionMinutes = calcEditProductionMinutes(qty, plan);
-    if (productionMinutes !== null) setEditEndDate(addMinutes(startDate, editMountingMinutes + productionMinutes));
+    if (productionMinutes !== null) setEditEndDate(advanceShiftMinutes(startDate, editMountingMinutes + productionMinutes, sh1, sh2, sh3));
   };
 
-  const recalcEditStartDate = (qty: number, endDate: string, plan: ProductionPlan) => {
+  const recalcEditStartDate = (qty: number, endDate: string, plan: ProductionPlan, sh1: boolean, sh2: boolean, sh3: boolean) => {
     if (!endDate || qty < 1) return;
     const productionMinutes = calcEditProductionMinutes(qty, plan);
     if (productionMinutes !== null) {
-      const d = new Date(endDate);
-      d.setMinutes(d.getMinutes() - editMountingMinutes - productionMinutes);
-      setEditStartDate(toDatetimeLocal(d));
+      setEditStartDate(retreatShiftMinutes(endDate, editMountingMinutes + productionMinutes, sh1, sh2, sh3));
     }
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!editDialogPlan) return;
     const qty = parseInt(editQty, 10);
     if (!qty || qty < 1 || !editMachineId) return;
-    dispatch(updateProductionPlan({
+
+    const savedEndDate = editEndDate || editDialogPlan.expectedEndDate || '';
+
+    // Build all updates upfront so we can dispatch them all and await together
+    type PlanUpdate = Parameters<typeof updateProductionPlan>[0];
+    const allUpdates: PlanUpdate[] = [{
       id: editDialogPlan.id,
       itemId: editDialogPlan.itemId,
       machineId: editMachineId,
       moldId: editDialogPlan.moldId,
       quantity: qty,
       expectedStartDate: editStartDate || editDialogPlan.expectedStartDate,
-      expectedEndDate: editEndDate || editDialogPlan.expectedEndDate,
+      expectedEndDate: savedEndDate,
       status: editDialogPlan.status,
       notes: editDialogPlan.notes,
       customerOrderLineId: editDialogPlan.customerOrderLineId,
-    }));
+      shift1: editShift1,
+      shift2: editShift2,
+      shift3: editShift3,
+    }];
+
+    // Cascade: recalculate start/end for all queued plans that follow on the same machine
+    const subsequent = plans
+      .filter((p) => p.machineId === editDialogPlan.machineId && p.status === 'queued' && p.id !== editDialogPlan.id && p.position > editDialogPlan.position)
+      .sort((a, b) => a.position - b.position);
+
+    let prevEndDate = savedEndDate;
+    let prevMoldId = editDialogPlan.moldId ?? null;
+
+    for (const plan of subsequent) {
+      if (!prevEndDate) break;
+      const moldChanging = !!plan.moldId && plan.moldId !== prevMoldId;
+      const mountingMins = moldChanging && plan.moldMountingTimeMinutes ? plan.moldMountingTimeMinutes : 0;
+      const productionMinutes = calcEditProductionMinutes(plan.quantity, plan);
+      if (productionMinutes === null) break;
+      const sh1 = plan.shift1 ?? true;
+      const sh2 = plan.shift2 ?? true;
+      const sh3 = plan.shift3 ?? true;
+      const newStart = prevEndDate;
+      const newEnd = advanceShiftMinutes(newStart, mountingMins + productionMinutes, sh1, sh2, sh3);
+      allUpdates.push({
+        id: plan.id,
+        itemId: plan.itemId,
+        machineId: plan.machineId,
+        moldId: plan.moldId,
+        quantity: plan.quantity,
+        expectedStartDate: newStart,
+        expectedEndDate: newEnd,
+        status: plan.status,
+        notes: plan.notes,
+        customerOrderLineId: plan.customerOrderLineId,
+        shift1: sh1,
+        shift2: sh2,
+        shift3: sh3,
+      });
+      prevEndDate = newEnd;
+      prevMoldId = plan.moldId ?? null;
+    }
+
     setEditDialogPlan(null);
+    // Dispatch all updates in parallel, then do a single refetch once all DB writes are done
+    await Promise.all(allUpdates.map((u) => dispatch(updateProductionPlan(u))));
+    dispatch(fetchProductionPlans({ page: 1, limit: 1000 }));
   };
 
   const renderBomSection = (plan: ProductionPlan) => {
@@ -503,6 +716,59 @@ const ProductionPlanList = () => {
             </Typography>
           </Box>
         )}
+      </Box>
+    );
+  };
+
+  const renderProductionStats = (plan: ProductionPlan) => {
+    const good = plan.producedQuantity ?? 0;
+    const scrap = plan.scrapQuantity ?? 0;
+    const gross = good + scrap;
+    if (gross === 0) return null;
+
+    const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
+    const injections = Math.floor(gross / effectiveCavities);
+    const progressPct = Math.min((good / plan.quantity) * 100, 100);
+
+    return (
+      <Box sx={{ mb: 1.5 }}>
+        <Box display="flex" gap={3} alignItems="flex-end" flexWrap="wrap" mb={0.75}>
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t('productionPlan.stats.good')}
+            </Typography>
+            <Typography variant="caption" fontWeight={700}>
+              {good.toLocaleString()} / {plan.quantity.toLocaleString()}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t('productionPlan.stats.gross')}
+            </Typography>
+            <Typography variant="caption" fontWeight={700}>
+              {gross.toLocaleString()}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {t('productionPlan.stats.injections')}
+              {effectiveCavities > 1 && (
+                <Box component="span" sx={{ ml: 0.5, opacity: 0.6 }}>
+                  · {t('productionPlan.stats.cavities', { count: effectiveCavities })}
+                </Box>
+              )}
+            </Typography>
+            <Typography variant="caption" fontWeight={700}>
+              {injections.toLocaleString()}
+            </Typography>
+          </Box>
+        </Box>
+        <LinearProgress
+          variant="determinate"
+          value={progressPct}
+          color={progressPct >= 100 ? 'success' : 'primary'}
+          sx={{ height: 4, borderRadius: 2 }}
+        />
       </Box>
     );
   };
@@ -649,7 +915,7 @@ const ProductionPlanList = () => {
               {renderQty(plan)}
             </Typography>
             {renderScrap(plan, t)}
-            {renderDateRange(plan, t, effectiveStartDate)}
+            {renderDateRange(plan, t, effectiveStartDate, needsMounting)}
             <Box sx={{ width: 90, flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
               <Chip label={t(`productionPlan.status.${plan.status}`)} color={statusColor(plan.status)} size="small" />
             </Box>
@@ -659,11 +925,26 @@ const ProductionPlanList = () => {
                   component="span"
                   onClick={(e) => {
                     e.stopPropagation();
+                    const openStartDate = plan.expectedStartDate?.slice(0, 16) ?? '';
+                    const openSh1 = plan.shift1 ?? true;
+                    const openSh2 = plan.shift2 ?? true;
+                    const openSh3 = plan.shift3 ?? true;
+                    const openPrevPlan = plans.find((p) => p.machineId === plan.machineId && p.position === plan.position - 1);
+                    const openMoldChanging = !!(plan.moldId && openPrevPlan?.moldId && plan.moldId !== openPrevPlan.moldId);
+                    const openNeedsInitialMount = !openPrevPlan && !!plan.moldId && !!plan.moldMountingTimeMinutes && plan.moldCurrentMachineId !== plan.machineId;
+                    const openMountingMins = (openMoldChanging || openNeedsInitialMount) && plan.moldMountingTimeMinutes ? plan.moldMountingTimeMinutes : 0;
+                    const openProdMins = calcEditProductionMinutes(plan.quantity, plan);
+                    const openEndDate = openProdMins !== null && openStartDate
+                      ? advanceShiftMinutes(openStartDate, openMountingMins + openProdMins, openSh1, openSh2, openSh3)
+                      : plan.expectedEndDate?.slice(0, 16) ?? '';
                     setEditDialogPlan(plan);
                     setEditQty(String(plan.quantity));
                     setEditMachineId(plan.machineId);
-                    setEditStartDate(plan.expectedStartDate?.slice(0, 16) ?? '');
-                    setEditEndDate(plan.expectedEndDate?.slice(0, 16) ?? '');
+                    setEditStartDate(openStartDate);
+                    setEditEndDate(openEndDate);
+                    setEditShift1(openSh1);
+                    setEditShift2(openSh2);
+                    setEditShift3(openSh3);
                   }}
                   sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
                 >
@@ -688,6 +969,7 @@ const ProductionPlanList = () => {
           {isExpanded && (
             <Box sx={{ pl: 5, pr: 2, pb: 2, pt: 0.5 }}>
               {renderBomSection(plan)}
+              {renderProductionStats(plan)}
               {renderScrapOverview(plan.id)}
               {renderTimeline(plan.id)}
             </Box>
@@ -708,19 +990,42 @@ const ProductionPlanList = () => {
     const monthLabel = calendarDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-    const getBar = (plan: ProductionPlan) => {
+    const calcPlanEnd = (plan: ProductionPlan, mountingMins: number): Date => {
+      if (plan.expectedStartDate) {
+        const sh1 = plan.shift1 ?? true;
+        const sh2 = plan.shift2 ?? true;
+        const sh3 = plan.shift3 ?? true;
+        const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
+        const cycles = Math.ceil(plan.quantity / effectiveCavities);
+        let productionMinutes: number | null = null;
+        if (plan.normPerShift && plan.normPerShift > 0) {
+          productionMinutes = Math.ceil((plan.quantity / plan.normPerShift) * 480);
+        } else if (plan.cycleTimeSeconds && plan.cycleTimeSeconds > 0) {
+          productionMinutes = Math.ceil((cycles * plan.cycleTimeSeconds) / 60);
+        }
+        if (productionMinutes !== null) {
+          return new Date(advanceShiftMinutes(plan.expectedStartDate, mountingMins + productionMinutes, sh1, sh2, sh3));
+        }
+      }
+      return plan.expectedEndDate ? new Date(plan.expectedEndDate) : monthEnd;
+    };
+
+    const getBar = (plan: ProductionPlan, mountingMins: number) => {
       if (!plan.expectedStartDate && !plan.expectedEndDate) return null;
       const start = plan.expectedStartDate ? new Date(plan.expectedStartDate) : monthStart;
-      const end = plan.expectedEndDate ? new Date(plan.expectedEndDate) : monthEnd;
+      const end = calcPlanEnd(plan, mountingMins);
       if (end < monthStart || start > monthEnd) return null;
       const cs = start < monthStart ? monthStart : start;
       const ce = end > monthEnd ? monthEnd : end;
       const startFrac = Math.max((cs.getDate() - 1 + (cs.getHours() * 60 + cs.getMinutes()) / 1440) / daysInMonth, 0);
       const endFrac = Math.min((ce.getDate() - 1 + (ce.getHours() * 60 + ce.getMinutes()) / 1440) / daysInMonth, 1);
+      const totalMs = end.getTime() - start.getTime();
       return {
         left: startFrac * 100,
         width: Math.max((endFrac - startFrac) * 100, 100 / daysInMonth / 2),
         clipped: start < monthStart || end > monthEnd,
+        clippedLeft: start < monthStart,
+        totalMs,
       };
     };
 
@@ -731,18 +1036,16 @@ const ProductionPlanList = () => {
       );
       const laneEndPcts: number[] = [];
       return sorted.map(plan => {
-        const bar = getBar(plan);
+        const mountMins = mountingNeeded.has(plan.id) && plan.moldMountingTimeMinutes ? plan.moldMountingTimeMinutes : 0;
+        const bar = getBar(plan, mountMins);
         if (!bar) return { plan, lane: 0, bar: null as null, mountFrac: 0 };
         const barEnd = bar.left + bar.width;
         let lane = laneEndPcts.findIndex(e => e <= bar.left);
         if (lane === -1) lane = laneEndPcts.length;
         laneEndPcts[lane] = barEnd;
-        let mountFrac = 0;
-        if (mountingNeeded.has(plan.id) && plan.moldMountingTimeMinutes && plan.expectedStartDate && plan.expectedEndDate) {
-          const totalMs = new Date(plan.expectedEndDate).getTime() - new Date(plan.expectedStartDate).getTime();
-          const mountMs = plan.moldMountingTimeMinutes * 60 * 1000;
-          mountFrac = totalMs > 0 ? Math.min(mountMs / totalMs, 0.5) : 0;
-        }
+        const mountFrac = (mountMins > 0 && bar.totalMs > 0)
+          ? Math.min((mountMins * 60 * 1000) / bar.totalMs, 0.5)
+          : 0;
         return { plan, lane, bar, mountFrac };
       });
     };
@@ -828,7 +1131,7 @@ const ProductionPlanList = () => {
                     {visible.map(({ plan, lane, bar, mountFrac }) => {
                       if (!bar) return null;
                       const colors = barColor(plan.status);
-                      const hasMounting = mountingNeeded.has(plan.id) && mountFrac > 0;
+                      const hasMounting = mountingNeeded.has(plan.id) && mountFrac > 0 && !bar.clippedLeft;
                       const tooltipContent = (
                         <Box>
                           <Typography variant="caption" display="block">{plan.itemCode} — {plan.itemName}</Typography>
@@ -1025,7 +1328,7 @@ const ProductionPlanList = () => {
               onChange={(e) => {
                 setEditQty(e.target.value);
                 const qty = parseInt(e.target.value, 10);
-                if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, editStartDate, editDialogPlan);
+                if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, editStartDate, editDialogPlan, editShift1, editShift2, editShift3);
               }}
               inputProps={{ min: 1 }}
               fullWidth
@@ -1055,6 +1358,52 @@ const ProductionPlanList = () => {
                 </Alert>
               );
             })()}
+            <Box
+              sx={{
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                px: 1,
+                py: 0.5,
+                backgroundColor: 'action.hover',
+              }}
+            >
+              <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ display: 'block', mb: 0.25 }}>
+                {t('productionPlan.form.activeShifts')}
+              </Typography>
+              <Box display="flex" gap={0} flexWrap="wrap">
+                <FormControlLabel
+                  control={<Checkbox size="small" checked={editShift1} color="secondary" onChange={(e) => {
+                    if (!e.target.checked && !editShift2 && !editShift3) return;
+                    setEditShift1(e.target.checked);
+                    const qty = parseInt(editQty, 10);
+                    if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, editStartDate, editDialogPlan, e.target.checked, editShift2, editShift3);
+                  }} />}
+                  label={<Typography variant="body2" fontWeight={500}>{t('productionPlan.form.shift1')}</Typography>}
+                  sx={{ mr: 1 }}
+                />
+                <FormControlLabel
+                  control={<Checkbox size="small" checked={editShift2} color="secondary" onChange={(e) => {
+                    if (!e.target.checked && !editShift1 && !editShift3) return;
+                    setEditShift2(e.target.checked);
+                    const qty = parseInt(editQty, 10);
+                    if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, editStartDate, editDialogPlan, editShift1, e.target.checked, editShift3);
+                  }} />}
+                  label={<Typography variant="body2" fontWeight={500}>{t('productionPlan.form.shift2')}</Typography>}
+                  sx={{ mr: 1 }}
+                />
+                <FormControlLabel
+                  control={<Checkbox size="small" checked={editShift3} color="secondary" onChange={(e) => {
+                    if (!e.target.checked && !editShift1 && !editShift2) return;
+                    setEditShift3(e.target.checked);
+                    const qty = parseInt(editQty, 10);
+                    if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, editStartDate, editDialogPlan, editShift1, editShift2, e.target.checked);
+                  }} />}
+                  label={<Typography variant="body2" fontWeight={500}>{t('productionPlan.form.shift3')}</Typography>}
+                  sx={{ mr: 0 }}
+                />
+              </Box>
+            </Box>
             <TextField
               label={t('productionPlan.form.expectedStartDate')}
               type="datetime-local"
@@ -1063,9 +1412,14 @@ const ProductionPlanList = () => {
               onChange={(e) => {
                 setEditStartDate(e.target.value);
                 const qty = parseInt(editQty, 10);
-                if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, e.target.value, editDialogPlan);
+                if (qty > 0 && editDialogPlan) recalcEditEndDate(qty, e.target.value, editDialogPlan, editShift1, editShift2, editShift3);
               }}
               InputLabelProps={{ shrink: true }}
+              inputProps={{ min: editMinStartDate ?? undefined }}
+              error={editStartDateError}
+              helperText={editStartDateError && editMinStartDate
+                ? t('productionPlan.editDialog.startDateTooEarly', { date: new Date(editMinStartDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) })
+                : undefined}
               fullWidth
             />
             <TextField
@@ -1076,16 +1430,17 @@ const ProductionPlanList = () => {
               onChange={(e) => {
                 setEditEndDate(e.target.value);
                 const qty = parseInt(editQty, 10);
-                if (qty > 0 && editDialogPlan) recalcEditStartDate(qty, e.target.value, editDialogPlan);
+                if (qty > 0 && editDialogPlan) recalcEditStartDate(qty, e.target.value, editDialogPlan, editShift1, editShift2, editShift3);
               }}
               InputLabelProps={{ shrink: true }}
               fullWidth
             />
-            {editDialogPlan && editQty && parseInt(editQty, 10) > 0 && (editDialogPlan.normPerShift || editDialogPlan.cycleTimeSeconds) && (() => {
+            {editDialogPlan && editQty && parseInt(editQty, 10) > 0 && editStartDate && (editDialogPlan.normPerShift || editDialogPlan.cycleTimeSeconds) && (() => {
               const productionMinutes = calcEditProductionMinutes(parseInt(editQty, 10), editDialogPlan);
               if (!productionMinutes) return null;
-              const totalMinutes = editMountingMinutes + productionMinutes;
               const productionShifts = Math.ceil(productionMinutes / 480);
+              const calcEnd = advanceShiftMinutes(editStartDate, editMountingMinutes + productionMinutes, editShift1, editShift2, editShift3);
+              const totalMinutes = Math.round((new Date(calcEnd).getTime() - new Date(editStartDate).getTime()) / 60000);
               const d = Math.floor(totalMinutes / 1440);
               const h = Math.floor((totalMinutes % 1440) / 60);
               const m = totalMinutes % 60;
@@ -1098,11 +1453,11 @@ const ProductionPlanList = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogPlan(null)}>{t('productionPlan.editDialog.cancel')}</Button>
+          <Button variant="outlined" color="inherit" onClick={() => setEditDialogPlan(null)}>{t('productionPlan.editDialog.cancel')}</Button>
           <Button
             variant="contained"
             onClick={handleEditSave}
-            disabled={!editQty || parseInt(editQty, 10) < 1 || !editMachineId}
+            disabled={!editQty || parseInt(editQty, 10) < 1 || !editMachineId || editStartDateError}
           >
             {t('productionPlan.editDialog.save')}
           </Button>

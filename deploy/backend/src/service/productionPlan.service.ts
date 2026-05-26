@@ -11,12 +11,15 @@ import {
   getProductionPlanByIdQuery,
   getProductionPlansByMachineQuery,
   getProductionPlansByOrderQuery,
+  getInProgressPlanByMachineNumberQuery,
   getQueuedPlansAfterPositionQuery,
+  incrementProducedQuantityQuery,
   reorderProductionPlansQuery,
   updatePlanDatesQuery,
   updateProductionPlanQuery,
   updateProductionPlanStatusQuery,
 } from "../models/productionPlan.model";
+import { createActionQuery } from "../models/productionPlanAction.model";
 import { ApiError } from "../shared/error/ApiError";
 import { CreateProductionPlanData, ProductionPlan, ProductionPlanStatus, ReorderPlanItem, UpdateProductionPlanData } from "./productionPlan.service.types";
 
@@ -30,6 +33,70 @@ const toLocalString = (d: Date): string => {
 const addMinutes = (dateStr: string, minutes: number): string =>
   toLocalString(new Date(new Date(dateStr).getTime() + minutes * 60 * 1000));
 
+// Shift windows within a day [startMin, endMin, activeShift]
+// 00:00–06:00 → shift 3, 06:00–14:00 → shift 1, 14:00–22:00 → shift 2, 22:00–24:00 → shift 3
+const SHIFT_WINDOWS: [number, number, 's1' | 's2' | 's3'][] = [
+  [0,    360,  's3'],
+  [360,  840,  's1'],
+  [840,  1320, 's2'],
+  [1320, 1440, 's3'],
+];
+
+const advanceShiftMinutes = (
+  startDateStr: string,
+  totalMinutes: number,
+  s1: boolean, s2: boolean, s3: boolean
+): string => {
+  if (!s1 && !s2 && !s3) return addMinutes(startDateStr, totalMinutes);
+  const flags: Record<'s1' | 's2' | 's3', boolean> = { s1, s2, s3 };
+
+  let d = new Date(startDateStr);
+  let remaining = totalMinutes;
+
+  for (let guard = 0; remaining > 0 && guard < 100000; guard++) {
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const minsOfDay = Math.round((d.getTime() - dayStart.getTime()) / 60000);
+
+    const winIdx = SHIFT_WINDOWS.findIndex(([ws, we]) => minsOfDay >= ws && minsOfDay < we);
+
+    if (winIdx === -1) {
+      // At or past end of day (minsOfDay >= 1440) — advance to next day
+      d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      continue;
+    }
+
+    const [, winEnd, shift] = SHIFT_WINDOWS[winIdx];
+    const active = flags[shift];
+
+    if (active) {
+      const room = winEnd - minsOfDay;
+      if (remaining <= room) {
+        d = new Date(d.getTime() + remaining * 60000);
+        remaining = 0;
+      } else {
+        remaining -= room;
+        const nextIdx = winIdx + 1;
+        if (nextIdx >= SHIFT_WINDOWS.length) {
+          d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+        } else {
+          const [nextStart] = SHIFT_WINDOWS[nextIdx];
+          d = new Date(dayStart.getTime() + nextStart * 60000);
+        }
+      }
+    } else {
+      const nextIdx = winIdx + 1;
+      if (nextIdx >= SHIFT_WINDOWS.length) {
+        d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      } else {
+        const [nextStart] = SHIFT_WINDOWS[nextIdx];
+        d = new Date(dayStart.getTime() + nextStart * 60000);
+      }
+    }
+  }
+
+  return toLocalString(d);
+};
+
 const calcDurationMinutes = (
   qty: number,
   cavities: number | null | undefined,
@@ -38,8 +105,8 @@ const calcDurationMinutes = (
 ): number | null => {
   const effectiveCavities = cavities && cavities > 0 ? cavities : 1;
   const cycles = Math.ceil(qty / effectiveCavities);
-  // normPerShift = cycles per shift; takes priority as the real-world production norm
-  if (normPerShift && normPerShift > 0) return Math.ceil((cycles / normPerShift) * 480);
+  // normPerShift = pieces per shift (not injections); takes priority as the real-world production norm
+  if (normPerShift && normPerShift > 0) return Math.ceil((qty / normPerShift) * 480);
   if (cycleTimeSeconds && cycleTimeSeconds > 0) return Math.ceil((cycles * cycleTimeSeconds) / 60);
   return null;
 };
@@ -100,7 +167,9 @@ const recalcAllQueuedDatesForMachine = async (machineId: string): Promise<void> 
   for (const plan of queuedPlans) {
     const mountingMinutes = await getMountingMinutes(plan, prevMoldId);
     const productionMinutes = calcDurationMinutes(plan.quantity, plan.cavities, plan.cycleTimeSeconds, plan.normPerShift);
-    const endDate = productionMinutes !== null ? addMinutes(prevEndDate, mountingMinutes + productionMinutes) : null;
+    const endDate = productionMinutes !== null
+      ? advanceShiftMinutes(prevEndDate, mountingMinutes + productionMinutes, plan.shift1 ?? true, plan.shift2 ?? true, plan.shift3 ?? true)
+      : null;
     await updatePlanDatesQuery(plan.id, prevEndDate, endDate);
     prevEndDate = endDate ?? prevEndDate;
     prevMoldId = plan.moldId;
@@ -116,7 +185,7 @@ const cascadePlanDates = async (updatedPlan: ProductionPlan): Promise<void> => {
     const mountingMinutes = await getMountingMinutes(updatedPlan, undefined);
     const productionMinutes = calcDurationMinutes(updatedPlan.quantity, updatedPlan.cavities, updatedPlan.cycleTimeSeconds, updatedPlan.normPerShift);
     if (productionMinutes !== null) {
-      anchorEndDate = addMinutes(updatedPlan.expectedStartDate, mountingMinutes + productionMinutes);
+      anchorEndDate = advanceShiftMinutes(updatedPlan.expectedStartDate, mountingMinutes + productionMinutes, updatedPlan.shift1 ?? true, updatedPlan.shift2 ?? true, updatedPlan.shift3 ?? true);
       await updatePlanDatesQuery(updatedPlan.id, updatedPlan.expectedStartDate, anchorEndDate);
     }
   }
@@ -131,7 +200,9 @@ const cascadePlanDates = async (updatedPlan: ProductionPlan): Promise<void> => {
   for (const plan of subsequent) {
     const mountingMinutes = await getMountingMinutes(plan, prevMoldId);
     const productionMinutes = calcDurationMinutes(plan.quantity, plan.cavities, plan.cycleTimeSeconds, plan.normPerShift);
-    const endDate = productionMinutes !== null ? addMinutes(prevEndDate, mountingMinutes + productionMinutes) : null;
+    const endDate = productionMinutes !== null
+      ? advanceShiftMinutes(prevEndDate, mountingMinutes + productionMinutes, plan.shift1 ?? true, plan.shift2 ?? true, plan.shift3 ?? true)
+      : null;
     await updatePlanDatesQuery(plan.id, prevEndDate, endDate);
     prevEndDate = endDate ?? prevEndDate;
     prevMoldId = plan.moldId;
@@ -249,5 +320,40 @@ export const reorderProductionPlans = async (machineId: string, updates: Reorder
   } catch (error) {
     if (error instanceof ApiError) throw error;
     throw new ApiError("Error reordering production plans!", httpStatus.INTERNAL_SERVER_ERROR);
+  }
+};
+
+export const processMachineCycleEvent = async (machineNumber: number): Promise<{
+  planId: string;
+  machineNumber: number;
+  cavities: number;
+  producedQuantity: number;
+  plannedQuantity: number;
+}> => {
+  try {
+    const plan = await getInProgressPlanByMachineNumberQuery(machineNumber);
+    if (!plan) throw new ApiError(`No in-progress plan found for machine #${machineNumber}`, httpStatus.NOT_FOUND);
+
+    const cavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
+    const newProducedQty = (plan.producedQuantity ?? 0) + cavities;
+
+    await incrementProducedQuantityQuery(plan.id, cavities);
+    await createActionQuery({
+      productionPlanId: plan.id,
+      actionType: 'cycle_completed',
+      quantity: cavities,
+      notes: `Machine #${machineNumber} — cycle completed (${cavities} piece${cavities !== 1 ? 's' : ''})`,
+    });
+
+    return {
+      planId: plan.id,
+      machineNumber,
+      cavities,
+      producedQuantity: newProducedQty,
+      plannedQuantity: plan.quantity,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError("Error processing machine cycle event!", httpStatus.INTERNAL_SERVER_ERROR);
   }
 };

@@ -16,7 +16,6 @@ module.exports = {
         ('unos_skarta_produkcija',    'Unos škarta u produkciji',          'Unos broja i razloga škarta u toku ili na kraju produkcije',                     TRUE, NOW(), NOW()),
         ('povecanje_kolicine',        'Ažuriranje količine komada',        'Unos trenutne količine proizvedenih komada u toku plana',                        TRUE, NOW(), NOW()),
         ('potvrda_pune_kaveze',       'Potvrda pune kaveze',               'Operater potvrđuje da je kavez pun i spreman za preuzimanje od strane magacina', TRUE, NOW(), NOW()),
-        ('izmena_operatera',          'Izmena operatera na mašini',        'Promena operatera koji aktivno radi na planu produkcije',                        TRUE, NOW(), NOW()),
         ('kontrola_kk_u_produkciji',  'Kontrola kvaliteta u produkciji',   'Kontrolor kvaliteta vrši pregled komada u toku produkcije',                      TRUE, NOW(), NOW()),
         ('zaustavljanje_plana',       'Zaustavljanje plana produkcije',    'Plan produkcije je privremeno zaustavljen',                                       TRUE, NOW(), NOW()),
         ('zavrsetak_plana',           'Završetak plana produkcije',        'Plan produkcije je uspešno završen i potvrđena finalna količina',                TRUE, NOW(), NOW()),

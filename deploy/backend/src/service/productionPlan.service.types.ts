@@ -28,6 +28,9 @@ export type ProductionPlan = {
   moldMountingTimeMinutes?: number | null;
   moldCurrentMachineId?: string | null;
   scrapQuantity?: number | null;
+  shift1?: boolean;
+  shift2?: boolean;
+  shift3?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -41,6 +44,9 @@ export type CreateProductionPlanData = {
   expectedStartDate?: string | null;
   expectedEndDate?: string | null;
   notes?: string | null;
+  shift1?: boolean;
+  shift2?: boolean;
+  shift3?: boolean;
 };
 
 export type ReorderPlanItem = { id: string; position: number };
@@ -56,4 +62,7 @@ export type UpdateProductionPlanData = {
   expectedEndDate?: string | null;
   status: ProductionPlanStatus;
   notes?: string | null;
+  shift1?: boolean;
+  shift2?: boolean;
+  shift3?: boolean;
 };

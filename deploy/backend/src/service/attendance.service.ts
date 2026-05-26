@@ -114,15 +114,21 @@ type AttendanceStats = {
 };
 
 const fetchShiftConfig = async (): Promise<ShiftConfig> => {
-  const [stdCfg, nightStartCfg, nightEndCfg, graceCfg, overtimeMinCfg, breakCfg] =
-    await Promise.all([
-      getSystemConfigByKeyQuery("standardWorkMinutes"),
-      getSystemConfigByKeyQuery("nightStartHour"),
-      getSystemConfigByKeyQuery("nightEndHour"),
-      getSystemConfigByKeyQuery("shiftGracePeriodMinutes"),
-      getSystemConfigByKeyQuery("overtimeMinimumMinutes"),
-      getSystemConfigByKeyQuery("standardBreakMinutes"),
-    ]);
+  const [
+    stdCfg,
+    nightStartCfg,
+    nightEndCfg,
+    graceCfg,
+    overtimeMinCfg,
+    breakCfg,
+  ] = await Promise.all([
+    getSystemConfigByKeyQuery("standardWorkMinutes"),
+    getSystemConfigByKeyQuery("nightStartHour"),
+    getSystemConfigByKeyQuery("nightEndHour"),
+    getSystemConfigByKeyQuery("shiftGracePeriodMinutes"),
+    getSystemConfigByKeyQuery("overtimeMinimumMinutes"),
+    getSystemConfigByKeyQuery("standardBreakMinutes"),
+  ]);
   return {
     standardWorkMinutes: parseInt(stdCfg?.value ?? "480", 10),
     nightStart: parseInt(nightStartCfg?.value ?? "22", 10),
@@ -147,41 +153,70 @@ const computeAttendanceStats = (
 
   const shiftEnd = shiftEndTime(shiftType, checkIn);
 
-  const minutesEarly = checkIn < shiftStart
-    ? Math.round((shiftStart.getTime() - checkIn.getTime()) / 60000)
-    : 0;
-  const minutesLateCheckout = checkOut > shiftEnd
-    ? Math.round((checkOut.getTime() - shiftEnd.getTime()) / 60000)
-    : 0;
+  const minutesEarly =
+    checkIn < shiftStart
+      ? Math.round((shiftStart.getTime() - checkIn.getTime()) / 60000)
+      : 0;
+  const minutesLateCheckout =
+    checkOut > shiftEnd
+      ? Math.round((checkOut.getTime() - shiftEnd.getTime()) / 60000)
+      : 0;
 
   let effectiveCheckIn = checkIn;
-  if (minutesEarly > 0 && minutesEarly <= cfg.gracePeriodMinutes && minutesLateCheckout <= cfg.gracePeriodMinutes) {
+  if (
+    minutesEarly > 0 &&
+    minutesEarly <= cfg.gracePeriodMinutes &&
+    minutesLateCheckout <= cfg.gracePeriodMinutes
+  ) {
     effectiveCheckIn = shiftStart;
   }
 
   let effectiveCheckOut = checkOut;
-  if (minutesLateCheckout > 0 && minutesLateCheckout <= cfg.gracePeriodMinutes) {
+  if (
+    minutesLateCheckout > 0 &&
+    minutesLateCheckout <= cfg.gracePeriodMinutes
+  ) {
     effectiveCheckOut = shiftEnd;
   }
 
-  const rawWorkMinutes = Math.round((effectiveCheckOut.getTime() - effectiveCheckIn.getTime()) / 60000);
+  const rawWorkMinutes = Math.round(
+    (effectiveCheckOut.getTime() - effectiveCheckIn.getTime()) / 60000,
+  );
   const trimApplies =
     rawWorkMinutes > cfg.standardWorkMinutes &&
     rawWorkMinutes - cfg.standardBreakMinutes <= cfg.standardWorkMinutes;
   const mandatoryBreak = trimApplies ? cfg.standardBreakMinutes : 0;
   const breakDeduction = Math.max(totalBreakMinutes, mandatoryBreak);
   const workMinutes = Math.max(0, rawWorkMinutes - breakDeduction);
-  const isWeekend = effectiveCheckIn.getDay() === 0 || effectiveCheckIn.getDay() === 6;
+  const isWeekend =
+    effectiveCheckIn.getDay() === 0 || effectiveCheckIn.getDay() === 6;
   const weekendMinutes = isWeekend ? workMinutes : 0;
-  const rawNightMinutes = computeNightMinutes(effectiveCheckIn, effectiveCheckOut, cfg.nightStart, cfg.nightEnd);
+  const rawNightMinutes = computeNightMinutes(
+    effectiveCheckIn,
+    effectiveCheckOut,
+    cfg.nightStart,
+    cfg.nightEnd,
+  );
   // break deduction absorbs non-standard time (early arrival / late checkout) which is where
   // night minutes typically accumulate for non-night-shift workers
   const nightMinutes = Math.max(0, rawNightMinutes - breakDeduction);
   const overtimeMinutes = Math.max(0, workMinutes - cfg.standardWorkMinutes);
-  const regularMinutes = Math.max(0, workMinutes - overtimeMinutes - nightMinutes);
-  const overtimeStatus = overtimeMinutes >= cfg.overtimeMinimumMinutes ? "pending" : null;
+  const regularMinutes = Math.max(
+    0,
+    workMinutes - overtimeMinutes - nightMinutes,
+  );
+  const overtimeStatus =
+    overtimeMinutes >= cfg.overtimeMinimumMinutes ? "pending" : null;
 
-  return { shiftType, workMinutes, regularMinutes, overtimeMinutes, nightMinutes, weekendMinutes, overtimeStatus };
+  return {
+    shiftType,
+    workMinutes,
+    regularMinutes,
+    overtimeMinutes,
+    nightMinutes,
+    weekendMinutes,
+    overtimeStatus,
+  };
 };
 
 const checkoutSession = async (
@@ -192,7 +227,12 @@ const checkoutSession = async (
   options: { note?: string; systemClosed?: boolean } = {},
 ): Promise<Attendance> => {
   const totalBreakMinutes = await getTotalBreakMinutesQuery(sessionId);
-  const stats = computeAttendanceStats(checkIn, checkOut, totalBreakMinutes, cfg);
+  const stats = computeAttendanceStats(
+    checkIn,
+    checkOut,
+    totalBreakMinutes,
+    cfg,
+  );
 
   return updateAttendanceCheckOutQuery(
     sessionId,
@@ -251,7 +291,12 @@ export const kioskAction = async (
       now,
       shiftType,
     );
-    return { status: "checked_in", personName: person.name, time: now, attendance };
+    return {
+      status: "checked_in",
+      personName: person.name,
+      time: now,
+      attendance,
+    };
   }
 
   const checkInTime = new Date(openSession.checkIn);
@@ -297,7 +342,11 @@ export const kioskAction = async (
 
   if (openBreak) {
     await closeOpenBreakQuery(openSession.id, now);
-    return { status: "returned_from_break", personName: person.name, time: now };
+    return {
+      status: "returned_from_break",
+      personName: person.name,
+      time: now,
+    };
   }
 
   if (requestedAction === "break") {
@@ -315,7 +364,12 @@ export const kioskAction = async (
     now,
     cfg,
   );
-  return { status: "checked_out", personName: person.name, time: now, attendance };
+  return {
+    status: "checked_out",
+    personName: person.name,
+    time: now,
+    attendance,
+  };
 };
 
 export const getAllAttendances = async (
@@ -421,16 +475,26 @@ export const createManualAttendance = async (
 
   if (input.checkOut) {
     const cfg = await fetchShiftConfig();
-    const stats = computeAttendanceStats(new Date(input.checkIn), new Date(input.checkOut), 0, cfg, input.shiftType ?? undefined);
-    return updateManualAttendanceQuery(record.id, {
-      shiftType: stats.shiftType,
-      workMinutes: stats.workMinutes,
-      regularMinutes: stats.regularMinutes,
-      overtimeMinutes: stats.overtimeMinutes,
-      nightMinutes: stats.nightMinutes,
-      weekendMinutes: stats.weekendMinutes,
-      overtimeStatus: stats.overtimeStatus,
-    }, editorPersonId);
+    const stats = computeAttendanceStats(
+      new Date(input.checkIn),
+      new Date(input.checkOut),
+      0,
+      cfg,
+      input.shiftType ?? undefined,
+    );
+    return updateManualAttendanceQuery(
+      record.id,
+      {
+        shiftType: stats.shiftType,
+        workMinutes: stats.workMinutes,
+        regularMinutes: stats.regularMinutes,
+        overtimeMinutes: stats.overtimeMinutes,
+        nightMinutes: stats.nightMinutes,
+        weekendMinutes: stats.weekendMinutes,
+        overtimeStatus: stats.overtimeStatus,
+      },
+      editorPersonId,
+    );
   }
 
   return record;
@@ -446,10 +510,14 @@ export const updateManualAttendance = async (
     throw new ApiError("Attendance record not found.", httpStatus.NOT_FOUND);
   }
 
-  const finalCheckIn = update.checkIn ? new Date(update.checkIn) : new Date(record.checkIn);
+  const finalCheckIn = update.checkIn
+    ? new Date(update.checkIn)
+    : new Date(record.checkIn);
   const finalCheckOut = update.checkOut
     ? new Date(update.checkOut)
-    : record.checkOut ? new Date(record.checkOut) : null;
+    : record.checkOut
+      ? new Date(record.checkOut)
+      : null;
 
   // keep date column in sync with checkIn date when checkIn is changed
   if (update.checkIn) {
@@ -462,8 +530,18 @@ export const updateManualAttendance = async (
       fetchShiftConfig(),
       getTotalBreakMinutesQuery(id),
     ]);
-    const shiftTypeOverride = (update.shiftType ?? record.shiftType) as "first" | "second" | "night" | undefined;
-    const stats = computeAttendanceStats(finalCheckIn, finalCheckOut, totalBreakMinutes, cfg, shiftTypeOverride ?? undefined);
+    const shiftTypeOverride = (update.shiftType ?? record.shiftType) as
+      | "first"
+      | "second"
+      | "night"
+      | undefined;
+    const stats = computeAttendanceStats(
+      finalCheckIn,
+      finalCheckOut,
+      totalBreakMinutes,
+      cfg,
+      shiftTypeOverride ?? undefined,
+    );
     statsUpdate = {
       shiftType: stats.shiftType,
       workMinutes: stats.workMinutes,
@@ -475,7 +553,11 @@ export const updateManualAttendance = async (
     };
   }
 
-  return updateManualAttendanceQuery(id, { ...update, ...statsUpdate }, editorPersonId);
+  return updateManualAttendanceQuery(
+    id,
+    { ...update, ...statsUpdate },
+    editorPersonId,
+  );
 };
 
 export const getPendingOvertime = async (

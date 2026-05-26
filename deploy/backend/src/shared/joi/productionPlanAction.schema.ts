@@ -1,8 +1,11 @@
 import Joi from "joi";
 
 const ACTION_TYPES = [
-  "mold_change_started", "mold_change_completed", "plan_started", "first_good_part_approved",
-  "operator_started", "operator_changed", "scrap_entry", "qty_increased",
+  "mold_change_started", "mold_change_completed",
+  "machine_setup_started", "machine_setup_completed",
+  "cycle_completed",
+  "plan_started", "first_good_part_approved",
+  "operator_started", "operator_ended", "scrap_entry", "qty_increased",
   "packaging_unit_full", "quality_checked", "plan_stopped", "plan_completed", "plan_change_started",
   "machine_service_started", "machine_service_ended", "machine_repair_started", "machine_repair_ended",
   "plan_resumed", "machine_fault_reported",

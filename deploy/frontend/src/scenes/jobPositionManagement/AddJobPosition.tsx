@@ -3,15 +3,8 @@ import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
   Button,
-  Checkbox,
   CircularProgress,
   Alert,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
   useTheme,
 } from '@mui/material';
 import { useEffect } from 'react';
@@ -36,6 +29,7 @@ import { fetchJobPositionCategories } from '@/state/jobPositionCategory/jobPosit
 import { selectJobPositionCategories } from '@/state/jobPositionCategory/jobPositionCategory.selectors.ts';
 import { fetchResponsibilities } from '@/state/responsibility/responsibility.actions.ts';
 import { selectResponsibilities } from '@/state/responsibility/responsibility.selectors.ts';
+import ResponsibilityGroupedSelect from '@/reusableComponents/ResponsibilityGroupedSelect';
 import { jobPositionSchema } from '@/zodValidationSchemas/jobPosition.schema';
 
 type AddJobPositionFormData = z.infer<typeof jobPositionSchema>;
@@ -176,37 +170,19 @@ const AddJobPosition = () => {
               />
             )}
           />
-          <FormControl fullWidth>
-            <InputLabel id="responsibilities-label">{t('jobPosition.form.responsibilities')}</InputLabel>
-            <Controller
-              name="responsibilities"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  labelId="responsibilities-label"
-                  id="responsibilities"
-                  multiple
-                  value={field.value ?? []}
-                  label={t('jobPosition.form.responsibilities')}
-                  onChange={(e: SelectChangeEvent<string[]>) =>
-                    field.onChange(e.target.value as string[])
-                  }
-                  renderValue={(selected) =>
-                    (selected as string[])
-                      .map((code) => allResponsibilities.find((r) => r.code === code)?.label ?? code)
-                      .join(', ')
-                  }
-                >
-                  {allResponsibilities.map((r) => (
-                    <MenuItem key={r.code} value={r.code}>
-                      <Checkbox checked={(field.value ?? []).includes(r.code)} />
-                      <ListItemText primary={r.label} secondary={r.code} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-          </FormControl>
+          <Controller
+            name="responsibilities"
+            control={control}
+            render={({ field }) => (
+              <ResponsibilityGroupedSelect
+                value={field.value ?? []}
+                onChange={field.onChange}
+                allResponsibilities={allResponsibilities}
+                label={t('jobPosition.form.responsibilities')}
+                error={errors.responsibilities?.message}
+              />
+            )}
+          />
 
           <Box display="flex" justifyContent="flex-end">
             <Button

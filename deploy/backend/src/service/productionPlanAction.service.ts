@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 import { createActionQuery, getActionsByPlanIdQuery } from "../models/productionPlanAction.model";
-import { getProductionPlanByIdQuery, incrementProducedQuantityQuery, incrementScrapQuantityQuery } from "../models/productionPlan.model";
+import { getProductionPlanByIdQuery, incrementProducedQuantityQuery, incrementScrapQuantityQuery, decrementProducedQuantityQuery } from "../models/productionPlan.model";
 import { getMoldMountedOnMachineQuery, setMoldCurrentMachineQuery } from "../models/mold.model";
 import { getPersonForActionVerificationQuery } from "../models/attendance.model";
 import { checkIfAdminQuery, checkUserHasResponsibilityQuery } from "../models/user.model";
@@ -11,13 +11,16 @@ import { CreateProductionPlanActionData, ProductionPlanAction, ProductionPlanAct
 const ACTION_RESPONSIBILITY_MAP: Record<ProductionPlanActionType, string> = {
   mold_change_started:    "pokretanje_izmene_kalupa",
   mold_change_completed:  "zavrsetak_izmene_kalupa",
+  machine_setup_started:  "pokretanje_podesavanja_masine",
+  machine_setup_completed:"zavrsetak_podesavanja_masine",
+  cycle_completed:        "zavrsetak_ciklusa",
   plan_started:           "pokretanje_plana",
   first_good_part_approved: "odobrenje_prvog_komada_kk",
   operator_started:       "pocetak_rada_operatera",
+  operator_ended:         "zavrsetak_rada_operatera",
   scrap_entry:            "unos_skarta_produkcija",
   qty_increased:          "povecanje_kolicine",
   packaging_unit_full:    "potvrda_pune_kaveze",
-  operator_changed:       "izmena_operatera",
   quality_checked:        "kontrola_kk_u_produkciji",
   plan_stopped:           "zaustavljanje_plana",
   plan_completed:         "zavrsetak_plana",
@@ -50,6 +53,7 @@ export const create = async (data: CreateProductionPlanActionData): Promise<Prod
     }
     if (data.productionPlanId && data.actionType === "scrap_entry" && data.quantity != null && data.quantity > 0) {
       await incrementScrapQuantityQuery(data.productionPlanId, data.quantity);
+      await decrementProducedQuantityQuery(data.productionPlanId, data.quantity);
     }
     if (data.productionPlanId && data.actionType === "mold_change_completed") {
       const plan = await getProductionPlanByIdQuery(data.productionPlanId);

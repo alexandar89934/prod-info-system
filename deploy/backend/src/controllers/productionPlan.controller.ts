@@ -85,3 +85,13 @@ export const reorderPlans = catchAsync(async (req: Request, res: Response) => {
   await productionPlanService.reorderProductionPlans(req.params.machineId, req.body.plans);
   res.status(httpStatus.OK).send({ success: true, message: "Plans reordered successfully!", content: {} });
 });
+
+export const machineCycleEvent = catchAsync(async (req: Request, res: Response) => {
+  const machineNumber = parseInt(req.body.machineNumber, 10);
+  if (!machineNumber || machineNumber < 1) {
+    res.status(httpStatus.BAD_REQUEST).send({ success: false, message: "machineNumber is required and must be a positive integer" });
+    return;
+  }
+  const result = await productionPlanService.processMachineCycleEvent(machineNumber);
+  res.status(httpStatus.OK).send({ success: true, message: "Cycle event processed", content: result });
+});

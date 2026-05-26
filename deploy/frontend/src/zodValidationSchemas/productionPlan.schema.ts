@@ -9,6 +9,9 @@ export const productionPlanSchema = z.object({
   expectedStartDate: z.string().nullable().optional(),
   expectedEndDate: z.string().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
+  shift1: z.boolean().optional().default(true),
+  shift2: z.boolean().optional().default(true),
+  shift3: z.boolean().optional().default(true),
 });
 
 export const updateProductionPlanSchema = productionPlanSchema.extend({

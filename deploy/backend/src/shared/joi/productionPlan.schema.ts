@@ -9,6 +9,9 @@ export const CreateProductionPlanSchema = Joi.object({
   expectedStartDate: Joi.string().isoDate().allow(null, "").optional(),
   expectedEndDate: Joi.string().isoDate().allow(null, "").optional(),
   notes: Joi.string().max(2000).allow(null, "").optional(),
+  shift1: Joi.boolean().optional(),
+  shift2: Joi.boolean().optional(),
+  shift3: Joi.boolean().optional(),
 });
 
 export const UpdateProductionPlanSchema = Joi.object({
@@ -21,6 +24,9 @@ export const UpdateProductionPlanSchema = Joi.object({
   expectedEndDate: Joi.string().isoDate().allow(null, "").optional(),
   status: Joi.string().valid("queued", "in_progress", "done", "cancelled").required(),
   notes: Joi.string().max(2000).allow(null, "").optional(),
+  shift1: Joi.boolean().optional(),
+  shift2: Joi.boolean().optional(),
+  shift3: Joi.boolean().optional(),
 });
 
 export const UpdateProductionPlanStatusSchema = Joi.object({

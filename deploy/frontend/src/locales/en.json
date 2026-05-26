@@ -90,7 +90,8 @@
       "description": "Description",
       "category": "Category",
       "addCategory": "Add Job Position Category",
-      "responsibilities": "Responsibilities"
+      "responsibilities": "Responsibilities",
+      "otherResponsibilities": "Other"
     }
   },
   "responsibility": {
@@ -583,6 +584,7 @@
       "cycleTimeSeconds": "Cycle Time (s)",
       "startupScrapCount": "Startup Scrap",
       "normPerShift": "Norm per Shift",
+      "normPerShiftHint": "Number of pieces per shift (not injections)",
       "pieceWeightG": "Piece Weight",
       "fromBom": "from BOM",
       "runnerWeightG": "Runner Weight (g)",
@@ -968,7 +970,11 @@
       "moldChangeOffset": "Mold change: {{minutes}} min — included in plan duration",
       "initialMountOffset": "Mold mounting: {{minutes}} min — included in plan duration",
       "shifts": "shift(s)",
-      "days": "day(s)"
+      "days": "day(s)",
+      "activeShifts": "Active shifts",
+      "shift1": "Shift 1 (06:00–14:00)",
+      "shift2": "Shift 2 (14:00–22:00)",
+      "shift3": "Shift 3 (22:00–06:00)"
     },
     "actions": {
       "title": "Log Action",
@@ -997,10 +1003,13 @@
       "types": {
         "mold_change_started": "Mold Change Started",
         "mold_change_completed": "Mold Change Completed",
+        "machine_setup_started": "Machine Setup Started",
+        "machine_setup_completed": "Machine Setup Completed",
+        "cycle_completed": "Cycle Completed",
         "plan_started": "Plan Started",
         "first_good_part_approved": "First Good Part Approved",
         "operator_started": "Operator Started",
-        "operator_changed": "Operator Changed",
+        "operator_ended": "Operator Ended",
         "scrap_entry": "Scrap Entry",
         "qty_increased": "Quantity Updated",
         "packaging_unit_full": "Packaging Unit Full",
@@ -1043,7 +1052,15 @@
       "quantity": "Quantity",
       "machine": "Machine",
       "save": "Save Changes",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "startDateTooEarly": "Overlaps with the plan above (earliest: {{date}})",
+      "startDateInPast": "Start date must be in the future"
+    },
+    "stats": {
+      "good": "Good parts",
+      "gross": "Gross produced",
+      "injections": "Injections",
+      "cavities": "{{count}} nest(s)"
     }
   },
   "dataGrid": {

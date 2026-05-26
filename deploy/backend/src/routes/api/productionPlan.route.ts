@@ -12,6 +12,9 @@ import {
 
 export const productionPlanRouter = Router();
 
+// Public endpoint — called by external machine devices (no auth token required)
+productionPlanRouter.route("/machine-cycle").post(productionPlanController.machineCycleEvent);
+
 productionPlanRouter.use(verifyTokenMiddleware);
 
 productionPlanRouter.route("/").get(productionPlanController.getAllProductionPlans);

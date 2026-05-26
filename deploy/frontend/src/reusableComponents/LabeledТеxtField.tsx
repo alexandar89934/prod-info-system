@@ -15,6 +15,7 @@ interface FormFieldProps {
   minWidth?: string;
   fullWidth?: boolean;
   InputLabelProps?: { shrink?: boolean };
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 export const LabeledXtField = ({
@@ -29,6 +30,7 @@ export const LabeledXtField = ({
   minWidth = '220px',
   fullWidth = true,
   InputLabelProps,
+  inputProps,
 }: FormFieldProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -78,6 +80,7 @@ export const LabeledXtField = ({
         rows={rows}
         fullWidth={fullWidth}
         InputLabelProps={(type === 'date' || type === 'datetime-local') ? { shrink: true, ...InputLabelProps } : InputLabelProps}
+        inputProps={inputProps}
         sx={{
           '& textarea': {
             maxHeight: '25vh',

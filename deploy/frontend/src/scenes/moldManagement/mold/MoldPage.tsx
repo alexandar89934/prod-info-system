@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormHelperText,
   Grid,
   IconButton,
   InputAdornment,
@@ -701,15 +702,17 @@ const MoldPage = () => {
               sx={{ flex: 1 }}
               inputProps={{ min: 0 }}
             />
-            <TextField
-              label={t('mold.form.normPerShift')}
-              type="number"
-              size="small"
-              value={assignNormPerShift}
-              onChange={(e) => setAssignNormPerShift(e.target.value)}
-              sx={{ flex: 1 }}
-              inputProps={{ min: 1 }}
-            />
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <TextField
+                label={t('mold.form.normPerShift')}
+                type="number"
+                size="small"
+                value={assignNormPerShift}
+                onChange={(e) => setAssignNormPerShift(e.target.value)}
+                inputProps={{ min: 1 }}
+              />
+              <FormHelperText>{t('mold.form.normPerShiftHint')}</FormHelperText>
+            </Box>
           </Box>
           <Box display="flex" gap={2} mt={2} alignItems="flex-start">
             <TextField
@@ -798,15 +801,17 @@ const MoldPage = () => {
               sx={{ flex: 1 }}
               inputProps={{ min: 0 }}
             />
-            <TextField
-              label={t('mold.form.normPerShift')}
-              type="number"
-              size="small"
-              value={editNormPerShift}
-              onChange={(e) => setEditNormPerShift(e.target.value)}
-              sx={{ flex: 1 }}
-              inputProps={{ min: 1 }}
-            />
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <TextField
+                label={t('mold.form.normPerShift')}
+                type="number"
+                size="small"
+                value={editNormPerShift}
+                onChange={(e) => setEditNormPerShift(e.target.value)}
+                inputProps={{ min: 1 }}
+              />
+              <FormHelperText>{t('mold.form.normPerShiftHint')}</FormHelperText>
+            </Box>
           </Box>
           <Box display="flex" gap={2} mt={2} alignItems="flex-start">
             <TextField

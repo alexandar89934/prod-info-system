@@ -117,11 +117,65 @@ Also, time calclulation for spending to a plan is not correct, it also need to t
 we also need to count time needed to mount mold to a machine, i propose adding new field to MoldMachineCompatibility. that time also need to be included in calculation of how much time will be needed to finish plan.
 we need to add information about time of expected mold change in that line where mold change is needed.
 //PROMPTED
+Shift flags implementation — TODO list
 
+  ---
+  Backend
 
-mold change time is not calculated in between plans. for example Poč.:13/05/2026, 22:04
-                                                                 Kraj:19/05/2026, 21:16 one plan, and than we have mold changeIzmena kalupaproc. 1h· 19/05, 21:16— 19/05, 22:16, and than Poč.:19/05/2026, 21:16
-                                                                                                                                                                                          Kraj:25/05/2026, 01:16, so it should be clear that mold change time should be calculated and beggining of next plan should be moved for that duration
+  1. Migration — create deploy/backend/migrations/20260515100000-add-shift-flags-to-production-plan.js
+    - ALTER TABLE "ProductionPlan" ADD COLUMN "shift1" BOOLEAN NOT NULL DEFAULT TRUE (same for shift2, shift3)
+  2. Service types (productionPlan.service.types.ts) — add to ProductionPlan, CreateProductionPlanData, UpdateProductionPlanData:
+    - shift1?: boolean; shift2?: boolean; shift3?: boolean;
+  3. Model (productionPlan.model.ts) — add shift1/2/3 to:
+    - createProductionPlanQuery INSERT (params $10, $11, $12)
+    - updateProductionPlanQuery UPDATE SET (params $10, $11, $12, bump WHERE "id" to $13)
+  4. Service (productionPlan.service.ts) — replace addMinutes with shift-aware walker:
+    - Add advanceShiftMinutes(startDateStr, totalMinutes, s1, s2, s3) — walks forward through shift windows [00:00–06:00 s3, 06:00–14:00 s1, 14:00–22:00 s2, 22:00–24:00 s3],
+  skips inactive, jumps to next window gap, advances day when all windows exhausted
+    - Replace all addMinutes(start, mounting + production) calls in cascadePlanDates and recalcAllQueuedDatesForMachine with advanceShiftMinutes(start, mounting + production,
+  plan.shift1 ?? true, plan.shift2 ?? true, plan.shift3 ?? true)
+  5. Joi schema (productionPlan.schema.ts) — add to Create and Update schemas:
+    - shift1: Joi.boolean().optional(), same for shift2, shift3
+
+  ---
+  Frontend
+
+  6. Zod schema (productionPlan.schema.ts) — add to schema:
+    - shift1: z.boolean().optional().default(true) (same for shift2, shift3)
+  7. Frontend types (productionPlan.types.ts) — add to ProductionPlan:
+    - shift1?: boolean; shift2?: boolean; shift3?: boolean;
+  8. Shared utility — add to both addProductionPlan.tsx and index.tsx:
+    - advanceShiftMinutes(startDateStr, totalMinutes, s1, s2, s3) — same window logic as backend, returns toDatetimeLocal(result)
+    - retreatShiftMinutes(endDateStr, totalMinutes, s1, s2, s3) — same but walks backward through reversed windows
+  9. Add form (addProductionPlan.tsx):
+    - Add shift1/2/3 to defaultValues (all true)
+    - Add useWatch for selectedShift1/2/3
+    - Add Checkbox + FormControlLabel imports
+    - Add shift checkbox row in form (under the schedule section label, before start date)
+    - Replace addMinutes(start, mounting+production) → advanceShiftMinutes(start, mounting+production, s1, s2, s3) in start→end effect
+    - Replace flat subtraction in end→start effect → retreatShiftMinutes
+    - Add shift1/2/3 to selectedShift1/2/3 in effect dependency arrays
+    - Update getDurationInfo — compute elapsed from endDate - startDate instead of flat totalMinutes
+  10. Edit dialog (index.tsx):
+    - Add Checkbox + FormControlLabel imports
+    - Add state: editShift1, editShift2, editShift3 (useState, default true)
+    - Initialize them when opening dialog (in the onClick of edit icon): setEditShift1(plan.shift1 ?? true) etc.
+    - Pass shifts to recalcEditEndDate → use advanceShiftMinutes
+    - Pass shifts to recalcEditStartDate → use retreatShiftMinutes
+    - Add checkbox row in dialog (between mold change alert and start date field)
+    - Include shift1/2/3 in handleEditSave dispatch
+    - Update duration display — compute elapsed from editEndDate - editStartDate
+
+  ---
+  i18n (en.json + sr.json)
+
+  11. Add under productionPlan.form:
+    - "activeShifts": "Active shifts" / "Aktivne smene"
+    - "shift1": "Shift 1 (06:00–14:00)" / "1. smena (06:00–14:00)"
+    - "shift2": "Shift 2 (14:00–22:00)" / "2. smena (14:00–22:00)"
+    - "shift3": "Shift 3 (22:00–06:00)" / "3. smena (22:00–06:00)"
+
+                                                                                                                                                                                      Kraj:25/05/2026, 01:16, so it should be clear that mold change time should be calculated and beggining of next plan should be moved for that duration
 - leave requests
 - sick day requests
--
+- employee with user role shouldn't be able to add work positions to himself,it cna be done by admin.

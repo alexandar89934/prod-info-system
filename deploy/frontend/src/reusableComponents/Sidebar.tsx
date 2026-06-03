@@ -21,6 +21,8 @@ import {
   TabletAndroidOutlined,
   HowToRegOutlined,
   BuildOutlined,
+  DirectionsCarOutlined,
+  AssignmentTurnedInOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -121,6 +123,8 @@ const navItems: NavItem[] = [
   { textKey: 'sidebar.productionView', path: 'production-view', icon: <PlayCircleOutlined />, requiresAuth: true },
   { textKey: 'sidebar.maintenance', path: null, icon: null, requiresAuth: true },
   { textKey: 'sidebar.maintenanceTemplates', path: 'maintenance-template', icon: <BuildOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.maintenanceAssignments', path: 'maintenance-assignment', icon: <AssignmentTurnedInOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.vehicles', path: 'vehicle', icon: <DirectionsCarOutlined />, requiresAuth: true },
   { textKey: 'sidebar.kioskManagement', path: null, icon: null, requiresAuth: false },
   { textKey: 'sidebar.checkInKiosk', path: 'kiosk', icon: <HowToRegOutlined />, requiresAuth: false },
   { textKey: 'sidebar.machineKiosk', path: 'machine-kiosk', icon: <TabletAndroidOutlined />, requiresAuth: false },

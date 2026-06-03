@@ -25,6 +25,8 @@ import customerOrderSlice from '@/state/customerOrder/customerOrder.slice.ts';
 import productionPlanSlice from '@/state/productionPlan/productionPlan.slice.ts';
 import productionPlanActionSlice from '@/state/productionPlanAction/productionPlanAction.slice.ts';
 import maintenanceTemplateSlice from '@/state/maintenanceTemplate/maintenanceTemplate.slice';
+import vehicleSlice from '@/state/vehicle/vehicle.slice';
+import maintenanceAssignmentSlice from '@/state/maintenanceAssignment/maintenanceAssignment.slice';
 
 const reducer = combineReducers({
   theme: themeSlice,
@@ -51,6 +53,8 @@ const reducer = combineReducers({
   productionPlan: productionPlanSlice,
   productionPlanAction: productionPlanActionSlice,
   maintenanceTemplate: maintenanceTemplateSlice,
+  vehicle: vehicleSlice,
+  maintenanceAssignment: maintenanceAssignmentSlice,
 });
 
 export default { reducer };

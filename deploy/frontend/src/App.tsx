@@ -35,6 +35,11 @@ import MachinePlanDetail from '@/scenes/planManagement/productionPlan/machinePla
 import MaintenanceTemplateList from '@/scenes/maintenance/maintenanceTemplate/index.tsx';
 import AddMaintenanceTemplate from '@/scenes/maintenance/maintenanceTemplate/addMaintenanceTemplate.tsx';
 import EditMaintenanceTemplate from '@/scenes/maintenance/maintenanceTemplate/editMaintenanceTemplate.tsx';
+import VehicleList from '@/scenes/maintenance/vehicle/index.tsx';
+import AddVehicle from '@/scenes/maintenance/vehicle/addVehicle.tsx';
+import EditVehicle from '@/scenes/maintenance/vehicle/editVehicle.tsx';
+import MaintenanceAssignmentList from '@/scenes/maintenance/maintenanceAssignment/index.tsx';
+import AddMaintenanceAssignment from '@/scenes/maintenance/maintenanceAssignment/addMaintenanceAssignment.tsx';
 import AddCompany from '@/scenes/companyManagement/addCompany.tsx';
 import EditCompany from '@/scenes/companyManagement/editCompany.tsx';
 import CompanyPage from '@/scenes/companyManagement/CompanyPage.tsx';
@@ -495,6 +500,26 @@ function App() {
               <Route
                 path="/maintenance-template/edit/:id"
                 element={<ProtectedRoute><EditMaintenanceTemplate /></ProtectedRoute>}
+              />
+              <Route
+                path="/vehicle"
+                element={<ProtectedRoute><VehicleList /></ProtectedRoute>}
+              />
+              <Route
+                path="/vehicle/add"
+                element={<ProtectedRoute><AddVehicle /></ProtectedRoute>}
+              />
+              <Route
+                path="/vehicle/edit/:id"
+                element={<ProtectedRoute><EditVehicle /></ProtectedRoute>}
+              />
+              <Route
+                path="/maintenance-assignment"
+                element={<ProtectedRoute><MaintenanceAssignmentList /></ProtectedRoute>}
+              />
+              <Route
+                path="/maintenance-assignment/add"
+                element={<ProtectedRoute><AddMaintenanceAssignment /></ProtectedRoute>}
               />
               <Route
                 path="/attendance"

@@ -25,3 +25,5 @@ export * as productionPlanController from "./productionPlan.controller";
 export * as productionPlanActionController from "./productionPlanAction.controller";
 export * as machineKioskController from "./machineKiosk.controller";
 export * as maintenanceTemplateController from "./maintenanceTemplate.controller";
+export * as vehicleController from "./vehicle.controller";
+export * as maintenanceAssignmentController from "./maintenanceAssignment.controller";

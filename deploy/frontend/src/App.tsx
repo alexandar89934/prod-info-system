@@ -32,6 +32,9 @@ import ProductionPlanList from '@/scenes/planManagement/productionPlan/index.tsx
 import ProductionView from '@/scenes/planManagement/productionPlan/productionView.tsx';
 import AddProductionPlan from '@/scenes/planManagement/productionPlan/addProductionPlan.tsx';
 import MachinePlanDetail from '@/scenes/planManagement/productionPlan/machinePlanDetail.tsx';
+import MaintenanceTemplateList from '@/scenes/maintenance/maintenanceTemplate/index.tsx';
+import AddMaintenanceTemplate from '@/scenes/maintenance/maintenanceTemplate/addMaintenanceTemplate.tsx';
+import EditMaintenanceTemplate from '@/scenes/maintenance/maintenanceTemplate/editMaintenanceTemplate.tsx';
 import AddCompany from '@/scenes/companyManagement/addCompany.tsx';
 import EditCompany from '@/scenes/companyManagement/editCompany.tsx';
 import CompanyPage from '@/scenes/companyManagement/CompanyPage.tsx';
@@ -480,6 +483,18 @@ function App() {
               <Route
                 path="/machine-plan/:machineId"
                 element={<ProtectedRoute><MachinePlanDetail /></ProtectedRoute>}
+              />
+              <Route
+                path="/maintenance-template"
+                element={<ProtectedRoute><MaintenanceTemplateList /></ProtectedRoute>}
+              />
+              <Route
+                path="/maintenance-template/add"
+                element={<ProtectedRoute><AddMaintenanceTemplate /></ProtectedRoute>}
+              />
+              <Route
+                path="/maintenance-template/edit/:id"
+                element={<ProtectedRoute><EditMaintenanceTemplate /></ProtectedRoute>}
               />
               <Route
                 path="/attendance"

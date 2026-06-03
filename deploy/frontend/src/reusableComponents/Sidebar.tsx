@@ -20,6 +20,7 @@ import {
   PlayCircleOutlined,
   TabletAndroidOutlined,
   HowToRegOutlined,
+  BuildOutlined,
 } from '@mui/icons-material';
 import {
   Box,
@@ -118,6 +119,8 @@ const navItems: NavItem[] = [
   { textKey: 'sidebar.customerOrders', path: 'customer-order', icon: <ListAltOutlined />, requiresAuth: true },
   { textKey: 'sidebar.productionPlan', path: 'production-plan', icon: <EventNoteOutlined />, requiresAuth: true },
   { textKey: 'sidebar.productionView', path: 'production-view', icon: <PlayCircleOutlined />, requiresAuth: true },
+  { textKey: 'sidebar.maintenance', path: null, icon: null, requiresAuth: true },
+  { textKey: 'sidebar.maintenanceTemplates', path: 'maintenance-template', icon: <BuildOutlined />, requiresAuth: true },
   { textKey: 'sidebar.kioskManagement', path: null, icon: null, requiresAuth: false },
   { textKey: 'sidebar.checkInKiosk', path: 'kiosk', icon: <HowToRegOutlined />, requiresAuth: false },
   { textKey: 'sidebar.machineKiosk', path: 'machine-kiosk', icon: <TabletAndroidOutlined />, requiresAuth: false },

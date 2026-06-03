@@ -24,3 +24,4 @@ export * as customerOrderController from "./customerOrder.controller";
 export * as productionPlanController from "./productionPlan.controller";
 export * as productionPlanActionController from "./productionPlanAction.controller";
 export * as machineKioskController from "./machineKiosk.controller";
+export * as maintenanceTemplateController from "./maintenanceTemplate.controller";

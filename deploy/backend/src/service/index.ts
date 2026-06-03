@@ -25,3 +25,5 @@ export * as productionPlanService from "./productionPlan.service";
 export * as productionPlanActionService from "./productionPlanAction.service";
 export * as machineKioskService from "./machineKiosk.service";
 export * as maintenanceTemplateService from "./maintenanceTemplate.service";
+export * as vehicleService from "./vehicle.service";
+export * as maintenanceAssignmentService from "./maintenanceAssignment.service";

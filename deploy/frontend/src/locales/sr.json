@@ -398,6 +398,8 @@
     "systemConfig": "Podešavanja sistema",
     "maintenance": "Održavanje",
     "maintenanceTemplates": "Šabloni",
+    "maintenanceAssignments": "Dodjele",
+    "vehicles": "Vozila",
     "kioskManagement": "Kiosk",
     "checkInKiosk": "Kiosk prijave",
     "machineKiosk": "Kiosk mašina"
@@ -1124,6 +1126,48 @@
     "createSuccess": "Šablon održavanja uspešno kreiran!",
     "updateSuccess": "Šablon održavanja uspešno izmenjen!",
     "deleteSuccess": "Šablon održavanja uspešno obrisan!"
+  },
+  "vehicle": {
+    "title": "Vozila",
+    "add": "Dodaj vozilo",
+    "edit": "Izmeni vozilo",
+    "name": "Naziv",
+    "type": "Tip",
+    "licensePlate": "Registarska oznaka",
+    "model": "Model",
+    "yearOfManufacture": "Godina proizvodnje",
+    "notes": "Napomene",
+    "types": {
+      "car": "Automobil",
+      "forklift": "Viljuškar",
+      "truck": "Kamion",
+      "other": "Ostalo"
+    },
+    "deleteConfirm": "Obrisati ovo vozilo?",
+    "noData": "Nema vozila",
+    "createSuccess": "Vozilo uspešno kreirano!",
+    "updateSuccess": "Vozilo uspešno izmenjeno!",
+    "deleteSuccess": "Vozilo uspešno obrisano!"
+  },
+  "maintenanceAssignment": {
+    "title": "Dodjele održavanja",
+    "add": "Dodeli šablon",
+    "templateName": "Šablon",
+    "targetType": "Tip cilja",
+    "targetName": "Cilj",
+    "selectTemplate": "Izaberi šablon",
+    "selectTargets": "Izaberi ciljeve",
+    "noTargetsAvailable": "Svi ciljevi ovog tipa su već dodeljeni ovom šablonu.",
+    "deleteConfirm": "Ukloniti ovu dodjelu?",
+    "noData": "Nema dodjela",
+    "createSuccess": "Dodjele uspešno kreirane!",
+    "deleteSuccess": "Dodjela uklonjena.",
+    "targetTypes": {
+      "machine": "Mašina",
+      "equipment": "Oprema",
+      "mold": "Kalup",
+      "vehicle": "Vozilo"
+    }
   },
   "dataGrid": {
     "toolbarColumns": "Kolone",

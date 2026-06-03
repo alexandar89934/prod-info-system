@@ -20,7 +20,9 @@ import { personRouter } from "./person.route";
 import { productionPlanRouter } from "./productionPlan.route";
 import { productionPlanActionRouter } from "./productionPlanAction.route";
 import { machineKioskRouter } from "./machineKiosk.route";
+import { maintenanceAssignmentRouter } from "./maintenanceAssignment.route";
 import { maintenanceTemplateRouter } from "./maintenanceTemplate.route";
+import { vehicleRouter } from "./vehicle.route";
 import { responsibilityRouter } from "./responsibility.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
@@ -133,6 +135,14 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/maintenance-template",
     route: maintenanceTemplateRouter,
+  },
+  {
+    path: "/vehicle",
+    route: vehicleRouter,
+  },
+  {
+    path: "/maintenance-assignment",
+    route: maintenanceAssignmentRouter,
   },
 ];
 

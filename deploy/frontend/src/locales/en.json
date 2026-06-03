@@ -398,6 +398,8 @@
     "systemConfig": "System Settings",
     "maintenance": "Maintenance",
     "maintenanceTemplates": "Templates",
+    "maintenanceAssignments": "Assignments",
+    "vehicles": "Vehicles",
     "kioskManagement": "Kiosk",
     "checkInKiosk": "Check-in Kiosk",
     "machineKiosk": "Machine Kiosk"
@@ -1124,6 +1126,48 @@
     "createSuccess": "Maintenance template created successfully!",
     "updateSuccess": "Maintenance template updated successfully!",
     "deleteSuccess": "Maintenance template deleted successfully!"
+  },
+  "vehicle": {
+    "title": "Vehicles",
+    "add": "Add Vehicle",
+    "edit": "Edit Vehicle",
+    "name": "Name",
+    "type": "Type",
+    "licensePlate": "License Plate",
+    "model": "Model",
+    "yearOfManufacture": "Year of Manufacture",
+    "notes": "Notes",
+    "types": {
+      "car": "Car",
+      "forklift": "Forklift",
+      "truck": "Truck",
+      "other": "Other"
+    },
+    "deleteConfirm": "Delete this vehicle?",
+    "noData": "No vehicles found",
+    "createSuccess": "Vehicle created successfully!",
+    "updateSuccess": "Vehicle updated successfully!",
+    "deleteSuccess": "Vehicle deleted successfully!"
+  },
+  "maintenanceAssignment": {
+    "title": "Maintenance Assignments",
+    "add": "Assign Template",
+    "templateName": "Template",
+    "targetType": "Target Type",
+    "targetName": "Target",
+    "selectTemplate": "Select Template",
+    "selectTargets": "Select Targets",
+    "noTargetsAvailable": "All targets of this type are already assigned to this template.",
+    "deleteConfirm": "Remove this assignment?",
+    "noData": "No assignments found",
+    "createSuccess": "Assignments created successfully!",
+    "deleteSuccess": "Assignment removed.",
+    "targetTypes": {
+      "machine": "Machine",
+      "equipment": "Equipment",
+      "mold": "Mold",
+      "vehicle": "Vehicle"
+    }
   },
   "dataGrid": {
     "toolbarColumns": "Columns",

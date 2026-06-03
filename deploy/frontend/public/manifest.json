@@ -1,6 +1,6 @@
 {
-    "short_name": "BLCK",
-    "name": "Okidoki",
+    "short_name": "PIS",
+    "name": "ProdInfoSystem",
     "icons": [
       {
         "src": "57x57.ico",
@@ -10,7 +10,8 @@
       {
         "src": "192x192.png",
         "type": "image/png",
-        "sizes": "192x192"
+        "sizes": "192x192",
+        "purpose": "any maskable"
       },
       {
         "src": "256x256.png",

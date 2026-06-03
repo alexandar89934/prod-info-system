@@ -8,10 +8,13 @@ import { AuthError } from "../error/AuthError";
 
 import { config } from "./../../config/config";
 
-export const encodeJWT = <T extends object>(objectToEncode: T): string => {
+export const encodeJWT = <T extends object>(
+  objectToEncode: T,
+  expiresIn?: number
+): string => {
   const { secret, validity } = config.jwt;
 
-  const options: SignOptions = { expiresIn: Number(validity) };
+  const options: SignOptions = { expiresIn: expiresIn ?? Number(validity) };
 
   return sign(objectToEncode, secret, options);
 };

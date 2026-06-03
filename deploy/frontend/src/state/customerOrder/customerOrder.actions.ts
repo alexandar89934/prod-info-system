@@ -92,9 +92,10 @@ export const updateCustomerOrder = createAsyncThunk<
   { rejectValue: string }
 >('customerOrder/update', async (data, { rejectWithValue }) => {
   try {
+    const { id, ...body } = data;
     const response = await axiosServer.put(
-      `/customer-order/update/${data.id}`,
-      data
+      `/customer-order/update/${id}`,
+      body
     );
     if (!response.data.success)
       return rejectWithValue(response.data.message || 'Failed to update order');

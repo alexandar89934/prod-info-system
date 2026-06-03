@@ -79,6 +79,37 @@ Branches follow `US<epic>-<story>` pattern (e.g. `US02-03`).
 | US06-03 | Planned | Plan levels: monthly → weekly → daily → shift |
 | US06-04 | Planned | Raw material requisition plan, packaging plan |
 
+### US07 — Warehouse Management
+| Story | Status | Description |
+|-------|--------|-------------|
+| US07-01 | Planned | Stock management: item stock levels, lot/batch tracking, packaging unit registry |
+| US07-02 | Planned | Incoming goods: receive raw materials, record supplier, link to purchase order |
+| US07-03 | Planned | Production output receipt: receive finished goods from work order, link to production plan |
+| US07-04 | Planned | Picking & delivery: collect items for a customer order, generate delivery note (otpremnica) |
+| US07-05 | Planned | Stock query: where are items produced for a given order, which packaging units belong to a delivery |
+
+#### Warehouse Traceability Design (agreed 2026-05-27)
+
+**Order qty vs Plan qty are separate concepts — never auto-sync them.**
+- Customer order line quantity = what the customer requested (contractual, frozen)
+- Production plan quantity = batch size scheduled on a machine (can be larger, e.g. scrap buffer, combined run)
+- Plan quantity changes do not update the order quantity
+
+**Traceability chain:**
+```
+Packaging unit → Warehouse receipt → Production plan → Customer order line (informational context)
+Delivery note  → Customer order   → picks N pieces from available stock (authoritative link)
+```
+
+**The delivery note (otpremnica) is the definitive "this piece belongs to this order" record**, not the production plan. The plan→order link is informational context ("this run was motivated by Order A"), not a hard allocation.
+
+**Doubling the plan quantity is not a structural problem** because:
+- All 20,000 received pieces carry "produced by Plan X (motivated by Order A)"
+- When fulfilling Order A, the picking process selects 10,000 and stamps them on the delivery note
+- The remaining 10,000 go to general stock; they are traceable to Plan X but not allocated to any order
+
+**Future consideration:** if multiple customer orders need the same item in a single combined production run, add an `allocatedQuantity` field per plan→order link so each order's share is explicit.
+
 ### US01x — Time Tracking PWA
 | Story | Status | Description |
 |-------|--------|-------------|

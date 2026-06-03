@@ -53,7 +53,7 @@ const AddCustomerOrder = () => {
       customerId: '',
       deliveryDate: null,
       notes: null,
-      lines: [{ itemId: '', quantity: 1 }],
+      lines: [{ itemId: '', quantity: 0 }],
     },
   });
 
@@ -202,13 +202,11 @@ const AddCustomerOrder = () => {
                   render={({ field: f }) => (
                     <TextField
                       size="small"
-                      type="number"
                       label={t('customerOrder.form.quantity')}
-                      value={f.value}
-                      onChange={(e) => f.onChange(parseInt(e.target.value, 10) || 1)}
+                      value={f.value === 0 ? '' : f.value}
+                      onChange={(e) => f.onChange(parseInt(e.target.value, 10) || 0)}
                       error={!!errors.lines?.[index]?.quantity}
                       helperText={errors.lines?.[index]?.quantity?.message}
-                      inputProps={{ min: 1 }}
                       fullWidth
                     />
                   )}
@@ -228,7 +226,7 @@ const AddCustomerOrder = () => {
             size="small"
             color="secondary"
             startIcon={<AddIcon />}
-            onClick={() => append({ itemId: '', quantity: 1 })}
+            onClick={() => append({ itemId: '', quantity: 0 })}
             sx={{ mt: 1 }}
           >
             {t('customerOrder.form.addLine')}

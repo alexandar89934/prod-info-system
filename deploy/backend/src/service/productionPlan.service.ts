@@ -329,6 +329,9 @@ export const processMachineCycleEvent = async (machineNumber: number): Promise<{
   cavities: number;
   producedQuantity: number;
   plannedQuantity: number;
+  remaining: number;
+  normPerShift: number | null;
+  newEndDate: string | null;
 }> => {
   try {
     const plan = await getInProgressPlanByMachineNumberQuery(machineNumber);
@@ -338,6 +341,22 @@ export const processMachineCycleEvent = async (machineNumber: number): Promise<{
     const newProducedQty = (plan.producedQuantity ?? 0) + cavities;
 
     await incrementProducedQuantityQuery(plan.id, cavities);
+
+    const remaining = plan.quantity - newProducedQty;
+    let newEndDate: string | null = null;
+
+    if (remaining > 0) {
+      const remainingMinutes = calcDurationMinutes(remaining, plan.cavities, plan.cycleTimeSeconds, plan.normPerShift);
+      if (remainingMinutes !== null) {
+        newEndDate = advanceShiftMinutes(
+          toLocalString(new Date()),
+          remainingMinutes,
+          plan.shift1 ?? true, plan.shift2 ?? true, plan.shift3 ?? true
+        );
+        await updatePlanDatesQuery(plan.id, plan.expectedStartDate, newEndDate);
+      }
+    }
+
     await createActionQuery({
       productionPlanId: plan.id,
       actionType: 'cycle_completed',
@@ -351,6 +370,9 @@ export const processMachineCycleEvent = async (machineNumber: number): Promise<{
       cavities,
       producedQuantity: newProducedQty,
       plannedQuantity: plan.quantity,
+      remaining,
+      normPerShift: plan.normPerShift ?? null,
+      newEndDate,
     };
   } catch (error) {
     if (error instanceof ApiError) throw error;

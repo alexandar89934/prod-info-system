@@ -19,6 +19,7 @@ import { packagingUnitRouter } from "./packagingUnit.route";
 import { personRouter } from "./person.route";
 import { productionPlanRouter } from "./productionPlan.route";
 import { productionPlanActionRouter } from "./productionPlanAction.route";
+import { machineKioskRouter } from "./machineKiosk.route";
 import { responsibilityRouter } from "./responsibility.route";
 import { roleRouter } from "./role.route";
 import { signInRouter } from "./signin.route";
@@ -123,6 +124,10 @@ const defaultRoutes: RouteDefinition[] = [
   {
     path: "/production-plan-action",
     route: productionPlanActionRouter,
+  },
+  {
+    path: "/machine-kiosk",
+    route: machineKioskRouter,
   },
 ];
 

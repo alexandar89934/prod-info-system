@@ -26,7 +26,7 @@ export type CustomerOrder = Omit<z.infer<typeof customerOrderSchema>, 'lines'> &
 };
 
 export type CreateCustomerOrderFormData = z.infer<typeof customerOrderSchema>;
-export type UpdateCustomerOrderFormData = CreateCustomerOrderFormData & {
+export type UpdateCustomerOrderFormData = Omit<CreateCustomerOrderFormData, 'lines'> & {
   id: string;
   status: CustomerOrderStatus;
 };

@@ -199,6 +199,68 @@ const fmtMinutes = (minutes: number): string => {
 const fmtDateShort = (iso: string): string =>
   new Date(iso).toLocaleString(undefined, { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+const SHIFT_WINDOWS: [number, number, 's1' | 's2' | 's3'][] = [
+  [0,    360,  's3'],
+  [360,  840,  's1'],
+  [840,  1320, 's2'],
+  [1320, 1440, 's3'],
+];
+
+const advanceShiftMinutes = (
+  startDateStr: string,
+  totalMinutes: number,
+  s1: boolean, s2: boolean, s3: boolean,
+): string => {
+  if (!s1 && !s2 && !s3) {
+    const d = new Date(startDateStr);
+    d.setMinutes(d.getMinutes() + totalMinutes);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  const flags: Record<'s1' | 's2' | 's3', boolean> = { s1, s2, s3 };
+  let d = new Date(startDateStr);
+  let remaining = totalMinutes;
+  for (let guard = 0; remaining > 0 && guard < 100000; guard++) {
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const minsOfDay = Math.round((d.getTime() - dayStart.getTime()) / 60000);
+    const winIdx = SHIFT_WINDOWS.findIndex(([ws, we]) => minsOfDay >= ws && minsOfDay < we);
+    if (winIdx === -1) { d = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000); continue; }
+    const [, winEnd, shift] = SHIFT_WINDOWS[winIdx];
+    if (flags[shift]) {
+      const room = winEnd - minsOfDay;
+      if (remaining <= room) { d = new Date(d.getTime() + remaining * 60000); remaining = 0; }
+      else {
+        remaining -= room;
+        const nextIdx = winIdx + 1;
+        d = nextIdx >= SHIFT_WINDOWS.length
+          ? new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
+          : new Date(dayStart.getTime() + SHIFT_WINDOWS[nextIdx][0] * 60000);
+      }
+    } else {
+      const nextIdx = winIdx + 1;
+      d = nextIdx >= SHIFT_WINDOWS.length
+        ? new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
+        : new Date(dayStart.getTime() + SHIFT_WINDOWS[nextIdx][0] * 60000);
+    }
+  }
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+const toDatetimeLocal = (d: Date): string => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+const calcProductionMinutes = (qty: number, plan: ProductionPlan): number | null => {
+  if (qty < 1) return null;
+  if (plan.normPerShift && plan.normPerShift > 0) return Math.ceil((qty / plan.normPerShift) * 480);
+  const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
+  const cycles = Math.ceil(qty / effectiveCavities);
+  if (plan.cycleTimeSeconds && plan.cycleTimeSeconds > 0) return Math.ceil((cycles * plan.cycleTimeSeconds) / 60);
+  return null;
+};
+
 const MoldChangeBar = ({ label, estLabel, minutes, startDate }: { label: string; estLabel: string; minutes?: number | null; startDate?: string | null }) => {
   const endDate = startDate && minutes != null && minutes > 0
     ? new Date(new Date(startDate).getTime() + minutes * 60 * 1000).toISOString()
@@ -241,9 +303,10 @@ type SortableRowProps = {
   isExpanded: boolean;
   onToggle: () => void;
   expandedContent?: ReactNode;
+  cascadedStart?: string | null;
 };
 
-const SortablePlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, onDelete, t, theme, isExpanded, onToggle, expandedContent }: SortableRowProps) => {
+const SortablePlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, onDelete, t, theme, isExpanded, onToggle, expandedContent, cascadedStart }: SortableRowProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: plan.id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -258,15 +321,23 @@ const SortablePlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, onDe
     !!plan.moldMountingTimeMinutes &&
     plan.moldCurrentMachineId !== plan.machineId;
   const needsMounting = hasMoldChange || needsInitialMount;
+  const baseStart = cascadedStart ?? plan.expectedStartDate;
   const effectiveStartDate =
-    needsMounting && plan.moldMountingTimeMinutes && plan.expectedStartDate
-      ? new Date(new Date(plan.expectedStartDate).getTime() + plan.moldMountingTimeMinutes * 60 * 1000).toISOString()
-      : plan.expectedStartDate;
+    needsMounting && plan.moldMountingTimeMinutes && baseStart
+      ? new Date(new Date(baseStart).getTime() + plan.moldMountingTimeMinutes * 60 * 1000).toISOString()
+      : baseStart;
+  const sh1q = plan.shift1 ?? true;
+  const sh2q = plan.shift2 ?? true;
+  const sh3q = plan.shift3 ?? true;
+  const prodMinsQ = calcProductionMinutes(plan.quantity, plan);
+  const displayEndDate = (effectiveStartDate && prodMinsQ !== null)
+    ? advanceShiftMinutes(effectiveStartDate, prodMinsQ, sh1q, sh2q, sh3q)
+    : plan.expectedEndDate;
 
   return (
     <Box ref={setNodeRef} style={style}>
-      {hasMoldChange && <MoldChangeBar label={moldChangeLabel} estLabel={moldChangeEstLabel} minutes={plan.moldMountingTimeMinutes} startDate={plan.expectedStartDate} />}
-      {needsInitialMount && <MoldChangeBar label={t('productionPlan.planner.initialMount')} estLabel={t('productionPlan.planner.initialMountEst')} minutes={plan.moldMountingTimeMinutes} startDate={plan.expectedStartDate} />}
+      {hasMoldChange && <MoldChangeBar label={moldChangeLabel} estLabel={moldChangeEstLabel} minutes={plan.moldMountingTimeMinutes} startDate={baseStart} />}
+      {needsInitialMount && <MoldChangeBar label={t('productionPlan.planner.initialMount')} estLabel={t('productionPlan.planner.initialMountEst')} minutes={plan.moldMountingTimeMinutes} startDate={baseStart} />}
       <Box
         sx={{
           borderBottom: '1px solid',
@@ -333,10 +404,10 @@ const SortablePlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, onDe
                 {new Date(effectiveStartDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
               </Typography>
             )}
-            {plan.expectedEndDate && (
+            {displayEndDate && (
               <Typography variant="caption" color="text.secondary" display="block">
                 <Box component="span" sx={{ opacity: 0.6, mr: 0.5 }}>{t('productionPlan.dates.end')}:</Box>
-                {new Date(plan.expectedEndDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                {new Date(displayEndDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
               </Typography>
             )}
           </Box>
@@ -385,6 +456,23 @@ const StaticPlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, t, isE
     needsMounting && plan.moldMountingTimeMinutes && plan.expectedStartDate
       ? new Date(new Date(plan.expectedStartDate).getTime() + plan.moldMountingTimeMinutes * 60 * 1000).toISOString()
       : plan.expectedStartDate;
+  const sh1s = plan.shift1 ?? true;
+  const sh2s = plan.shift2 ?? true;
+  const sh3s = plan.shift3 ?? true;
+  let displayEndDate: string | null | undefined;
+  let endIsEta = false;
+  if (plan.status === 'in_progress') {
+    const remaining = plan.quantity - (plan.producedQuantity ?? 0);
+    const remainingMins = remaining > 0 ? calcProductionMinutes(remaining, plan) : null;
+    if (remainingMins !== null) {
+      displayEndDate = advanceShiftMinutes(toDatetimeLocal(new Date()), remainingMins, sh1s, sh2s, sh3s);
+      endIsEta = true;
+    } else {
+      displayEndDate = plan.expectedEndDate;
+    }
+  } else {
+    displayEndDate = plan.expectedEndDate;
+  }
   return (
   <Box sx={{ opacity: plan.status === 'done' ? 0.55 : 1 }}>
     {hasMoldChange && <MoldChangeBar label={moldChangeLabel} estLabel={moldChangeEstLabel} minutes={plan.moldMountingTimeMinutes} startDate={plan.expectedStartDate} />}
@@ -437,10 +525,10 @@ const StaticPlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, t, isE
               {new Date(effectiveStartDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
             </Typography>
           )}
-          {plan.expectedEndDate && (
-            <Typography variant="caption" color="text.secondary" display="block">
-              <Box component="span" sx={{ opacity: 0.6, mr: 0.5 }}>{t('productionPlan.dates.end')}:</Box>
-              {new Date(plan.expectedEndDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+          {displayEndDate && (
+            <Typography variant="caption" color={endIsEta ? 'warning.main' : 'text.secondary'} display="block">
+              <Box component="span" sx={{ opacity: 0.6, mr: 0.5 }}>{endIsEta ? 'ETA:' : `${t('productionPlan.dates.end')}:`}</Box>
+              {new Date(displayEndDate).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
             </Typography>
           )}
         </Box>
@@ -456,6 +544,82 @@ const StaticPlanRow = ({ plan, prev, moldChangeLabel, moldChangeEstLabel, t, isE
       )}
     </Box>
   </Box>
+  );
+};
+
+type CycleEntry = {
+  id: string;
+  timestamp: string;
+  quantity?: number | null;
+};
+
+const CycleGroupRow = ({ actions, t }: { actions: CycleEntry[]; t: (key: string) => string }) => {
+  const [open, setOpen] = useState(false);
+  const totalPieces = actions.reduce((sum, a) => sum + (a.quantity ?? 0), 0);
+  const first = actions[0];
+  const last = actions[actions.length - 1];
+  return (
+    <Box>
+      <Box
+        display="flex"
+        alignItems="center"
+        gap={1}
+        sx={{ cursor: 'pointer', py: 0.25, borderRadius: 0.5, '&:hover': { backgroundColor: 'action.hover' } }}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Box sx={{ color: 'info.main', flexShrink: 0 }}>
+          <AutorenewIcon sx={{ fontSize: 16 }} />
+        </Box>
+        <Box flexGrow={1} minWidth={0}>
+          <Typography variant="caption" fontWeight={600} display="block">
+            {t('productionPlan.actions.types.cycle_completed')}
+            <Box component="span" sx={{ fontWeight: 400, color: 'text.secondary', ml: 0.5 }}>
+              ×{actions.length} · {totalPieces.toLocaleString()} kom
+            </Box>
+          </Typography>
+          <Typography variant="caption" color="text.disabled" display="block">
+            {new Date(first.timestamp).toLocaleString()} → {new Date(last.timestamp).toLocaleString()}
+          </Typography>
+        </Box>
+        <ExpandMoreIcon
+          sx={{
+            fontSize: 14,
+            color: 'text.disabled',
+            flexShrink: 0,
+            transition: 'transform 0.2s',
+            transform: open ? 'rotate(180deg)' : 'none',
+          }}
+        />
+      </Box>
+      {open && (
+        <Box sx={{ pl: 3, ml: 1, borderLeft: '1px dashed', borderColor: 'divider', mt: 0.25 }}>
+          <Stack spacing={0.25}>
+            {actions.map((a) => (
+              <Typography key={a.id} variant="caption" color="text.disabled" display="block">
+                {new Date(a.timestamp).toLocaleString()}
+                {a.quantity != null && ` · ${a.quantity.toLocaleString()} kom`}
+              </Typography>
+            ))}
+          </Stack>
+        </Box>
+      )}
+    </Box>
+  );
+};
+
+const TimelineBox = ({ children, loaded }: { children: ReactNode; loaded: boolean }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const scrolledRef = useRef(false);
+  useEffect(() => {
+    if (ref.current && loaded && !scrolledRef.current) {
+      scrolledRef.current = true;
+      ref.current.scrollTop = ref.current.scrollHeight;
+    }
+  }, [loaded]);
+  return (
+    <Box ref={ref} sx={{ maxHeight: 280, overflowY: 'auto', pr: 0.5 }}>
+      {children}
+    </Box>
   );
 };
 
@@ -506,6 +670,11 @@ const MachinePlanDetail = () => {
 
   useEffect(() => { fetchPlans(); }, [fetchPlans]);
 
+  useEffect(() => {
+    const id = setInterval(fetchPlans, 10000);
+    return () => clearInterval(id);
+  }, [fetchPlans]);
+
   useEffect(() => () => { dispatch(resetState()); }, [dispatch]);
 
   useEffect(() => {
@@ -549,6 +718,34 @@ const MachinePlanDetail = () => {
     () => allPlans.filter((p) => p.status === 'queued').sort((a, b) => a.position - b.position),
     [allPlans]
   );
+
+  const cascadedQueuedStarts = useMemo(() => {
+    const result: Record<string, string> = {};
+    const inProgress = inProgressPlans[0] ?? null;
+    if (!inProgress) return result;
+    const remaining = inProgress.quantity - (inProgress.producedQuantity ?? 0);
+    const remainingMins = remaining > 0 ? calcProductionMinutes(remaining, inProgress) : null;
+    if (remainingMins === null) return result;
+    const sh1i = inProgress.shift1 ?? true;
+    const sh2i = inProgress.shift2 ?? true;
+    const sh3i = inProgress.shift3 ?? true;
+    let prevEnd = advanceShiftMinutes(toDatetimeLocal(new Date()), remainingMins, sh1i, sh2i, sh3i);
+    let prevMoldId = inProgress.moldId ?? null;
+    for (const plan of localQueued) {
+      const sh1 = plan.shift1 ?? true;
+      const sh2 = plan.shift2 ?? true;
+      const sh3 = plan.shift3 ?? true;
+      result[plan.id] = prevEnd;
+      const moldChanging = !!plan.moldId && plan.moldId !== prevMoldId;
+      const mountMins = moldChanging && plan.moldMountingTimeMinutes ? plan.moldMountingTimeMinutes : 0;
+      const postMount = mountMins > 0 ? advanceShiftMinutes(prevEnd, mountMins, sh1, sh2, sh3) : prevEnd;
+      const prodMins = calcProductionMinutes(plan.quantity, plan);
+      if (prodMins === null) break;
+      prevEnd = advanceShiftMinutes(postMount, prodMins, sh1, sh2, sh3);
+      prevMoldId = plan.moldId ?? null;
+    }
+    return result;
+  }, [inProgressPlans, localQueued]);
 
   useEffect(() => {
     if (!initializedRef.current && inProgressPlans.length > 0) {
@@ -657,10 +854,9 @@ const MachinePlanDetail = () => {
       <Box sx={{ mb: 1.5, mt: 0.5 }}>
         <Typography variant="caption" fontWeight={700} color="text.secondary" display="block" mb={0.5}>
           {t('productionPlan.bom.title')}
-          {plan.normPerShift && (
+          {effectiveCavities > 1 && (
             <Box component="span" sx={{ ml: 1, color: 'text.disabled' }}>
-              ({t('productionPlan.bom.norm')}: {plan.normPerShift.toLocaleString()}
-              {effectiveCavities > 1 && ` · ${effectiveCavities} ${t('productionPlan.bom.nests')}`})
+              ({effectiveCavities} {t('productionPlan.bom.nests')})
             </Box>
           )}
         </Typography>
@@ -715,7 +911,7 @@ const MachinePlanDetail = () => {
     const good = plan.producedQuantity ?? 0;
     const scrap = plan.scrapQuantity ?? 0;
     const gross = good + scrap;
-    if (gross === 0) return null;
+    if (gross === 0 && !plan.normPerShift) return null;
 
     const effectiveCavities = plan.cavities && plan.cavities > 0 ? plan.cavities : 1;
     const injections = Math.floor(gross / effectiveCavities);
@@ -723,43 +919,57 @@ const MachinePlanDetail = () => {
 
     return (
       <Box sx={{ mb: 1.5 }}>
-        <Box display="flex" gap={3} alignItems="flex-end" flexWrap="wrap" mb={0.75}>
-          <Box>
-            <Typography variant="caption" color="text.secondary" display="block">
-              {t('productionPlan.stats.good')}
-            </Typography>
-            <Typography variant="caption" fontWeight={700}>
-              {good.toLocaleString()} / {plan.quantity.toLocaleString()}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" display="block">
-              {t('productionPlan.stats.gross')}
-            </Typography>
-            <Typography variant="caption" fontWeight={700}>
-              {gross.toLocaleString()}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="caption" color="text.secondary" display="block">
-              {t('productionPlan.stats.injections')}
-              {effectiveCavities > 1 && (
-                <Box component="span" sx={{ ml: 0.5, opacity: 0.6 }}>
-                  · {t('productionPlan.stats.cavities', { count: effectiveCavities })}
-                </Box>
-              )}
-            </Typography>
-            <Typography variant="caption" fontWeight={700}>
-              {injections.toLocaleString()}
-            </Typography>
-          </Box>
+        <Box display="flex" gap={3} alignItems="flex-end" flexWrap="wrap" mb={gross > 0 ? 0.75 : 0}>
+          {gross > 0 && (
+            <>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  {t('productionPlan.stats.good')}
+                </Typography>
+                <Typography variant="caption" fontWeight={700}>
+                  {good.toLocaleString()} / {plan.quantity.toLocaleString()}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  {t('productionPlan.stats.gross')}
+                </Typography>
+                <Typography variant="caption" fontWeight={700}>
+                  {gross.toLocaleString()}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  {t('productionPlan.stats.injections')}
+                  {effectiveCavities > 1 && (
+                    <Box component="span" sx={{ ml: 0.5, opacity: 0.6 }}>
+                      · {t('productionPlan.stats.cavities', { count: effectiveCavities })}
+                    </Box>
+                  )}
+                </Typography>
+                <Typography variant="caption" fontWeight={700}>
+                  {injections.toLocaleString()}
+                </Typography>
+              </Box>
+            </>
+          )}
+          {plan.normPerShift && (
+            <Box>
+              <Typography variant="caption" color="text.secondary" display="block">
+                {t('productionPlan.bom.norm')}
+              </Typography>
+              <Typography variant="caption" fontWeight={700}>
+                {plan.normPerShift.toLocaleString()} {t('productionPlan.scrap.pcs')}
+              </Typography>
+            </Box>
+          )}
         </Box>
-        <LinearProgress
+        {gross > 0 && <LinearProgress
           variant="determinate"
           value={progressPct}
           color={progressPct >= 100 ? 'success' : 'primary'}
           sx={{ height: 4, borderRadius: 2 }}
-        />
+        />}
       </Box>
     );
   };
@@ -798,12 +1008,39 @@ const MachinePlanDetail = () => {
 
   const renderTimeline = (planId: string) => {
     const actions = actionsByPlan[planId];
+
+    type ActionItem = NonNullable<typeof actions>[0];
+    type TimelineEntry =
+      | { kind: 'action'; action: ActionItem }
+      | { kind: 'cycles'; group: ActionItem[]; key: string };
+
+    const timelineItems: TimelineEntry[] = [];
+    if (actions) {
+      let cycleBuffer: ActionItem[] = [];
+      let groupIdx = 0;
+      const flush = () => {
+        if (cycleBuffer.length > 0) {
+          timelineItems.push({ kind: 'cycles', group: [...cycleBuffer], key: `${planId}-g${groupIdx++}` });
+          cycleBuffer = [];
+        }
+      };
+      for (const action of actions) {
+        if (action.actionType === 'cycle_completed') {
+          cycleBuffer.push(action);
+        } else {
+          flush();
+          timelineItems.push({ kind: 'action', action });
+        }
+      }
+      flush();
+    }
+
     return (
       <Box>
         <Typography variant="caption" fontWeight={700} color="text.secondary" display="block" mb={0.5}>
           {t('productionPlan.actions.timeline')}
         </Typography>
-        <Box sx={{ maxHeight: 280, overflowY: 'auto', pr: 0.5 }}>
+        <TimelineBox loaded={!!actions}>
           {!actions ? (
             <CircularProgress size={14} />
           ) : actions.length === 0 ? (
@@ -812,32 +1049,38 @@ const MachinePlanDetail = () => {
             </Typography>
           ) : (
             <Stack spacing={0.5}>
-              {actions.map((action) => (
-                <Box key={action.id} display="flex" alignItems="flex-start" gap={1}>
-                  <Box sx={{ mt: 0.25, color: `${ACTION_COLORS[action.actionType]}.main`, flexShrink: 0 }}>
-                    {ACTION_ICON_MAP[action.actionType]}
+              {timelineItems.map((item) => {
+                if (item.kind === 'cycles') {
+                  return <CycleGroupRow key={item.key} actions={item.group} t={t as (key: string) => string} />;
+                }
+                const { action } = item;
+                return (
+                  <Box key={action.id} display="flex" alignItems="flex-start" gap={1}>
+                    <Box sx={{ mt: 0.25, color: `${ACTION_COLORS[action.actionType]}.main`, flexShrink: 0 }}>
+                      {ACTION_ICON_MAP[action.actionType]}
+                    </Box>
+                    <Box>
+                      <Typography variant="caption" fontWeight={600} display="block">
+                        {t(`productionPlan.actions.types.${action.actionType}`)}
+                        {(action.performedByPersonName || action.performedByName) && (
+                          <Box component="span" sx={{ fontWeight: 400, color: 'text.secondary', ml: 0.5 }}>
+                            — {action.performedByPersonName ?? action.performedByName}
+                          </Box>
+                        )}
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled" display="block">
+                        {new Date(action.timestamp).toLocaleString()}
+                        {action.quantity != null && ` · ${action.quantity.toLocaleString()} kom`}
+                        {action.scrapReason && ` · ${t(`productionPlan.steps.scrapReasons.${action.scrapReason}`)}`}
+                        {action.packagingUnitName && ` · ${action.packagingUnitName}`}
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Typography variant="caption" fontWeight={600} display="block">
-                      {t(`productionPlan.actions.types.${action.actionType}`)}
-                      {(action.performedByPersonName || action.performedByName) && (
-                        <Box component="span" sx={{ fontWeight: 400, color: 'text.secondary', ml: 0.5 }}>
-                          — {action.performedByPersonName ?? action.performedByName}
-                        </Box>
-                      )}
-                    </Typography>
-                    <Typography variant="caption" color="text.disabled" display="block">
-                      {new Date(action.timestamp).toLocaleString()}
-                      {action.quantity != null && ` · ${action.quantity.toLocaleString()} kom`}
-                      {action.scrapReason && ` · ${t(`productionPlan.steps.scrapReasons.${action.scrapReason}`)}`}
-                      {action.packagingUnitName && ` · ${action.packagingUnitName}`}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+                );
+              })}
             </Stack>
           )}
-        </Box>
+        </TimelineBox>
       </Box>
     );
   };
@@ -1015,6 +1258,7 @@ const MachinePlanDetail = () => {
                     <>
                       {renderBomSection(plan)}
                       {renderProductionStats(plan)}
+                      {renderScrapOverview(plan.id)}
                       {renderTimeline(plan.id)}
                     </>
                   }
@@ -1056,9 +1300,11 @@ const MachinePlanDetail = () => {
                       theme={theme}
                       isExpanded={expandedPlans.has(plan.id)}
                       onToggle={() => togglePlan(plan.id, plan)}
+                      cascadedStart={cascadedQueuedStarts[plan.id] ?? null}
                       expandedContent={
                         <>
                           {renderBomSection(plan)}
+                          {renderScrapOverview(plan.id)}
                           {renderTimeline(plan.id)}
                         </>
                       }

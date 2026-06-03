@@ -206,11 +206,9 @@ const CustomerOrderPage = () => {
             </FormControl>
             <TextField
               label={t('customerOrder.form.quantity')}
-              type="number"
               size="small"
               value={newQuantity}
               onChange={(e) => setNewQuantity(e.target.value)}
-              inputProps={{ min: 1 }}
               sx={{ width: 120 }}
             />
             <Button
@@ -275,17 +273,22 @@ const CustomerOrderPage = () => {
                     <Typography variant="body2" color="text.secondary">{t('customerOrder.form.quantity')}</Typography>
                     <Typography variant="h6" fontWeight={700}>{line.quantity.toLocaleString()}</Typography>
                   </Box>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    startIcon={<AddIcon />}
-                    onClick={() =>
-                      navigate(`/addProductionPlan?orderLineId=${line.id}&itemId=${line.itemId}&quantity=${line.quantity}&orderId=${id}`)
-                    }
-                  >
-                    {t('customerOrder.detail.plan')}
-                  </Button>
+                  <Tooltip title={hasActivePlans ? t('customerOrder.detail.alreadyPlanned') : ''}>
+                    <span>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        disabled={hasActivePlans}
+                        onClick={() =>
+                          navigate(`/addProductionPlan?orderLineId=${line.id}&itemId=${line.itemId}&quantity=${line.quantity}&orderId=${id}`)
+                        }
+                      >
+                        {t('customerOrder.detail.plan')}
+                      </Button>
+                    </span>
+                  </Tooltip>
                   <Tooltip title={hasActivePlans ? t('customerOrder.detail.cannotDeleteLine') : t('customerOrder.detail.deleteLine')}>
                     <span>
                       <IconButton

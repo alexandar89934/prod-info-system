@@ -84,7 +84,6 @@ const EditCustomerOrder = () => {
       deliveryDate: data.deliveryDate ?? null,
       notes: data.notes ?? null,
       status: data.status,
-      lines: order?.lines?.map((l) => ({ itemId: l.itemId, quantity: l.quantity })) ?? [],
     }));
     if (updateCustomerOrder.fulfilled.match(result)) {
       dispatch(createPlanAction({

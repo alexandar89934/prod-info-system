@@ -42,6 +42,7 @@ import JobPositionList from '@/scenes/jobPositionManagement';
 import AddJobPosition from '@/scenes/jobPositionManagement/AddJobPosition.tsx';
 import EditJobPosition from '@/scenes/jobPositionManagement/EditJobPosition.tsx';
 import Kiosk from '@/scenes/kiosk';
+import MachineKiosk from '@/scenes/machineKiosk';
 import Login from '@/scenes/login';
 import MachineAvailabilityStatusList from '@/scenes/machineManagement/machineAvailabilityStatus';
 import AddMachineAvailabilityStatus from '@/scenes/machineManagement/machineAvailabilityStatus/addMachineAvailabilityStatus.tsx';
@@ -499,6 +500,7 @@ function App() {
             </Route>
             {/* Kiosk — full screen, no layout */}
             <Route path="/kiosk" element={<Kiosk />} />
+            <Route path="/machine-kiosk" element={<MachineKiosk />} />
           </Routes>
         </ThemeProvider>
       </BrowserRouter>

@@ -33,7 +33,8 @@ Worker authentication: **NFC card** (primary) + employee number/password (fallba
 | BOM / Normative (Item → Item lines) | US03-03-bom-crud | Not started |
 | Customer | US03-04-customer-crud | Not started |
 | Packaging Unit (standard packaging types with images + instructions) | US03-05-packaging-unit-crud | Not started |
-| Production Plan (simple) + Work Order system (incl. QC, batch release, NCR) | US04-00-production-plan-crud | Not started |
+| Production Plan + machine plan with queue, actions, scrap, stats | US03-03-production-plan | ✅ Done |
+| Machine Kiosk PWA (auth, machine select, plan detail, operator actions) | US03-03-production-plan | ✅ Done |
 | Warehouse management (stock, receiving, reservations, shipments) | US05-01-warehouse-stock | Not started |
 | Maintenance management (faults, service logs, schedules) | US06-01-machine-fault | Not started |
 | PWA shell + NFC (attendance terminal, machine log-on) | US07-01-pwa-shell | Not started |
@@ -465,17 +466,35 @@ Sub-order tables: `TransporterOrder`, `ToolMountingOrder`, `MachineStartupOrder`
 
 ### Maintenance entities
 
-**MachineFault**
-`id`, `machineId`, `reportedBy` (FK Person), `reportedAt`, `description`, `severity` (low | medium | high | critical), `status` (open | assigned | in_progress | resolved), `assignedTo` (FK Person — Maintenance Worker), `resolvedAt`, `resolution` (notes)
+Maintenance covers four target types: **machine** (main injection press), **equipment** (auxiliary: robot, conveyor, boiler), **mold** (tool/alat), **vehicle** (car, forklift, truck).
 
-**MachineServiceLog**
-`id`, `machineId`, `performedBy` (FK Person), `serviceType` (regular | repair | inspection | lubrication | cleaning), `date`, `durationMinutes`, `description`, `workOrderRef` (optional external ref), `nextScheduledDate`
+**Vehicle**
+`id`, `name`, `type` (car | forklift | truck | other), `licensePlate`, `model`, `yearOfManufacture`, `notes`
 
-**ToolServiceLog**
-`id`, `toolId`, `performedBy` (FK Person), `serviceType` (regular | repair | lubrication | cleaning), `date`, `durationMinutes`, `pieceCounterAtService` (snapshot of tool cycle counter), `description`, `serviceCategory` (S-1 | S-2 | S-3 | S-4 — matches pricing category from tool card)
+**MaintenanceTemplate** — reusable checklist definition, created once and assigned to multiple targets
+`id`, `name`, `notes`, `targetType` (machine | equipment | mold | vehicle), `intervalType` (days | injections | on_demand), `intervalValue` (nullable — empty for on_demand)
 
-**MaintenanceSchedule**
-`id`, `targetType` (machine | tool), `targetId`, `scheduleType` (by_hours | by_days), `intervalValue` (e.g. 500 hours or 30 days), `lastServiceDate`, `lastServiceHours`, `nextDueDate`, `nextDueHours` (auto-calculated), `isOverdue` (derived)
+**MaintenanceTemplateStep** — dynamic checklist steps belonging to a template
+`id`, `templateId` (FK MaintenanceTemplate), `stepOrder`, `description` (e.g. "Check oil level", "Check hydraulic pressure"), `isRequired`
+
+**MaintenanceAssignment** — template applied to a specific target (many-to-many)
+`id`, `templateId` (FK), `targetType`, `targetId` — create template once, assign to N similar machines/molds/vehicles
+
+**isDue derived** (not stored):
+- `days` → `today − lastRecord.completedAt > intervalValue`
+- `injections` → `machine.injectionCounter − lastRecord.injectionCounterAtCompletion > intervalValue`
+- `on_demand` → never auto-due, only triggered by a fault
+
+**MachineFault** — fault reported on any target type by any worker
+`id`, `targetType` (machine | equipment | mold | vehicle), `targetId`, `reportedBy` (FK Person), `reportedAt`, `description`, `severity` (low | medium | high | critical), `status` (open | in_progress | resolved), `assignedTo` (FK Person — nullable), `resolvedAt`, `resolution`, `maintenanceRecordId` (FK nullable — linked when fault resolved through a service record)
+
+**MaintenanceRecord** — one completed service instance
+`id`, `templateId` (FK nullable — null if ad-hoc fault resolution with no template), `faultId` (FK MachineFault nullable — null if scheduled service), `targetType`, `targetId`, `performedBy` (FK Person), `performedAt`, `injectionCounterAtCompletion` (nullable — machines only), `performerNotes`, `requiresApproval` (bool — true when performer is not Maintenance Worker / Maintenance Manager), `approvalStatus` (pending | approved | rejected | null), `approvedBy` (FK Person nullable), `approvedAt`, `approvalNotes`
+
+**MaintenanceRecordStep** — step-by-step result for a completed record
+`id`, `recordId` (FK), `templateStepId` (FK), `checked` (bool), `notes` (nullable), `photoUrl` (nullable)
+
+**Approval rule**: if `performedBy` holds job position Maintenance Worker or Maintenance Manager → `requiresApproval = false`, auto-approved. Any other job position → `requiresApproval = true`, `approvalStatus = pending`; maintenance staff must review, approve or reject with notes.
 
 ---
 
@@ -543,11 +562,14 @@ On approval: `Person.status` is set to `vacation` or `sick` for the covered date
 - [ ] `US05-07-stock-overview` — Stock dashboard: current levels, reserved, available per Item; low-stock alerts (MinStockThreshold per Item); lot/batch search
 
 ### Phase 5 — Maintenance Management
-- [ ] `US06-01-machine-fault` — Any worker reports machine fault (machine, description, severity); machine status auto-set to "fault"; Maintenance Manager assigns to worker
-- [ ] `US06-02-machine-service-log` — Maintenance Worker logs service performed (machine, type: regular/repair/inspection, duration, date, notes); fault marked resolved; MachineServiceLog entry
-- [ ] `US06-03-tool-service-log` — Tool/mold service: ToolServiceLog per event; lubrication/cleaning log per tool (date, worker, type); piece counter reset on service
-- [ ] `US06-04-maintenance-schedule` — Planned service intervals per machine and per tool (by work hours or calendar days); system generates due reminders; Maintenance Manager confirms completion
-- [ ] `US06-05-maintenance-dashboard` — Maintenance Manager view: open faults, scheduled services due, tool lubrication overdue; machine/tool status overview
+
+Targets: machine, equipment (auxiliary), mold, vehicle (car/forklift/truck).
+
+- [ ] `US06-01-maintenance-template` — MaintenanceTemplate CRUD with dynamic checklist steps; `targetType` (machine | equipment | mold | vehicle); `intervalType` (days | injections | on_demand); steps added/removed/reordered dynamically
+- [ ] `US06-02-maintenance-assignment` — Assign a template to one or many targets of the same type; Vehicle entity CRUD (name, type, license plate, model, year)
+- [ ] `US06-03-fault-reporting` — Any worker reports a fault on any target type (machine / equipment / mold / vehicle); severity + description; Maintenance Manager assigns to a worker; fault status: open → in_progress → resolved; fault can trigger a MaintenanceRecord
+- [ ] `US06-04-maintenance-record` — Worker completes a service: fills checklist steps (checked + optional notes/photo per step), adds performer notes; if performer is not maintenance staff → record goes to `pending approval`; Maintenance Worker / Manager reviews and approves or rejects with notes; completing a fault-triggered record auto-resolves the linked fault
+- [ ] `US06-05-maintenance-dashboard` — Maintenance Manager view: open faults grouped by severity; overdue scheduled services (isDue derived from date or injection counter); due-soon services (within 7 days or 80% of injection interval); pending approval records; recent completions
 
 ### Phase 6 — PWA & NFC
 - [ ] `US07-01-pwa-shell` — PWA shell (installable, mobile-first layout)

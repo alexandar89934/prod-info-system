@@ -395,7 +395,10 @@
     "packagingUnits": "Packaging Units",
     "attendanceManagement": "Attendance Management",
     "attendance": "Attendance",
-    "systemConfig": "System Settings"
+    "systemConfig": "System Settings",
+    "kioskManagement": "Kiosk",
+    "checkInKiosk": "Check-in Kiosk",
+    "machineKiosk": "Machine Kiosk"
   },
   "systemConfig": {
     "title": "SYSTEM SETTINGS",
@@ -494,6 +497,31 @@
       "overtime": "Overtime",
       "vacationUsed": "Vacation Used",
       "vacationRemaining": "Vacation Remaining"
+    }
+  },
+  "machineKiosk": {
+    "auth": {
+      "title": "Machine Kiosk",
+      "employeeNumber": "Employee Number",
+      "pin": "PIN (4 digits)",
+      "enter": "Enter",
+      "noPermission": "This employee does not have kiosk access permission",
+      "incorrectPin": "Incorrect PIN",
+      "notFound": "Employee not found",
+      "error": "Authentication failed. Please try again."
+    },
+    "machines": {
+      "title": "Select Machine",
+      "idle": "Idle",
+      "empty": "No machines with active plans",
+      "logout": "Log out"
+    },
+    "detail": {
+      "switchMachine": "Switch Machine"
+    },
+    "switch": {
+      "title": "Authenticate to Switch Machine",
+      "confirm": "Confirm"
     }
   },
   "kiosk": {
@@ -835,7 +863,8 @@
       "addLineTitle": "Add Item to Order",
       "addLineConfirm": "Add",
       "deleteLine": "Remove line",
-      "cannotDeleteLine": "Cannot remove — line has active or queued plans"
+      "cannotDeleteLine": "Cannot remove — line has active or queued plans",
+      "alreadyPlanned": "Already planned — cancel or complete the existing plan first"
     }
   },
   "productionPlan": {

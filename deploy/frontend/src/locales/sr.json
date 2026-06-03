@@ -395,7 +395,10 @@
     "packagingUnits": "Ambalaža",
     "attendanceManagement": "Evidencija prisustva",
     "attendance": "Prisustvo",
-    "systemConfig": "Podešavanja sistema"
+    "systemConfig": "Podešavanja sistema",
+    "kioskManagement": "Kiosk",
+    "checkInKiosk": "Kiosk prijave",
+    "machineKiosk": "Kiosk mašina"
   },
   "systemConfig": {
     "title": "PODEŠAVANJA SISTEMA",
@@ -494,6 +497,31 @@
       "overtime": "Prekovremeno",
       "vacationUsed": "Odmor iskorišćen",
       "vacationRemaining": "Odmor preostao"
+    }
+  },
+  "machineKiosk": {
+    "auth": {
+      "title": "Kiosk mašina",
+      "employeeNumber": "Broj zaposlenog",
+      "pin": "PIN (4 cifre)",
+      "enter": "Ulaz",
+      "noPermission": "Zaposleni nema pravo pristupa kiosku",
+      "incorrectPin": "Pogrešan PIN",
+      "notFound": "Zaposleni nije pronađen",
+      "error": "Autentifikacija neuspešna. Pokušajte ponovo."
+    },
+    "machines": {
+      "title": "Izaberite mašinu",
+      "idle": "Miruje",
+      "empty": "Nema mašina sa aktivnim planovima",
+      "logout": "Odjava"
+    },
+    "detail": {
+      "switchMachine": "Promeni mašinu"
+    },
+    "switch": {
+      "title": "Autentifikujte se za promenu mašine",
+      "confirm": "Potvrdi"
     }
   },
   "kiosk": {
@@ -835,7 +863,8 @@
       "addLineTitle": "Dodaj stavku narudžbini",
       "addLineConfirm": "Dodaj",
       "deleteLine": "Ukloni stavku",
-      "cannotDeleteLine": "Nije moguće ukloniti — stavka ima aktivne ili čekajuće planove"
+      "cannotDeleteLine": "Nije moguće ukloniti — stavka ima aktivne ili čekajuće planove",
+      "alreadyPlanned": "Već je u planu — otkaži ili završi postojeći plan prvo"
     }
   },
   "productionPlan": {

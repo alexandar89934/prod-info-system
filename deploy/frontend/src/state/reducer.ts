@@ -24,6 +24,7 @@ import companySlice from '@/state/company/company.slice.ts';
 import customerOrderSlice from '@/state/customerOrder/customerOrder.slice.ts';
 import productionPlanSlice from '@/state/productionPlan/productionPlan.slice.ts';
 import productionPlanActionSlice from '@/state/productionPlanAction/productionPlanAction.slice.ts';
+import maintenanceTemplateSlice from '@/state/maintenanceTemplate/maintenanceTemplate.slice';
 
 const reducer = combineReducers({
   theme: themeSlice,
@@ -49,6 +50,7 @@ const reducer = combineReducers({
   customerOrder: customerOrderSlice,
   productionPlan: productionPlanSlice,
   productionPlanAction: productionPlanActionSlice,
+  maintenanceTemplate: maintenanceTemplateSlice,
 });
 
 export default { reducer };

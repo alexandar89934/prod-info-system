@@ -396,6 +396,8 @@
     "attendanceManagement": "Evidencija prisustva",
     "attendance": "Prisustvo",
     "systemConfig": "Podešavanja sistema",
+    "maintenance": "Održavanje",
+    "maintenanceTemplates": "Šabloni",
     "kioskManagement": "Kiosk",
     "checkInKiosk": "Kiosk prijave",
     "machineKiosk": "Kiosk mašina"
@@ -1091,6 +1093,37 @@
       "injections": "Ubrizgavanja",
       "cavities": "{{count}} gnezd(a)"
     }
+  },
+  "maintenanceTemplate": {
+    "title": "Šabloni održavanja",
+    "add": "Dodaj šablon",
+    "edit": "Izmeni šablon",
+    "name": "Naziv",
+    "targetType": "Tip cilja",
+    "intervalType": "Tip intervala",
+    "intervalValue": "Vrednost intervala",
+    "notes": "Napomene",
+    "steps": "Koraci kontrolne liste",
+    "addStep": "Dodaj korak",
+    "stepDescription": "Opis koraka",
+    "isRequired": "Obavezan",
+    "stepCount": "Koraci",
+    "targetTypes": {
+      "machine": "Mašina",
+      "equipment": "Oprema",
+      "mold": "Kalup",
+      "vehicle": "Vozilo"
+    },
+    "intervalTypes": {
+      "days": "Dani",
+      "injections": "Ubrizgavanja",
+      "on_demand": "Po zahtevu"
+    },
+    "deleteConfirm": "Obrisati ovaj šablon održavanja?",
+    "noData": "Nema šablona održavanja",
+    "createSuccess": "Šablon održavanja uspešno kreiran!",
+    "updateSuccess": "Šablon održavanja uspešno izmenjen!",
+    "deleteSuccess": "Šablon održavanja uspešno obrisan!"
   },
   "dataGrid": {
     "toolbarColumns": "Kolone",

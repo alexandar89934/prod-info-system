@@ -396,6 +396,8 @@
     "attendanceManagement": "Attendance Management",
     "attendance": "Attendance",
     "systemConfig": "System Settings",
+    "maintenance": "Maintenance",
+    "maintenanceTemplates": "Templates",
     "kioskManagement": "Kiosk",
     "checkInKiosk": "Check-in Kiosk",
     "machineKiosk": "Machine Kiosk"
@@ -1091,6 +1093,37 @@
       "injections": "Injections",
       "cavities": "{{count}} nest(s)"
     }
+  },
+  "maintenanceTemplate": {
+    "title": "Maintenance Templates",
+    "add": "Add Template",
+    "edit": "Edit Template",
+    "name": "Name",
+    "targetType": "Target Type",
+    "intervalType": "Interval Type",
+    "intervalValue": "Interval Value",
+    "notes": "Notes",
+    "steps": "Checklist Steps",
+    "addStep": "Add Step",
+    "stepDescription": "Step description",
+    "isRequired": "Required",
+    "stepCount": "Steps",
+    "targetTypes": {
+      "machine": "Machine",
+      "equipment": "Equipment",
+      "mold": "Mold",
+      "vehicle": "Vehicle"
+    },
+    "intervalTypes": {
+      "days": "Days",
+      "injections": "Injections",
+      "on_demand": "On Demand"
+    },
+    "deleteConfirm": "Delete this maintenance template?",
+    "noData": "No maintenance templates found",
+    "createSuccess": "Maintenance template created successfully!",
+    "updateSuccess": "Maintenance template updated successfully!",
+    "deleteSuccess": "Maintenance template deleted successfully!"
   },
   "dataGrid": {
     "toolbarColumns": "Columns",
